@@ -1,0 +1,7 @@
+This repository contains a script I use on various servers for monitoring
+directories and notifying relevant users of file changes. It's all pretty
+straightforward python code. All code in this repository is in the Public
+Domain. Note that active development of this script actually happens in a
+privately hosted repository, so if you're after the latest version of this
+script please contact me at matthew.fernandez@gmail.com and I'll be happy to
+pass it on.
