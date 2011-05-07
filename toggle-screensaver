@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+gnome-screensaver-command --query | grep "The screensaver is being inhibited by" >/dev/null
+if [ $? = 0 ]; then
+    killall gnome-screensaver-command
+    notify-send --icon=/usr/share/icons/hicolor/scalable/apps/checkbox.svg \
+                "Toggle Screensaver" \
+                "Screensaver enabled"
+else
+    notify-send --icon=/usr/share/icons/hicolor/scalable/apps/checkbox.svg \
+                "Toggle Screensaver" \
+                "Screensaver disabled"
+    gnome-screensaver-command --inhibit \
+                              --application-name "toggle-screensaver" \
+                              --reason "Scripted disable"
+fi
+
