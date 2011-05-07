@@ -3,6 +3,7 @@ use on various machines. Note that development to some of these scripts happens
 in a private repo, so you may be looking at an older copy here. If in doubt,
 email me and I can provide you with the latest version.
 
+has-changed.sh  A bash script for monitoring updates to a given webpage.
 MediaWatch.py   A python script I use for monitoring directories on various
                 servers that I administer. It's designed to be run as a cron
                 job that scans a set of directories and emails you any changes
