@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ "$1" == "" ]; then
+    PWD_LEN=8
+else
+    PWD_LEN=$1
+fi
+
+< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${PWD_LEN}
+echo ""
+
