@@ -13,7 +13,11 @@
 #define INIT_ALLOC 1024*1024*1024 /* 1GB */
 
 /* You'll need to SIGTERM this program to stop it. */
+
+#ifdef __GNUC__
+/* GCC-specific optimisation. */
 int main(int argc, char** argv) __attribute__((noreturn));
+#endif
 
 typedef struct mem {
     unsigned int sz;
@@ -65,4 +69,7 @@ int main(int argc, char** argv) {
                 last->data[sz] = 0;
 
     /* We'll never reach this point. */
+#ifndef __GNUC__
+    return 0;
+#endif
 }
