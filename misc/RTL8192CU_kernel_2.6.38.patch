@@ -1,0 +1,25 @@
+diff --git a/rtl8192CU_linux_v2.0.1212.20101208/os_dep/linux/usb_intf.c b/rtl8192CU_linux_v2.0.1212.20101208/os_dep/linux/usb_intf.c
+index 813d4db..4fc01bc 100755
+--- a/rtl8192CU_linux_v2.0.1212.20101208/os_dep/linux/usb_intf.c
++++ b/rtl8192CU_linux_v2.0.1212.20101208/os_dep/linux/usb_intf.c
+@@ -775,7 +775,6 @@ static int rtw_drv_init(struct usb_interface *pusb_intf, const struct usb_device
+ 		}
+ 		
+ 		if(padapter->registrypriv.usbss_enable ){ 	/* autosuspend (2s delay) */
+-			pdvobjpriv->pusbdev->autosuspend_delay = 0 * HZ;//15 * HZ; idle-delay time		 	
+ 
+ 			#if (LINUX_VERSION_CODE>=KERNEL_VERSION(2,6,35))
+ 			usb_enable_autosuspend(padapter->dvobjpriv.pusbdev);
+diff --git a/rtl8192CU_linux_v2.0.1212.20101208/os_dep/osdep_service.c b/rtl8192CU_linux_v2.0.1212.20101208/os_dep/osdep_service.c
+index 40f2ba1..93acb51 100755
+--- a/rtl8192CU_linux_v2.0.1212.20101208/os_dep/osdep_service.c
++++ b/rtl8192CU_linux_v2.0.1212.20101208/os_dep/osdep_service.c
+@@ -289,7 +289,7 @@ void	_rtw_rwlock_init(_rwlock *prwlock)
+ {
+ #ifdef PLATFORM_LINUX
+ 
+-	init_MUTEX(prwlock);
++	sema_init(prwlock, 1);
+ 
+ #endif
+ #ifdef PLATFORM_OS_XP

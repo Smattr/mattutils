@@ -3,10 +3,22 @@ use on various machines. Note that development to some of these scripts happens
 in a private repo, so you may be looking at an older copy here. If in doubt,
 email me and I can provide you with the latest version.
 
-generate-passwd A script for generating random passwords.
-has-changed.sh  A bash script for monitoring updates to a given webpage.
-MediaWatch.py   A python script I use for monitoring directories on various
-                servers that I administer. It's designed to be run as a cron
-                job that scans a set of directories and emails you any changes
-                observed since its last scan.
-toggle-screensaver A script for enabling and disabling the Gnome screensaver.
+generate-passwd - A script for generating random passwords.
+has-changed.sh - A bash script for monitoring updates to a given webpage.
+misc/ - A directory for miscellaneous half-finished bits or tools that I don't
+    actually deploy anywhere, but like to track changes to.
+misc/ram-churn.c - A utility for pushing all running processes' pages to disk
+    (i.e. evicting them from RAM).
+misc/RTL8192CU_kernel_2.6.38.patch - If you have a Realtek RTL8192CU wireless
+    device and have attempted to use it on Linux, you will have discovered that
+    the Realtek driver doesn't compile under any kernel after 2.6.35. This patch
+    fixes the driver for 2.6.38. If you've got the RAR archive from Realtek, the
+    best approach is to extract it, run the install.sh script, when it fails
+    modify the script to comment out the tar zxvf line, apply the patch, re-run
+    the script. There's an in-kernel driver in the staging tree scheduled for
+    inclusion in the 2.6.39 so this patch shouldn't be relevant for long.
+MediaWatch.py - A python script I use for monitoring directories on various
+    servers that I administer. It's designed to be run as a cron job that scans
+    a set of directories and emails you any changes observed since its last
+    scan.
+toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
