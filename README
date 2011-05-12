@@ -21,4 +21,6 @@ MediaWatch.py - A python script I use for monitoring directories on various
     servers that I administer. It's designed to be run as a cron job that scans
     a set of directories and emails you any changes observed since its last
     scan.
+playtime - A script for playing all your videos on random. Like watching TV
+    without ads :)
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
