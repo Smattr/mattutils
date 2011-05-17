@@ -50,6 +50,10 @@ int main(int argc, char** argv) {
                 break;
             case ']':
                 --indent_level;
+                if (!indent_level) {
+                    fprintf(stderr, "Unmatched ].\n");
+                    return 1;
+                }
                 strcpy(symbol, "}");
                 break;
             default:
