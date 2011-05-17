@@ -6,45 +6,59 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+
+#define SYMBOL_BUFFER 20
 
 int main(int argc, char** argv) {
     int c;
+    char* indent = "    ";
+    char symbol[SYMBOL_BUFFER];
+    unsigned int indent_level = 1, i;
 
     /* Write prologue. */
-    printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char** argv) {\nunsigned char* p;\np = (unsigned char*)malloc(sizeof(unsigned char) * 30000);\n");
+    printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char** argv) {\n%sunsigned char* p;\n%sp = (unsigned char*)malloc(sizeof(unsigned char) * 30000);\n", indent, indent);
 
     /* Translate the body of the code. */
     while ((c = getchar()) != EOF) {
         switch (c) {
             case '>':
-                printf("++p;\n");
+                strcpy(symbol, "++p;");
                 break;
             case '<':
-                printf("--p;\n");
+                strcpy(symbol, "--p;");
                 break;
             case '-':
-                printf("--*p;\n");
+                strcpy(symbol, "--*p;");
                 break;
             case '+':
-                printf("++*p;\n");
+                strcpy(symbol, "++*p;");
                 break;
             case ',':
-                printf("*p = getchar();\n");
+                strcpy(symbol, "*p = getchar();");
                 break;
             case '.':
-                printf("putchar(*p);\n");
+                strcpy(symbol, "putchar(*p);");
                 break;
             case '[':
-                printf("while (*p) {\n");
+                strcpy(symbol, "while (*p) {");
                 break;
             case ']':
-                printf("}\n");
+                --indent_level;
+                strcpy(symbol, "}");
                 break;
+            default:
+                continue;
         }
+
+        for (i = 0; i < indent_level; ++i)
+            printf("%s", indent);
+        printf("%s\n", symbol);
+        if (c == '[') ++indent_level;
     }
 
     /* Write epilogue. */
-    printf("return 0;\n}\n");
+    printf("%sreturn 0;\n}\n", indent);
 
     return 0;
 }
