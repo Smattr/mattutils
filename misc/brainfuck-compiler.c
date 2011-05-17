@@ -10,6 +10,11 @@
 
 #define SYMBOL_BUFFER 20
 
+/* The size of the space the pointer can iterate over (defined by the brainfuck
+ * specification.
+ */
+#define BF_SPACE 30000
+
 int main(int argc, char** argv) {
     int c;
     char* indent = "    ";
@@ -17,7 +22,7 @@ int main(int argc, char** argv) {
     unsigned int indent_level = 1, i;
 
     /* Write prologue. */
-    printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char** argv) {\n%sunsigned char* p;\n%sp = (unsigned char*)malloc(sizeof(unsigned char) * 30000);\n", indent, indent);
+    printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char** argv) {\n%sunsigned char* p;\n%sp = (unsigned char*)malloc(sizeof(unsigned char) * %u);\n%smemset(p, 0, %u);\n\n", indent, indent, BF_SPACE, indent, BF_SPACE);
 
     /* Translate the body of the code. */
     while ((c = getchar()) != EOF) {
