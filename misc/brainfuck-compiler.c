@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     int c;
     char* indent = "    ";
     char symbol[SYMBOL_BUFFER];
-    unsigned int indent_level = 1, i;
+    unsigned int indent_level = 1, i, line = 1;
 
     /* Write prologue. */
     printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char** argv) {\n%sunsigned char* p;\n%sp = (unsigned char*)malloc(sizeof(unsigned char) * %u);\n%smemset(p, 0, %u);\n\n", indent, indent, BF_SPACE, indent, BF_SPACE);
@@ -51,11 +51,13 @@ int main(int argc, char** argv) {
             case ']':
                 --indent_level;
                 if (!indent_level) {
-                    fprintf(stderr, "Unmatched ].\n");
+                    fprintf(stderr, "Line %u: Unmatched ].\n", line);
                     return 1;
                 }
                 strcpy(symbol, "}");
                 break;
+            case '\n':
+                ++line;
             default:
                 continue;
         }
