@@ -1,0 +1,34 @@
+%include ${HOME}/.hgrc_local
+
+[ui]
+ignore = ${HOME}/.hgignore
+
+[diff]
+git = 1
+
+[extensions]
+rebase =
+mq =
+graphlog =
+color = 
+pager =
+
+[hooks]
+pre-commit.subrepo = ${HOME}/bin/check_subrepo_commit.sh
+pre-push.subrepo = ${HOME}/bin/check_subrepo_push.sh
+
+[pager]
+pager = less
+quiet = True
+attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog
+
+[merge-tools]
+vimdiff.executable = /usr/bin/vimdiff
+vimdiff.args = $base $local $other -o $output
+vimdiff.priority = 2
+
+meld.gui=True
+meld.args=--label='local' $local --label='base' $base --label='other' $other
+meld.diffargs=-a --label='$plabel1' $parent --label='$clabel' $child
+meld.priority = 1
+

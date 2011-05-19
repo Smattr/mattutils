@@ -1,0 +1,6 @@
+<ruleset name="Google Reader AU">
+    <target host="www.google.com.au" />
+
+    <rule from="^http://www\.google\.com\.au/" to="https://www.google.com.au/" />
+</ruleset>
+

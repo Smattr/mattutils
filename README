@@ -3,6 +3,7 @@ use on various machines. Note that development to some of these scripts happens
 in a private repo, so you may be looking at an older copy here. If in doubt,
 email me and I can provide you with the latest version.
 
+config - Directory for containing my shared configuration settings.
 generate-passwd - A script for generating random passwords.
 has-changed.sh - A bash script for monitoring updates to a given webpage.
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
