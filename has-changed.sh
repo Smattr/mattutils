@@ -29,11 +29,11 @@ STATUS=0
 if [ -e "${CACHE}/${CACHED_COPY}" ]; then
     diff "${CACHE}/${CACHED_COPY}" ${WGET_TMP}/* >/dev/null
     if [ $? != 0 ]; then
-        echo "Modified page."
+        echo "Modified page: $1."
         STATUS=2
     fi
 else
-    echo "New page (not in cache)."
+    echo "New page (not in cache): $1."
     STATUS=1
 fi
 
