@@ -8,6 +8,8 @@ purpose.
 config - Directory for containing my shared configuration settings.
 generate-passwd - A script for generating random passwords.
 has-changed.sh - A bash script for monitoring updates to a given webpage.
+have-lib.sh - A bash script to check for the existence of a library (handy for
+    Makefiles).
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
