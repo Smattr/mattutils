@@ -13,6 +13,8 @@ have-lib.sh - A bash script to check for the existence of a library (handy for
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
+misc/puts-ldpreload-example.c - A nice simple example of an LD_PRELOAD hack.
+    These tricks are useful for instrumenting closed source programs.
 misc/ram-churn.c - A utility for pushing all running processes' pages to disk
     (i.e. evicting them from RAM).
 misc/RTL8192CU_kernel_2.6.38.patch - If you have a Realtek RTL8192CU wireless
