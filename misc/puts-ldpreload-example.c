@@ -3,8 +3,14 @@
  * I need to write one in a hurry.
  *
  * Note, you can avoid the dlopen call if you're including stdio anyway by
- * calling dlsym(RTLD_NEXT, ...), but I've left this in here for a more general
- * example.
+ * calling dlsym(RTLD_NEXT, ...), but this is a bit problematic when you need
+ * to refer to the (shadowed) function of the same name. If we did not need to
+ * refer to the "real" puts we could get away with RTLD_NEXT:
+ *  #ifdef RTLD_NEXT
+ *      stdio = RTLD_NEXT; // GNU extension to grab the "next" symbol.
+ *  #else
+ *      stdio = dlopen("libc.so.6", RTLD_LAZY);
+ *  #endif
  *
  * To compile:
  *  gcc -shared -ldl -fPIC -o puts-ldpreload-example.so puts-ldpreload-example.c
@@ -26,7 +32,7 @@ int puts(const char* str) {
     int result;
 
     /* Dynamically load the real libc. */
-    stdio = dlopen("/lib/lib.so.6", RTLD_LAZY);
+    stdio = dlopen("libc.so.6", RTLD_LAZY);
 
     if (stdio) {
 
