@@ -7,6 +7,8 @@ purpose.
 
 config - Directory for containing my shared configuration settings.
 generate-passwd - A script for generating random passwords.
+github-ls.sh - A script for listing the names of all your github repos. I use
+    this to generate a manifest to pass to my backup script.
 has-changed.sh - A bash script for monitoring updates to a given webpage.
 have-lib.sh - A bash script to check for the existence of a library (handy for
     Makefiles).
