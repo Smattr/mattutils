@@ -5,7 +5,7 @@ email me and I can provide you with the latest version. Some of these scripts
 are example code or my own experimentation, so yes, some of this code has no
 purpose.
 
-config - Directory for containing my shared configuration settings.
+config/ - Directory for containing my shared configuration settings.
 generate-passwd - A script for generating random passwords.
 github-ls.sh - A script for listing the names of all your github repos. I use
     this to generate a manifest to pass to my backup script.
@@ -19,6 +19,9 @@ internal/install.sh - A script to symlink all the relevant bits I use into my
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
+misc/linked_list.[ch] - An implementation of a linked list in C. This was some
+    code from when I was learning C. If you want a linked list, you are
+    probably better served by rolling your own.
 misc/puts-ldpreload-example.c - A nice simple example of an LD_PRELOAD hack.
     These tricks are useful for instrumenting closed source programs.
 misc/ram-churn.c - A utility for pushing all running processes' pages to disk
