@@ -3,7 +3,7 @@
 # This script symlinks all relevant scripts from this repository into ~/bin and
 # configuration settings into your home directory.
 
-# Set verbose and make a failure terminate the script
+# Make a failure terminate the script
 set -e
 
 REPO=`dirname $0`
