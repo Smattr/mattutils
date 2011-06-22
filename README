@@ -12,6 +12,10 @@ github-ls.sh - A script for listing the names of all your github repos. I use
 has-changed.sh - A bash script for monitoring updates to a given webpage.
 have-lib.sh - A bash script to check for the existence of a library (handy for
     Makefiles).
+internal/ - A directory for scripts for managing operations specific to this
+    repository.
+internal/install.sh - A script to symlink all the relevant bits I use into my
+    ~/bin directory.
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.

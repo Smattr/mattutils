@@ -9,6 +9,23 @@ set -e
 REPO=`dirname $0`
 REPO=`readlink -f "${REPO}/.."`
 
+# Check that we're on the private branch. This repo has two branches, master
+# and private. Private contains everything in master plus some extra bits that
+# are confidential. The master branch is hosted on github and my private
+# server, while the private branch is only hosted on my private server. If
+# you're installing from master it's most likely you forgot to switch branches
+# and are going to miss some scripts/configs.
+if [ -z "`which git`" ]; then
+    echo "Error: Git is not installed or not in your \$PATH." >&2
+    exit 1
+fi
+pushd "${REPO}" >/dev/null
+if [ "`git branch --color=never | grep --color=never "^\*." | cut -d" " -f 2`" != "private" ]; then
+    echo "Error: Your working directory is not on the private branch." >&2
+    exit 1
+fi
+popd >/dev/null
+
 mkdir -p "${HOME}/bin"
 
 # Link useful scripts.
