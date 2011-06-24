@@ -12,10 +12,8 @@ mq =
 graphlog =
 color = 
 pager =
-
-[hooks]
-pre-commit.subrepo = ${HOME}/bin/check_subrepo_commit.sh
-pre-push.subrepo = ${HOME}/bin/check_subrepo_push.sh
+purge =
+record =
 
 [pager]
 pager = less
