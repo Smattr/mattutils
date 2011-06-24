@@ -20,8 +20,8 @@ if [ -z "`which git`" ]; then
     exit 1
 fi
 pushd "${REPO}" >/dev/null
-if [ "`git branch --color=never | grep --color=never "^\*." | cut -d" " -f 2`" != "private" ]; then
-    echo "Error: Your working directory is not on the private branch." >&2
+if [ "`git branch --color=never | grep --color=never "^\*." | cut -d" " -f 2`" == "master" ]; then
+    echo "Error: Your working directory is on the master branch." >&2
     exit 1
 fi
 popd >/dev/null
@@ -46,7 +46,7 @@ for i in generate-passwd \
     fi
 done
 if [ ":${PATH}:" != *":${HOME}/bin:"* ]; then
-    echo "Warning: ${HOME}/bin, where symlinks are created, is not in your \$PATH." >&2
+    echo "Warning: ${HOME}/bin, where symlinks are created, is not in your bash \$PATH." >&2
 fi
 
 # Link configurations.
@@ -80,4 +80,15 @@ else
             echo "Warning: Skipping HTTPS Everywhere rule "`basename "$i"`" that already exists." >&2
         fi
     done
+fi
+
+# SSH
+if [ ! -e "${HOME}/.ssh" ]; then
+    echo "Warning: Skipping all SSH setup because ~/.ssh doesn't exist." >&2
+else
+    if [ ! -e "${HOME}/.ssh/config" ]; then
+        ln -s "${REPO}/config/.ssh/config" "${HOME}/.ssh/config"
+    elif [ ! -L "${HOME}/.ssh/config" ]; then
+        echo "Warning: Skipping ~/.ssh/config that already exists." >&2
+    fi
 fi
