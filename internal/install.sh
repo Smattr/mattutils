@@ -30,6 +30,7 @@ mkdir -p "${HOME}/bin"
 
 # Link useful scripts.
 for i in generate-passwd \
+         gg \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
