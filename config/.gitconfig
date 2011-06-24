@@ -1,7 +1,19 @@
+# This config file is divided into shared (which live in master) and non-shared
+# (which live in other branches) sections. Make sure your edits to each section
+# are committed in the correct branch. If you commit edits in the wrong branch
+# changes will not merge nicely across branches. [Why doesn't .gitconfig support
+# include directives?!?]
+
+# Shared - Make sure all edits to this section happen in master and are then
+#          merged into other branches.
 [user]
 	name = Matthew Fernandez
-	email = matthew.fernandez@gmail.com
 [color]
-	ui = true
+    ui = True
+[pager]
+    status = True
 [github]
-	user = smattr
+	user = Smattr
+
+# Non-shared - Make sure all edits to this section happen in a branch other
+#              than master.
