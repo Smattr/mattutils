@@ -6,6 +6,7 @@ are example code or my own experimentation, so yes, some of this code has no
 purpose.
 
 config/ - Directory for containing my shared configuration settings.
+fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
 github-ls.sh - A script for listing the names of all your github repos. I use
     this to generate a manifest to pass to my backup script.
