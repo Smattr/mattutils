@@ -22,33 +22,72 @@ import getpass
 import mailbox
 import smtplib
 import socket
-import argparse
+import optparse
 
 # The default place to look for your local mail.
 DEFAULT_MBOX = '/var/mail/%s' % getpass.getuser()
 
+# The usage information string.
+USAGE = """Usage: %(prog)s options
+  Forward local mail to another address.
+ [-f address | --from_address address]  Address to send from.
+ [-t address | --to address]            Address to send to.
+ [-s server | --server server]          SMTP server to forward through.
+ [-p port | --port port]                Port to connect to (default 25).
+ [-m file | --mbox file]                Use a specific mailbox (default %(mbox)s).
+ [--login login]                        Login name for SMTP if required.
+ [--password password]                  Password for SMTP if required.
+ [--tls]                                Use TLS security (default off).
+"""
+
 def main():
     global DEFAULT_MBOX
+    global USAGE
 
     # Parse command line arguments.
-    parser = argparse.ArgumentParser('A script for forwarding local mail to another address.')
-    parser.add_argument('-f', '--from_address', required=True, help='From address to use when forwarding')
-    parser.add_argument('--login', help='Login name if authentication is required for sending')
-    parser.add_argument('-m', '--mbox', default=DEFAULT_MBOX, help='Mbox file to open if not the default')
-    parser.add_argument('-p', '--port', default=25, type=int, help='Port to send through if not 25')
-    parser.add_argument('--password', help='Password if authentication is required for sending')
-    parser.add_argument('-s', '--server', required=True, help='SMTP server to forward messages through')
-    parser.add_argument('-t', '--to', required=True, help='Address to forward to')
-    parser.add_argument('--tls', default=False, action='store_true', help='Use TLS security (default is False)')
-    p = parser.parse_args()
-
-    # FIXME: This is almost certainly not how argparse should be used, but I'm
-    # in a hurry.
-    if 'f' in p: p.from_address = p.f
-    if 'm' in p: p.mbox = p.m
-    if 'p' in p: p.port = p.p
-    if 's' in p: p.server = p.s
-    if 't' in p: p.to = p.t
+    parser = optparse.OptionParser()
+    parser.add_option('-f', '--from_address', \
+                      dest='from_address', \
+                      help='From address to use when forwarding')
+    parser.add_option('--login', \
+                      dest='login', \
+                      help='Login name if authentication is required for sending')
+    parser.add_option('-m', '--mbox', \
+                      dest='mbox', \
+                      default=DEFAULT_MBOX, \
+                      help='Mbox file to open if not the default')
+    parser.add_option('-p', '--port', \
+                      dest='port', \
+                      default=25, \
+                      type=int, \
+                      help='Port to send through if not 25')
+    parser.add_option('--password', \
+                      dest='password', \
+                      help='Password if authentication is required for sending')
+    parser.add_option('-s', '--server', \
+                      dest='server', \
+                      help='SMTP server to forward messages through')
+    parser.add_option('-t', '--to', \
+                      dest='to', \
+                      help='Address to forward to')
+    parser.add_option('--tls', \
+                      dest='tls', \
+                      default=False, \
+                      action='store_true', \
+                      help='Use TLS security (default is False)')
+    p = None
+    args = None
+    try:
+        (p, args) = parser.parse_args()
+        if args or not p.from_address \
+                or not p.to \
+                or not p.server:
+            raise Exception('Illegal arguments')
+    except Exception as inst:
+        print str(inst)
+        sys.stderr.write(USAGE % {'prog':sys.argv[0], \
+                                  'mbox':DEFAULT_MBOX})
+        return -1
 
     hostname = socket.gethostname()
 
