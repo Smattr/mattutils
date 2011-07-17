@@ -99,19 +99,7 @@ def main():
         sys.stderr.write('Failed to open %s: %s\n' % (p.mbox, str(inst)))
         return 1
 
-    # Connect to the SMTP server.
     smtp = None
-    try:
-        smtp = smtplib.SMTP()
-        smtp.connect(p.server, p.port)
-        if p.tls:
-            smtp.starttls()
-        if p.login:
-            smtp.login(p.login, p.password)
-    except Exception as inst:
-        sys.stderr.write('Failed to connect to %s: %s\n' % \
-            (p.server, str(inst)))
-        return 1
 
     # Forward and delete each message.
     try:
@@ -120,6 +108,21 @@ def main():
         sys.stderr.write('Failed to lock mailbox file: %s\n' % str(inst))
         return -1
     for msg in box.items():
+        if not smtp:
+            # Connect to the SMTP server.
+            try:
+                smtp = smtplib.SMTP()
+                smtp.connect(p.server, p.port)
+                if p.tls:
+                    smtp.starttls()
+                if p.login:
+                    smtp.login(p.login, p.password)
+            except Exception as inst:
+                sys.stderr.write('Failed to connect to %s: %s\n' % \
+                    (p.server, str(inst)))
+                box.flush()
+                box.unlock()
+                return 1
         try:
             smtp.sendmail(p.from_address, p.to, \
 """From: %(from)s
@@ -143,7 +146,7 @@ Forwarded email from %(hostname)s:%(mailbox)s:
             box.flush()
             box.unlock()
             return -1
-    smtp.quit()
+    if smtp: smtp.quit()
     box.flush()
     box.unlock()
 
