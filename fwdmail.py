@@ -139,9 +139,11 @@ Forwarded email from %(hostname)s:%(mailbox)s:
         except Exception as inst:
             sys.stderr.write('Failed to send/delete message %d: %s\n' % \
                 (msg[0], str(inst)))
+            smtp.quit()
             box.flush()
             box.unlock()
-            return 1
+            return -1
+    smtp.quit()
     box.flush()
     box.unlock()
 
