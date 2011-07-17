@@ -114,7 +114,11 @@ def main():
         return 1
 
     # Forward and delete each message.
-    box.lock()
+    try:
+        box.lock()
+    except Exception as inst:
+        sys.stderr.write('Failed to lock mailbox file: %s\n' % str(inst))
+        return -1
     for msg in box.items():
         try:
             smtp.sendmail(p.from_address, p.to, \
