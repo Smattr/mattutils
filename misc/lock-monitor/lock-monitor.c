@@ -364,7 +364,7 @@ static void lock(const void *lock) {
     if (t->locks && lockcmp(lock, t->locks->value) < 0)
         lock_monitor_exception("Lock Monitor: Thread %p attempted to lock "
             "%p while holding the lock %p, that comes after it in the partial "
-            "ordering.\n", (void*)t->thread, lock, t->locks);
+            "ordering.\n", (void*)t->thread, lock, t->locks->value);
         /* Unreachable. */
     else {
         /* Allow the lock to succeed. */
