@@ -115,8 +115,10 @@ static int panic;
 static void *libpthread;
 static int (*real_mutex_lock)(pthread_mutex_t*);
 static int (*real_mutex_unlock)(pthread_mutex_t*);
+static int (*real_mutex_trylock)(pthread_mutex_t*);
 static int (*real_sem_wait)(sem_t*);
 static int (*real_sem_post)(sem_t*);
+static int (*real_sem_trywait)(sem_t*);
 
 /* This function is called when the partial ordering is violated (or when any
  * critical setup or teardown functions fail). It is really static (don't try
@@ -153,8 +155,10 @@ void lock_monitor_init(void) {
     }
     LOAD_FN(real_mutex_lock, libpthread, pthread_mutex_lock);
     LOAD_FN(real_mutex_unlock, libpthread, pthread_mutex_unlock);
+    LOAD_FN(real_mutex_trylock, libpthread, pthread_mutex_trylock);
     LOAD_FN(real_sem_wait, libpthread, sem_wait);
     LOAD_FN(real_sem_post, libpthread, sem_post);
+    LOAD_FN(real_sem_trywait, libpthread, sem_trywait);
 
     INIT_LOCK(ordering_lock);
     INIT_LOCK(thread_list_lock);
@@ -402,24 +406,64 @@ static void unlock(const void *lock) {
 }
 
 /* The wrapper functions that trap your binary's calls to the locking/unlocking
- * functions.
+ * functions. The general pattern for locking operations is:
+ *  1. Assess the lock against the partial ordering (call lock);
+ *  2. Lock the variable;
+ *  3. If the locking failed, remove it from the thread's lock list;
+ *  4. Return the result.
+ * The general pattern for unlocking is:
+ *  1. Unlock the variable;
+ *  2. If this SUCCEEDED, remove it from the thread's lock list;
+ *  3. Return the result.
  */
 int pthread_mutex_lock(pthread_mutex_t *mutex) {
+    int ret;
     lock((void*)mutex);
-    return real_mutex_lock(mutex);
+    assert(real_mutex_lock);
+    ret = real_mutex_lock(mutex);
+    if (ret) unlock((void*)mutex);
+    return ret;
 }
 
 int pthread_mutex_unlock(pthread_mutex_t *mutex) {
-    unlock((void*)mutex);
-    return real_mutex_unlock(mutex);
+    int ret;
+    assert(real_mutex_unlock);
+    ret = real_mutex_unlock(mutex);
+    if (!ret) unlock((void*)mutex);
+    return ret;
+}
+
+int pthread_mutex_trylock(pthread_mutex_t *mutex) {
+    int ret;
+    lock((void*)mutex);
+    assert(real_mutex_trylock);
+    ret = real_mutex_trylock(mutex);
+    if (ret) unlock((void*)mutex);
+    return ret;
 }
 
 int sem_wait(sem_t *sem) {
+    int ret;
     lock((void*)sem);
-    return real_sem_wait(sem);
+    assert(real_sem_wait);
+    ret = real_sem_wait(sem);
+    if (ret) unlock((void*)sem);
+    return ret;
 }
 
 int sem_post(sem_t *sem) {
-    unlock((void*)sem);
-    return real_sem_post(sem);
+    int ret;
+    assert(real_sem_post);
+    ret = real_sem_post(sem);
+    if (!ret) unlock((void*)sem);
+    return ret;
+}
+
+int sem_trywait(sem_t *sem) {
+    int ret;
+    lock((void*)sem);
+    assert(real_sem_trywait);
+    ret = real_sem_trywait(sem);
+    if (ret) unlock((void*)sem);
+    return ret;
 }
