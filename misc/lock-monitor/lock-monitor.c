@@ -131,10 +131,45 @@ void lock_monitor_exception(const char *format, ...)
     __attribute__((format (printf, 1, 2)));
 void lock_monitor_exception(const char *format, ...) {
     va_list ap;
+    struct list *tl, *l;
+    struct thread *t;
 
     va_start(ap, format);
     vfprintf(stderr, format, ap);
     va_end(ap);
+
+    /* Dump the information we have; analogous to a back trace in GDB. */
+    fprintf(stderr, "Lock trace (threads reported as \"thread: locks "
+            "held in reverse order...\"):\n");
+
+    /* Thread list information. */
+    /* Note that at the point the exception occurs a thread may be in the midst
+     * of attempting to acquire a lock. If the call to lock has already occurred
+     * but the underlying library locking call has not, the thread will be
+     * reported as holding a lock that it actually does not yet hold. For this
+     * reason it will sometimes look as if the constraints of a semaphore or
+     * mutex have been exceeded although they have not.
+     */
+    real_mutex_lock(&thread_list_lock);
+    tl = thread_list;
+    real_mutex_unlock(&thread_list_lock);
+    for (; tl; tl = tl->next) {
+        t = (struct thread*)tl->value;
+        fprintf(stderr, "%p: ", (void*)t->thread);
+        for (l = t->locks; l; l = l->next)
+            fprintf(stderr, "%p ", l->value);
+        fprintf(stderr, "\n");
+    }
+
+    /* Ordering information. */
+    real_mutex_lock(&ordering_lock);
+    l = ordering;
+    real_mutex_unlock(&ordering_lock);
+    fprintf(stderr, "Lock ordering (reverse): ");
+    for (; l; l = l->next)
+        fprintf(stderr, "%p ", l->value);
+    fprintf(stderr, "\n");
+
     panic = 1; /* Suppress warning messages during lock_monitor_destroy. */
     exit(1);
 }
