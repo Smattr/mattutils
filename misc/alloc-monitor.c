@@ -88,6 +88,7 @@ static int panic;
 static void *(*real_malloc)(size_t);
 static void  (*real_free)(void*);
 static void *(*real_realloc)(void*, size_t);
+static void *(*real_calloc)(size_t, size_t);
 
 /* Setup relevant resources for this library. The GCC constructor trick ensures
  * this function is called before anything else in this library.
@@ -101,6 +102,7 @@ void alloc_monitor_init(void) {
     LOAD_FN(real_malloc, malloc);
     LOAD_FN(real_free, free);
     LOAD_FN(real_realloc, realloc);
+    LOAD_FN(real_calloc, calloc);
 }
 
 /* Destroy relevant resources for this library. The GCC destructor trick
@@ -129,6 +131,7 @@ void alloc_monitor_destroy(void) {
     real_malloc = NULL;
     real_free = NULL;
     real_realloc = NULL;
+    real_calloc = NULL;
 }
 
 /* Returns 1 if this lock is in the current list of allocated pointers and 0
@@ -261,4 +264,23 @@ void *realloc(void *ptr, size_t size) {
     else
         add(ptr2);
     return ptr2;
+}
+
+void *calloc(size_t nelem, size_t elsize) {
+    void *ptr;
+
+    /* dlsym uses calloc during an RTLD_NEXT call when linked with pthread,
+     * which is problematic when we're trying to shadow calloc itself.
+     * Thankfully if calloc fails during dlsym it reallocates from a global
+     * static array.
+     */
+    if (!real_calloc) return NULL;
+
+    ptr = real_calloc(nelem, elsize);
+    if (ptr)
+        add(ptr);
+    else
+        fprintf(stderr, "Alloc Monitor: Warning: returning null pointer from "
+                "calloc.\n");
+    return ptr;
 }
