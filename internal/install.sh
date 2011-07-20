@@ -39,6 +39,7 @@ for i in .dircolors \
          .hgrc \
          .screenrc \
          .vimrc \
+         .zsh \
          .zshrc; do
     if [ ! -e "${REPO}/config/$i" ]; then
         echo "Error: $i not found in working directory." >&2
