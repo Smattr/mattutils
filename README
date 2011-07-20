@@ -23,7 +23,7 @@ internal/install.sh - A script to symlink all the relevant bits I use into my
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/alloc-monitor.c - Yet another LD_PRELOAD hack for instrumenting calls to
-    malloc and free. WIP.
+    malloc and free.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
 misc/linked_list.[ch] - An implementation of a linked list in C. This was some
     code from when I was learning C. If you want a linked list, you are
