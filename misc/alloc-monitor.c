@@ -1,4 +1,4 @@
-/* Tool for instrumenting memory allocation functions in C.
+/* Tool for interposing memory allocation functions in C.
  *
  * C programmers are traditionally lax at handling failure in a call to malloc
  * or one of its cousins. The reasons behind this range from "there is no good
@@ -205,7 +205,9 @@ void *malloc(size_t size) {
      *      Find the instruction following the call you're interested in and
      *      note its address. Now use a stack smash combined with a check for
      *      this address. Note you may have to juggle the value 4 for your
-     *      compiler and optimisation level.
+     *      compiler and optimisation level. This is x86 specific. Other
+     *      architectures may push the return address into a link register. In
+     *      this case just check the LR against the address you're looking for.
      *       if (*(&ptr + 4) == 0x8048354a) return 0;
      *
      * If you're adding bits and pieces here, remember that you may want to add
@@ -270,9 +272,9 @@ void *calloc(size_t nelem, size_t elsize) {
     void *ptr;
 
     /* dlsym uses calloc during an RTLD_NEXT call when linked with pthread,
-     * which is problematic when we're trying to shadow calloc itself.
-     * Thankfully if calloc fails during dlsym it reallocates from a global
-     * static array.
+     * which is problematic when we're trying to interpose calloc itself.
+     * Thankfully if calloc fails during dlsym it reallocates from a static
+     * array.
      */
     if (!real_calloc) return NULL;
 
