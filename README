@@ -29,6 +29,7 @@ misc/linked_list.[ch] - An implementation of a linked list in C. This was some
     code from when I was learning C. If you want a linked list, you are
     probably better served by rolling your own.
 misc/lock-monitor/ - A tool for catching deadlock and livelock issues.
+misc/memset.c - Various memset implementations.
 misc/puts-ldpreload-example.c - A nice simple example of an LD_PRELOAD hack.
     These tricks are useful for instrumenting closed source programs.
 misc/ram-churn.c - A utility for pushing all running processes' pages to disk
