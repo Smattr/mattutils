@@ -55,4 +55,7 @@ MediaWatch.py - A python script I use for monitoring directories on various
     scan.
 mplayerfs - Wrapper for starting mplayer in full screen mode and accounting for
     network playback.
+reset-perms.sh - Script for reseting the permissions on a folder recursively.
+    This is awkward to do with chmod when you want to set different permissions
+    for the directories and files.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
