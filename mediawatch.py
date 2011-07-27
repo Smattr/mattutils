@@ -19,6 +19,8 @@ MODIFIED_FILE = 1
 REMOVED_FILE = 2
 UNCHANGED_FILE = 3
 
+READ_BUFFER = 10240
+
 def parseArguments(options):
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'd:f:p:s:t:', ['database=', \
@@ -48,7 +50,10 @@ def getHash(filepath):
     try:
         hash = hashlib.md5()
         f = open(filepath, 'rb')
-        hash.update(f.read())
+        data = f.read(READ_BUFFER)
+        while data:
+            hash.update(data)
+            data = f.read(READ_BUFFER)
         f.close()
         return hash.hexdigest()
     except:
