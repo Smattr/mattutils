@@ -18,6 +18,7 @@ for i in fwdmail.py \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
+         reset-perms.sh \
          toggle-screensaver; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
