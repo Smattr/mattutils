@@ -49,7 +49,7 @@ misc/smartquote.c - Code golf with a program designed to convert single quotes
     into smart quotes. Can you do better?
 misc/stack-smash-hello-world.c - Hello world written using a stack smashing
     attack.
-MediaWatch.py - A python script I use for monitoring directories on various
+mediawatch.py - A python script I use for monitoring directories on various
     servers that I administer. It's designed to be run as a cron job that scans
     a set of directories and emails you any changes observed since its last
     scan.

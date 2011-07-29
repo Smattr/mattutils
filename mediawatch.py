@@ -75,6 +75,11 @@ def updateFileTable(table, path):
             elif file in table:
                 if str(os.path.getmtime(file)) == table[file]['modified']:
                     table[file]['state'] = UNCHANGED_FILE
+                    if not table[file]['hash']:
+                        # We may have failed to hash this file previously due
+                        # to permissions (or I/O errors as happened to me) in
+                        # which case we may as well try again.
+                        table[file]['hash'] = getHash(file)
                 else:
                     table[file]['state'] = MODIFIED_FILE
                     table[file]['modified'] = str(os.path.getmtime(file))
