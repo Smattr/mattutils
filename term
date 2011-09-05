@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ~/
+pterm -geometry 200x70 -sb- -fn a14 -e screen zsh
