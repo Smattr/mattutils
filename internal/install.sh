@@ -18,7 +18,8 @@ for i in fwdmail.py \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
-         toggle-screensaver; do
+         toggle-screensaver \
+         wh ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
         exit 1
