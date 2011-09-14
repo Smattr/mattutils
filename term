@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd ~/
+if [ "$1" == "screen" ]; then
+    RUN="-e screen zsh"
+elif [ "$1" == "tmux" ]; then
+    RUN="-e tmux"
+else
+    RUN=
+fi
+pterm -geometry 200x70 -sb- -fn a14 ${RUN}

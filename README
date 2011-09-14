@@ -23,12 +23,13 @@ internal/install.sh - A script to symlink all the relevant bits I use into my
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/alloc-monitor.c - Yet another LD_PRELOAD hack for instrumenting calls to
-    malloc and free. WIP.
+    malloc and free.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
 misc/linked_list.[ch] - An implementation of a linked list in C. This was some
     code from when I was learning C. If you want a linked list, you are
     probably better served by rolling your own.
 misc/lock-monitor/ - A tool for catching deadlock and livelock issues.
+misc/memset.c - Various memset implementations.
 misc/puts-ldpreload-example.c - A nice simple example of an LD_PRELOAD hack.
     These tricks are useful for instrumenting closed source programs.
 misc/ram-churn.c - A utility for pushing all running processes' pages to disk
@@ -48,10 +49,13 @@ misc/smartquote.c - Code golf with a program designed to convert single quotes
     into smart quotes. Can you do better?
 misc/stack-smash-hello-world.c - Hello world written using a stack smashing
     attack.
-MediaWatch.py - A python script I use for monitoring directories on various
+mediawatch.py - A python script I use for monitoring directories on various
     servers that I administer. It's designed to be run as a cron job that scans
     a set of directories and emails you any changes observed since its last
     scan.
 mplayerfs - Wrapper for starting mplayer in full screen mode and accounting for
     network playback.
+reset-perms.sh - Script for reseting the permissions on a folder recursively.
+    This is awkward to do with chmod when you want to set different permissions
+    for the directories and files.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.

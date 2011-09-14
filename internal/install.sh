@@ -19,6 +19,8 @@ for i in fwdmail.py \
          has-changed.sh \
          have-lib.sh \
          toggle-screensaver \
+         mediawatch.py \
+         reset-perms.sh \
          wh ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2

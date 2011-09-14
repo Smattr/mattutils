@@ -32,7 +32,7 @@
  * is because it has no real information about the internals of your program.
  * If you find lock-monitor identifying problems and you cannot spot the cause
  * you may find that you need to resort to a debugger like GDB to introspect
- * your code at the point as which lock_monitor_exception is called.
+ * your code at the point at which lock_monitor_exception is called.
  */
 #include <stdio.h>
 #include <pthread.h>

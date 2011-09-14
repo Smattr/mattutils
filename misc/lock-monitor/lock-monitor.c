@@ -15,7 +15,7 @@
  * locking behaviour and detect violations of a perceived partial ordering. If
  * you are using the utility it is probably wise to comprehensively read
  * through the code below to understand exactly what it is checking for. Note
- * that the instrumented functions only relate to semaphores (sem_t) and
+ * that the interposed functions only relate to semaphores (sem_t) and
  * mutexes (pthread_mutex_t). If you are using some other method of locking you
  * may need to modify the code.
  *
@@ -25,7 +25,7 @@
  *  LD_PRELOAD=./lock-monitor.so your-program
  *
  * Read the included example.c if this does not explain everything. Note that
- * this instrumentation will significantly slow down locking/unlocking
+ * this interposing will significantly slow down locking/unlocking
  * operations and these are typically on the critical path of your application.
  * Do not use this on a production build unless you are prepared for things to
  * slow down. Significantly.
