@@ -19,6 +19,7 @@ for i in fwdmail.py \
          has-changed.sh \
          have-lib.sh \
          toggle-screensaver \
+         term \
          mediawatch.py \
          reset-perms.sh \
          wh ; do
@@ -41,6 +42,7 @@ for i in .dircolors \
          .gdbinit \
          .hgrc \
          .screenrc \
+         .tmux.conf \
          .vimrc \
          .zsh \
          .zshrc; do
