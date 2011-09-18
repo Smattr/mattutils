@@ -11,3 +11,4 @@ cnoreabbrev Q q
 cnoreabbrev Wq wq
 cnoreabbrev WQ wq
 set display+=lastline
+set bg=dark
