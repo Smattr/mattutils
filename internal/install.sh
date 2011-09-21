@@ -21,6 +21,7 @@ for i in fwdmail.py \
          toggle-screensaver \
          term \
          mediawatch.py \
+         pdfcrop.sh \
          reset-perms.sh \
          wh ; do
     if [ ! -e "${REPO}/$i" ]; then
