@@ -12,7 +12,8 @@ REPO=`readlink -f "${REPO}/.."`
 mkdir -p "${HOME}/bin"
 
 # Link useful scripts.
-for i in fwdmail.py \
+for i in defn.sh \
+         fwdmail.py \
          generate-passwd \
          gg \
          github-ls.sh \
