@@ -1,8 +1,15 @@
 #!/bin/bash
 
 if [ "$1" == "" ]; then
-    echo "Usage: $0 word [--force-command-line]" 1>&2
-    exit 1
+    which xclip &>/dev/null
+    if [ $? -eq 0 ]; then
+        WORD="`xclip -o`"
+    else
+        echo "Usage: $0 word [--force-command-line]" 1>&2
+        exit 1
+    fi
+else
+    WORD=$1
 fi
 
 which dict &>/dev/null
@@ -12,9 +19,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # WordNet (wn) seems to give nicer concise results than some of the others.
-DEF=`dict -d wn $1 2>/dev/null`
+DEF=`dict -d wn ${WORD} 2>/dev/null`
 if [ $? -ne 0 ]; then
-    DEF="$1
+    DEF="${WORD}
 No definition found."
 else
     DEF=`echo "${DEF}" | tail --lines=+5`
