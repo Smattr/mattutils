@@ -13,6 +13,11 @@ fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
 github-ls.sh - A script for listing the names of all your github repos. I use
     this to generate a manifest to pass to my backup script.
+giveem.sh - Creates a setuid binary for a given shell command. This is a quick
+    hack to give someone else the ability to run commands as you. Handy on a
+    system where you're collaborating with someone and neither of you have
+    sudo. Obviously it's pretty easy to shoot yourself in the foot with this
+    one, so tread carefully.
 has-changed.sh - A bash script for monitoring updates to a given webpage.
 have-lib.sh - A bash script to check for the existence of a library (handy for
     Makefiles).
