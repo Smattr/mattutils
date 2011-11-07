@@ -13,6 +13,7 @@ mkdir -p "${HOME}/bin"
 
 # Link useful scripts.
 for i in defn.sh \
+         compresspdf.sh \
          fwdmail.py \
          generate-passwd \
          gg \
