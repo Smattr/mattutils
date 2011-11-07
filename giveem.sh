@@ -16,5 +16,9 @@ int main(int argc, char **argv) {
     return system("$1");
 }
 EOF
-chmod ug+s ${1// /}
+if [ $? -ne 0 ]; then
+    exit 1
+else
+    chmod ug+s ${1// /}
+fi
 
