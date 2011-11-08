@@ -31,8 +31,8 @@ limit coredumpsize 0
 # Environment Variables
 #
 
-LOCAL_PROMPT="[%n@%m %~] "
-REMOTE_PROMPT="[%n@%m %~ %{[1;32m%}#%{[0m%}]"
+LOCAL_PROMPT="[%n@%m %{[1;31m%}%(?..%?)%{[0m%}%~] "
+REMOTE_PROMPT="[%n@%m %{[1;31m%}%(?..%?)%{[0m%}%~ %{[1;32m%}#%{[0m%}]"
 export PATH="$HOME/bin:$HOME/bin/shared:${HOME}/.cabal/bin:$PATH:/opt/local/bin:/opt/local/maude"
 export EDITOR="vim"
 export LESS="-i -R -n -S -FRX"
