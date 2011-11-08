@@ -122,6 +122,19 @@ bindkey '\e\e[5D' backward-word
 fpath=(~/.zsh $fpath)
 autoload -U ~/.zsh/*(:t)
 
+setopt PROMPT_SUBST
+function vcs_prompt {
+    git branch &>/dev/null && \
+     echo -n '-±-' && \
+     git branch | grep '^*' | cut -d ' ' -f 2 && \
+     return
+    hg root &>/dev/null && \
+     echo -n '-☿-' && \
+     hg branch && \
+     return
+}
+export RPROMPT=$'[%*$(vcs_prompt)]'
+
 # Reload scripts
 r() {
 	local f
