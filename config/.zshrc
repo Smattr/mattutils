@@ -169,6 +169,22 @@ function vcs_prompt {
         echo -n `hg branch`
         echo -n "${NORMAL}"
     fi
+    svn list &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -n '-svn-'
+        if [ -z "`svn status`" ]; then
+            # Working directory is clean.
+            echo -n "${GREEN}"
+        elif [ -z "`svn status | grep -v '^?'`" ]; then
+            # Working directory only contains changes to untracked files.
+            echo -n "${YELLOW}"
+        else
+            # Working directory contains changes to tracked files.
+            echo -n "${RED}"
+        fi
+        echo -n `svn info | grep URL | sed 's/.*\/\(.*\)/\1/g'`
+        echo -n "${NORMAL}"
+    fi
 }
 export RPROMPT=$'[%*$(vcs_prompt)]'
 
