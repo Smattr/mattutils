@@ -152,7 +152,6 @@ function vcs_prompt {
         fi
         echo -n `git branch | grep '^*' | cut -d ' ' -f 2`
         echo -n "${NORMAL}"
-        return
     fi
     hg root &>/dev/null
     if [ $? -eq 0 ]; then
