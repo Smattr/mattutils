@@ -133,16 +133,42 @@ MAGENTA="%{[1;35m%}"
 CYAN="%{[1;36m%}"
 WHITE="%{[1;37m%}"
 
+# Version control status.
 setopt PROMPT_SUBST
 function vcs_prompt {
-    git branch &>/dev/null && \
-     echo -n '-git-' && \
-     git branch | grep '^*' | cut -d ' ' -f 2 && \
-     return
-    hg root &>/dev/null && \
-     echo -n '-hg-' && \
-     hg branch && \
-     return
+    git branch &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -n '-git-'
+        if [ -z "`git status --short`" ]; then
+            # Working directory is clean.
+            echo -n "${GREEN}"
+        elif [ -z "`git status --short | grep -v '^?'`" ]; then
+            # Working directory only contains changes to untracked files.
+            echo -n "${YELLOW}"
+        else
+            # Working directory contains changes to tracked files.
+            echo -n "${RED}"
+        fi
+        echo -n `git branch | grep '^*' | cut -d ' ' -f 2`
+        echo -n "${NORMAL}"
+        return
+    fi
+    hg root &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -n '-hg-'
+        if [ -z "`hg status`" ]; then
+            # Working directory is clean.
+            echo -n "${GREEN}"
+        elif [ -z "`hg status | grep -v '^?'`" ]; then
+            # Working directory only contains changes to untracked files.
+            echo -n "${YELLOW}"
+        else
+            # Working directory contains changes to tracked files.
+            echo -n "${RED}"
+        fi
+        echo -n `hg branch`
+        echo -n "${NORMAL}"
+    fi
 }
 export RPROMPT=$'[%*$(vcs_prompt)]'
 
