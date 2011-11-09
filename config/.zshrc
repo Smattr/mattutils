@@ -122,6 +122,17 @@ bindkey '\e\e[5D' backward-word
 fpath=(~/.zsh $fpath)
 autoload -U ~/.zsh/*(:t)
 
+# Prompt foreground colour shortcuts.
+NORMAL="%{[0m%}"
+BLACK="%{[1;30m%}"
+RED="%{[1;31m%}"
+GREEN="%{[1;32m%}"
+YELLOW="%{[1;33m%}"
+BLUE="%{[1;34m%}"
+MAGENTA="%{[1;35m%}"
+CYAN="%{[1;36m%}"
+WHITE="%{[1;37m%}"
+
 setopt PROMPT_SUBST
 function vcs_prompt {
     git branch &>/dev/null && \
