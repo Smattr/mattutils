@@ -125,11 +125,11 @@ autoload -U ~/.zsh/*(:t)
 setopt PROMPT_SUBST
 function vcs_prompt {
     git branch &>/dev/null && \
-     echo -n '-±-' && \
+     echo -n '-git-' && \
      git branch | grep '^*' | cut -d ' ' -f 2 && \
      return
     hg root &>/dev/null && \
-     echo -n '-☿-' && \
+     echo -n '-hg-' && \
      hg branch && \
      return
 }
