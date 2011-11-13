@@ -247,8 +247,8 @@ esac
 
 # Source any computer-local options
 
-if [ -e ~/.zsh_local ]; then
-	source ~/.zsh_local
+if [ -e ~/.zshrc_local ]; then
+	source ~/.zshrc_local
 fi
 
 
