@@ -30,6 +30,7 @@ if [ -e "${CACHE}/${CACHED_COPY}" ]; then
     diff "${CACHE}/${CACHED_COPY}" ${WGET_TMP}/* >/dev/null
     if [ $? != 0 ]; then
         echo "Modified page: $1."
+        diff -purN "${CACHE}/${CACHED_COPY}" ${WGET_TMP}/*
         STATUS=2
     fi
 else
