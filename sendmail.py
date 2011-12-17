@@ -101,7 +101,7 @@ parameters provided on the command line.
  [ --tls ]                             Use TLS security.
  [ -t address | --to=address ]         Add a recipient.
  [ -s subject | --subject=subject ]    Message subject.
-""")
+""" % {'prog':sys.argv[0]})
         return -1
 
     # Read the message body. It's possible to do this inline below when
