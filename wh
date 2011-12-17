@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# This script determines what package a given command lives in.
+
+# Location of Ubuntu's dash magic.
+NOT_FOUND_SCRIPT=/usr/lib/command-not-found
+
+if [ -z "$1" ]; then
+    echo "Usage $0 command" >&2
+    exit 1
+elif [ -n "`which ${NOT_FOUND_SCRIPT} 2>/dev/null`" ]; then
+    "${NOT_FOUND_SCRIPT}" "$1" 2>&1 | head --lines=-1
+else
+    echo "Command not found helper does not seem to exist..." >&2
+    exit 1
+fi

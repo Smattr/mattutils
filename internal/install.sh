@@ -12,15 +12,20 @@ REPO=`readlink -f "${REPO}/.."`
 mkdir -p "${HOME}/bin"
 
 # Link useful scripts.
-for i in fwdmail.py \
+for i in defn.sh \
+         compresspdf.sh \
+         fwdmail.py \
          generate-passwd \
          gg \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
+         toggle-screensaver \
+         term \
          mediawatch.py \
+         pdfcrop.sh \
          reset-perms.sh \
-         toggle-screensaver; do
+         wh ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
         exit 1
@@ -40,6 +45,7 @@ for i in .dircolors \
          .gdbinit \
          .hgrc \
          .screenrc \
+         .tmux.conf \
          .vimrc \
          .zsh \
          .zshrc; do

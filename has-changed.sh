@@ -21,7 +21,7 @@ CACHED_COPY="`echo $1 | sha1sum | cut -d\" \" -f 1`"
 # Why doesn't wget have a PROPER option to rename the output?!?
 WGET_TMP=`mktemp -d`
 pushd ${WGET_TMP} >/dev/null
-wget -N "$1" >/dev/null 2>/dev/null
+wget -N --no-cache "$1" >/dev/null 2>/dev/null
 popd >/dev/null
 
 STATUS=0
@@ -30,6 +30,7 @@ if [ -e "${CACHE}/${CACHED_COPY}" ]; then
     diff "${CACHE}/${CACHED_COPY}" ${WGET_TMP}/* >/dev/null
     if [ $? != 0 ]; then
         echo "Modified page: $1."
+        diff -purN "${CACHE}/${CACHED_COPY}" ${WGET_TMP}/*
         STATUS=2
     fi
 else

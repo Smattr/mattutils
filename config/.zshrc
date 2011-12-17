@@ -31,14 +31,12 @@ limit coredumpsize 0
 # Environment Variables
 #
 
-LOCAL_PROMPT="[%n@%m %~] "
-REMOTE_PROMPT="[%n@%m %~ %{[1;32m%}#%{[0m%}]"
-export PATH="$HOME/bin:$HOME/bin/shared:${HOME}/.cabal/bin:$PATH:/opt/local/bin:/opt/local/maude"
+LOCAL_PROMPT="[%n@%m %{[1;31m%}%(?..%?)%{[0m%}%~] "
+REMOTE_PROMPT="[%n@%m %{[1;31m%}%(?..%?)%{[0m%}%~ %{[1;32m%}#%{[0m%}]"
+export PATH="$HOME/bin:$HOME/bin/shared:$PATH"
 export EDITOR="vim"
 export LESS="-i -R -n -S -FRX"
 export PYTHONSTARTUP="$HOME/.python"
-# For C-semantics tool
-export K_MAUDE_BASE="/opt/local/k-framework-svn-2880"
 
 #
 # Determine if we are a remote login
@@ -74,6 +72,7 @@ alias la="ls -A"
 alias vi="vim"
 alias hist='fc -RI' # Import History
 alias :q=exit
+alias tmp='pushd `mktemp -d`'
 
 # ZSH Options
 
@@ -121,6 +120,71 @@ bindkey '\e\e[5D' backward-word
 
 fpath=(~/.zsh $fpath)
 autoload -U ~/.zsh/*(:t)
+
+# Prompt foreground colour shortcuts.
+NORMAL="%{[0m%}"
+BLACK="%{[1;30m%}"
+RED="%{[1;31m%}"
+GREEN="%{[1;32m%}"
+YELLOW="%{[1;33m%}"
+BLUE="%{[1;34m%}"
+MAGENTA="%{[1;35m%}"
+CYAN="%{[1;36m%}"
+WHITE="%{[1;37m%}"
+
+# Version control status.
+setopt PROMPT_SUBST
+function vcs_prompt {
+    git branch &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -n '-git-'
+        if [ -z "`git status --short`" ]; then
+            # Working directory is clean.
+            echo -n "${GREEN}"
+        elif [ -z "`git status --short | grep -v '^?'`" ]; then
+            # Working directory only contains changes to untracked files.
+            echo -n "${YELLOW}"
+        else
+            # Working directory contains changes to tracked files.
+            echo -n "${RED}"
+        fi
+        echo -n `git branch | grep '^*' | cut -d ' ' -f 2`
+        echo -n "${NORMAL}"
+    fi
+    hg root &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -n '-hg-'
+        if [ -z "`hg status`" ]; then
+            # Working directory is clean.
+            echo -n "${GREEN}"
+        elif [ -z "`hg status | grep -v '^?'`" ]; then
+            # Working directory only contains changes to untracked files.
+            echo -n "${YELLOW}"
+        else
+            # Working directory contains changes to tracked files.
+            echo -n "${RED}"
+        fi
+        echo -n `hg branch`
+        echo -n "${NORMAL}"
+    fi
+    svn list &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -n '-svn-'
+        if [ -z "`svn status`" ]; then
+            # Working directory is clean.
+            echo -n "${GREEN}"
+        elif [ -z "`svn status | grep -v '^?'`" ]; then
+            # Working directory only contains changes to untracked files.
+            echo -n "${YELLOW}"
+        else
+            # Working directory contains changes to tracked files.
+            echo -n "${RED}"
+        fi
+        echo -n `svn info | grep URL | sed 's/.*\/\(.*\)/\1/g'`
+        echo -n "${NORMAL}"
+    fi
+}
+export RPROMPT=$'[%*$(vcs_prompt)]'
 
 # Reload scripts
 r() {
@@ -181,8 +245,8 @@ esac
 
 # Source any computer-local options
 
-if [ -e ~/.zsh_local ]; then
-	source ~/.zsh_local
+if [ -e ~/.zshrc_local ]; then
+	source ~/.zshrc_local
 fi
 
 
@@ -198,3 +262,6 @@ fi
 # Terminal highlighting.
 highlight() { perl -pe "s/$1/\e[1;31;43m$&\e[0m/g"; }
 
+if [[ "${TERM}" != "screen" ]]; then
+    echo "You are not in screen/tmux..."
+fi
