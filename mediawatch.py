@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 
 """
-This script scans a given list of directories and notifies a list of users by
-email of any changes observed since the previous scan. It is designed to be run
-as a cron job. Note that there is no error handling so you will need to check
-your cron mail to ensure the script is running correctly.
+This script scans a given list of directories and reports on changes noted
+since the last run.
 """
 
 import os.path
-import smtplib
-import socket
 import sys
 import getopt
 import hashlib
@@ -23,23 +19,15 @@ READ_BUFFER = 10240
 
 def parseArguments(options):
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'd:f:p:s:t:', ['database=', \
-            'from=', 'path=', 'server=', 'subject=', 'to='])
+        opts, args = getopt.getopt(sys.argv[1:], 'd:p:', ['database=', \
+            'path='])
         if args:
             raise 'Extra arguments on command line'
         for o, a in opts:
             if o in ['-d', '--database']:
                 options['database'] = a
-            elif o in ['-f', '--from']:
-                options['from'] = a
             elif o in ['-p', '--path']:
                 options['paths'].append(a)
-            elif o in ['-s', '--server']:
-                options['server'] = a
-            elif o == '--subject':
-                options['subject'] = a
-            elif o in ['-t', '--to']:
-                options['to'].append(a)
             else:
                 raise 'Unexpected argument'
     except:
@@ -94,31 +82,20 @@ def updateFileTable(table, path):
             (path, sys.exc_info()[0]))
 
 def main():
-    # Setup default options.
+    # Setup some default options.
     options = {
         'database':None,
         'paths':[],
-        'subject':'File changes on %s' % socket.gethostname(),
-        'to':[],
-        'from':None,
-        'server':None,
     }
 
     if not parseArguments(options) or \
        not options['database'] or \
-       not options['paths'] or \
-       not options['to'] or \
-       not options['from'] or \
-       not options['server']:
+       not options['paths']:
         sys.stderr.write(\
 """Usage: %s options
  Options:
   -d file | --database=file   File to read/write file information from/to, recording data from last time and this pass. This option is required.
-  -f address | --from=address Address to send from. This option is required.
   -p path | --path=path       A path to examine. This option must be used at least once, but can also be used multiple times.
-  -s server | --server=server SMTP server to send through. This option is required.
-  --subject=subject           Subject for the notification email. This is optional.
-  -t address | --to=address   Address to send to. This option must be used at least once, but can also be used multiple times.
 """ % sys.argv[0])
         return -1
 
@@ -147,19 +124,7 @@ def main():
     for p in options['paths']:
         updateFileTable(files, p)
 
-    # Construct email
-    message = \
-"""From: Media Watch <%(from)s>
-To: %(to)s
-Subject: %(subject)s
-
-The following changes have been recorded on your server. + indicates an added file, - a removed file and M a modified file.
-
-""" % {'from':options['from'], \
-       'to':', '.join(options['to']), \
-       'subject':options['subject']}
-    sendEmail = 0
-
+    # Write output where necessary.
     try:
         f = open(options['database'], 'w')
         for key in sorted(files.keys()):
@@ -167,29 +132,17 @@ The following changes have been recorded on your server. + indicates an added fi
                 f.write('%s|%s|%s\n' % (files[key]['hash'], key,
                     files[key]['modified']))
             if files[key]['state'] == NEW_FILE:
-                message += '+ %s\n' % key
-                sendEmail = 1
+                sys.stdout.write('+ %s\n' % key)
             elif files[key]['state'] == MODIFIED_FILE:
-                message += 'M %s\n' % key
-                sendEmail = 1
+                sys.stdout.write('M %s\n' % key)
             elif files[key]['state'] == REMOVED_FILE:
-                message += '- %s\n' % key
-                sendEmail = 1
+                sys.stdout.write('- %s\n' % key)
         f.close()
     except:
         sys.stderr.write('Failed to write to database %s: %s.\n' % \
             (options['database'], sys.exc_info()[0]))
         return -1
 
-    if sendEmail:
-        try:
-            smtpObj = smtplib.SMTP(options['server'])
-            smtpObj.sendmail(options['from'], options['to'], message)
-            smtpObj.quit()
-        except:
-            sys.stderr.write('Failed to send notification email: %s.\n' % \
-                sys.exc_info()[0])
-            return -1
     return 0
 
 if __name__ == '__main__':
