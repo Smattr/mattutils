@@ -73,6 +73,7 @@ alias vi="vim"
 alias hist='fc -RI' # Import History
 alias :q=exit
 alias tmp='pushd `mktemp -d`'
+alias cim=vim # Cope with my typos.
 
 # ZSH Options
 
