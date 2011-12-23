@@ -69,3 +69,4 @@ sendmail.py - Script for sending mail from the command line. I got tired of
     configuring Postfix and other MTAs, when all I wanted to do was script a
     simple email.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
+vimall.sh - Quick way of opening everything in a directory in vim.
