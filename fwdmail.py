@@ -30,6 +30,7 @@ DEFAULT_MBOX = '/var/mail/%s' % getpass.getuser()
 # The usage information string.
 USAGE = """Usage: %(prog)s options
   Forward local mail to another address.
+ [ --check_connection ]                 Exit with success if offline.
  [-f address | --from_address address]  Address to send from.
  [-t address | --to address]            Address to send to.
  [-s server | --server server]          SMTP server to forward through.
@@ -46,6 +47,10 @@ def main():
 
     # Parse command line arguments.
     parser = optparse.OptionParser()
+    parser.add_option('--check_connection', \
+                      dest='check_connection', \
+                      default=False, \
+                      help='Exit with success if offline')
     parser.add_option('-f', '--from_address', \
                       dest='from_address', \
                       help='From address to use when forwarding')
@@ -111,8 +116,16 @@ def main():
         if not smtp:
             # Connect to the SMTP server.
             try:
-                smtp = smtplib.SMTP()
-                smtp.connect(p.server, p.port)
+                try:
+                    smtp = smtplib.SMTP()
+                    smtp.connect(p.server, p.port)
+                except Exception as inst:
+                    if p.check_connection:
+                        box.flush()
+                        box.unlock()
+                        return 0
+                    else:
+                        raise inst
                 if p.tls:
                     smtp.starttls()
                 if p.login:
