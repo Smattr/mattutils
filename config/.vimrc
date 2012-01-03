@@ -14,3 +14,7 @@ cnoreabbrev Wq wq
 cnoreabbrev WQ wq
 set display+=lastline
 set bg=dark
+
+" Isabelle syntax.
+au BufRead,BufNewFile *.thy set filetype=isabelle
+au! Syntax isabelle source $HOME/.vim/syntax/isabelle.vim
