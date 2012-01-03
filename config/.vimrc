@@ -5,6 +5,8 @@ set shiftwidth=4
 set expandtab
 set hlsearch
 set number
+set ignorecase
+set textwidth=80
 
 cnoreabbrev W w
 cnoreabbrev Q q
