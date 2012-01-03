@@ -159,6 +159,9 @@ syn match IsabelleSpecial /\./
 
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
+syn match IsabelleComment "(\*\_.\{-}\*)"
+hi def link IsabelleComment Comment
+
 hi IsabelleCommand           ctermfg=3 cterm=bold guifg=yellow gui=bold
 hi IsabelleCommandPart       ctermfg=3 cterm=none guifg=yellow
 hi IsabelleCommandMod        ctermfg=3 cterm=none guifg=yellow
