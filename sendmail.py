@@ -40,14 +40,16 @@ Parse command line options.
 def parseArguments(options):
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'f:h:l:p:t:s:',
-            ['from=', 'host=', 'login=', 'password=', 'port=', 'tls', 'to=',
-            'subject='])
+            ['debug', 'empty', 'from=', 'host=', 'login=', 'password=', 'port=',
+            'tls', 'to=', 'subject='])
         if args:
             raise 'Extra arguments on command line'
         for o, a in opts:
-            if o == '--empty':
+            if o == '--debug':
+                options['debug'] = True
+            elif o == '--empty':
                 options['empty-cancel'] = True
-            if o in ['-f', '--from']:
+            elif o in ['-f', '--from']:
                 options['from'] = a
             elif o in ['-h', '--host']:
                 options['host'] = a
@@ -66,12 +68,14 @@ def parseArguments(options):
             else:
                 raise 'Unexpected argument'
     except:
+        sys.stderr.write('While parsing arguments: %s\n' % str(sys.exc_info()[0]))
         return False
     return True
 
 def main():
     # Setup some default options.
     options = {
+        'debug':False,
         'empty-cancel':False,
         'from':None,
         'host':None,
@@ -89,10 +93,12 @@ def main():
         not options['host'] or \
         not options['to']:
         sys.stderr.write("""Usage: %(prog)s options
-Reads an email from STDIN with standard SMTP headers and sends it using the
-parameters provided on the command line.
+Reads an email body from STDIN and sends it using the parameters provided on
+the command line.
  [ --empty ]                           Don't send email and quit with success
                                        if an empty body is supplied.
+ [ --debug ]                           Print the body that would be sent and
+                                       exit without sending.
  [ -f address | --from=address ]       Sender's address.
  [ -h hostname | --host=hostname ]     SMTP server.
  [ -l login | --login=login ]          Username.
@@ -110,6 +116,18 @@ parameters provided on the command line.
     # connection could timeout.
     message = sys.stdin.read()
     if options['empty-cancel'] and not message:
+        return 0
+    message = """To: %(to)s
+From: %(from)s
+Subject: %(subject)s
+%(body)s""" % {'to':', '.join(options['to']),
+              'from':options['from'],
+              'subject':options['subject'] or '',
+              'body':message}
+
+    # If we're in debugging mode, bail out without sending the email.
+    if options['debug']:
+        sys.stdout.write('%s\n' % message)
         return 0
 
     # Send the email.
