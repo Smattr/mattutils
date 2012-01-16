@@ -2,7 +2,7 @@
 #
 # .zshrc
 #
-# 2010-2011 Matthew Fernandez
+# 2010-2012 Matthew Fernandez
 #
 # 2004-2007 David Greenaway
 #
@@ -136,7 +136,7 @@ WHITE="%{[1;37m%}"
 # Version control status.
 setopt PROMPT_SUBST
 function vcs_prompt {
-    git branch &>/dev/null
+    timeout 1 git branch &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-git-'
         if [ -z "`git status --short`" ]; then
@@ -152,7 +152,7 @@ function vcs_prompt {
         echo -n `git branch | grep '^*' | cut -d ' ' -f 2`
         echo -n "${NORMAL}"
     fi
-    hg root &>/dev/null
+    timeout 1 hg root &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-hg-'
         if [ -z "`hg status`" ]; then
@@ -168,7 +168,7 @@ function vcs_prompt {
         echo -n `hg branch`
         echo -n "${NORMAL}"
     fi
-    svn list &>/dev/null
+    timeout 1 svn list &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-svn-'
         if [ -z "`svn status`" ]; then
