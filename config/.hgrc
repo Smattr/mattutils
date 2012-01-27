@@ -1,3 +1,4 @@
+# Include local hg settings.
 %include ${HOME}/.hgrc_local
 
 [ui]
@@ -14,6 +15,8 @@ color =
 pager =
 purge =
 record =
+# Remember to `hg clone https://bitbucket.org/edgimar/crecord ${HOME}/bin/crecord`
+hgext.crecord = ${HOME}/bin/crecord/crecord
 
 [pager]
 pager = less
