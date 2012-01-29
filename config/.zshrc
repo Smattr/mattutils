@@ -185,7 +185,7 @@ function vcs_prompt {
         echo -n "${NORMAL}"
     fi
 }
-export RPROMPT=$'[%*$(vcs_prompt)]'
+export RPROMPT=$'[${RED}$(jobs | wc -l | grep -v "^0")${NORMAL}%*$(vcs_prompt)]'
 
 # Reload scripts
 r() {
