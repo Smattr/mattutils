@@ -50,6 +50,7 @@ def main():
     parser.add_option('--check_connection', \
                       dest='check_connection', \
                       default=False, \
+                      action='store_true', \
                       help='Exit with success if offline')
     parser.add_option('-f', '--from_address', \
                       dest='from_address', \
