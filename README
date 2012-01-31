@@ -9,6 +9,7 @@ to use this code for any purpose provided you retain attribution to the
 original author, Matthew Fernandez <matthew.fernandez@gmail.com>.
 
 config/ - Directory for containing my shared configuration settings.
+find-broken.sh - A script for finding broken symlinks.
 fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
 github-ls.sh - A script for listing the names of all your github repos. I use
