@@ -71,5 +71,6 @@ reset-perms.sh - Script for reseting the permissions on a folder recursively.
 sendmail.py - Script for sending mail from the command line. I got tired of
     configuring Postfix and other MTAs, when all I wanted to do was script a
     simple email.
+ssh - Wrapper to ssh for supporting multiple config files.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
 vimall.sh - Quick way of opening everything in a directory in vim.
