@@ -61,6 +61,13 @@ for i in .dircolors \
     fi
 done
 
+# Link SSH config.
+if [ ! -e "${HOME}/.ssh/config_mattutils" ]; then
+    ln -s "${REPO}/config/.ssh/config" "${HOME}/.ssh/config_mattutils"
+elif [ ! -L "${HOME}/.ssh/config_mattutils" ]; then
+    echo "Warning: Skipping SSH config_mattutils that already exists." >&2
+fi
+
 # Link HTTPS Everywhere rules.
 if [ `find "${HOME}/.mozilla" -type d -name HTTPSEverywhereUserRules | wc -l` -ne 1 ]; then
     echo "Error: could not determine your HTTPS Everwhere rules directory." >&2
