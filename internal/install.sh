@@ -25,6 +25,7 @@ for i in defn.sh \
          mediawatch.py \
          pdfcrop.sh \
          reset-perms.sh \
+         ssh \
          wh ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
