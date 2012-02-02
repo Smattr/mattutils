@@ -18,6 +18,7 @@ for i in bashd.sh \
          fwdmail.py \
          generate-passwd \
          gg \
+         git \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \

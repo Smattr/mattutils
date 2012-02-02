@@ -1,0 +1,10 @@
+#!/bin/zsh
+
+# Do some magic to support multiple gitconfigs. Unfortunately this needs to be
+# a script rather than a ZSH alias so things that exec git directly get this
+# wrapper as well.
+if [ -e "${HOME}/bin/ssh" ]; then
+    export GIT_SSH="${HOME}/bin/ssh"
+fi
+GIT_CONFIG=<(cat ${HOME}/.gitconfig*) /usr/bin/git "$@"
+

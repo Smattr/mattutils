@@ -14,6 +14,7 @@ config/ - Directory for containing my shared configuration settings.
 find-broken.sh - A script for finding broken symlinks.
 fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
+git - Wrapper to support multiple .gitconfigs.
 github-ls.sh - A script for listing the names of all your github repos. I use
     this to generate a manifest to pass to my backup script.
 giveem.sh - Creates a setuid binary for a given shell command. This is a quick

@@ -1,0 +1,11 @@
+# Shared parts of .gitconfig.
+
+[user]
+	name = Matthew Fernandez
+[color]
+    ui = True
+[pager]
+    status = True
+[github]
+	user = Smattr
+
