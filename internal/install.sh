@@ -12,7 +12,8 @@ REPO=`readlink -f "${REPO}/.."`
 mkdir -p "${HOME}/bin"
 
 # Link useful scripts.
-for i in defn.sh \
+for i in bashd.sh \
+         defn.sh \
          compresspdf.sh \
          fwdmail.py \
          generate-passwd \
