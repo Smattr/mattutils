@@ -15,6 +15,7 @@ mkdir -p "${HOME}/bin"
 for i in bashd.sh \
          defn.sh \
          compresspdf.sh \
+         find-broken.sh \
          fwdmail.py \
          generate-passwd \
          gg \
