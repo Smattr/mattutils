@@ -17,6 +17,8 @@ purge =
 record =
 # Remember to `hg clone https://bitbucket.org/edgimar/crecord ${HOME}/bin/crecord`
 hgext.crecord = ${HOME}/bin/crecord/crecord
+# Remember to `hg clone https://bitbucket.org/parren/hg-pbranch ${HOME}/bin/hg-pbranch`
+pbranch = ${HOME}/bin/hg-pbranch/hgext/pbranch.py
 
 [pager]
 pager = less
