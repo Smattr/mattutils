@@ -42,6 +42,7 @@ misc/linked_list.[ch] - An implementation of a linked list in C. This was some
     probably better served by rolling your own.
 misc/lock-monitor/ - A tool for catching deadlock and livelock issues.
 misc/macros.h - A header file of handy C macros.
+misc/mem-exec.c - Utility for testing executability of memory regions.
 misc/memset.c - Various memset implementations.
 misc/probe-mmap.c - Determine the dimensions of your mmap region.
 misc/puts-ldpreload-example.c - A nice simple example of an LD_PRELOAD hack.
