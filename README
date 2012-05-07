@@ -31,6 +31,7 @@ internal/install.sh - A script to symlink all the relevant bits I use into my
     ~/bin directory.
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
+misc/alloc/ - Fragments of a half-finished allocation library.
 misc/alloc-monitor.c - Yet another LD_PRELOAD hack for instrumenting calls to
     malloc and free.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
