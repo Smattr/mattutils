@@ -53,5 +53,34 @@
 #define ISNULL(a, b) (((a) == NULL) ? (b) : (a))
 #define NULLIF(a, b) (((a) == (b)) ? NULL : (a))
 
+/* Some useful macros for stubbing out sections of code. You often want to mark
+ * pieces of code as TODO or FIXME, but then later on forget to clean this up.
+ * By making them macros, you can make them force a compile error (if you want
+ * to aggressively weed out all instances), fail in a debug context, fail
+ * always, exit or block execution. Seems simple, but in practice I've found
+ * the ability to configure this behaviour invaluable.
+ */
+/* First macros for possible expansions: */
+#define IGNORE(x) ((void)##x) /* Nothing */
+#define COMPILE_ERROR(x) Forced compile time error: ##x
+                                               /* Only works as long as other
+                                                * macros don't interfere with
+                                                * this expansion.
+                                                */
+#define DEBUG_FAIL(x) assert(!("Forced debug failure" ##x))
+#define RUNTIME_FAIL(x) \
+    do { \
+        volatile int _a = 0; \
+        _a = ((int)##x) / _a; /* Force division by 0. */ \
+    } while (0)
+#define EXIT(x) exit(1)
+#define BLOCK(x) \
+    do { \
+        ((void)##x); \
+    } while (1)
+/* Now define TODO and FIXME to the behaviour you want. */
+#define TODO(x) IGNORE(x)
+#define FIXME(x) IGNORE(x)
+
 #endif /* _MACROS_H_ */
 
