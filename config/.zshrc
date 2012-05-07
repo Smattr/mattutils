@@ -75,6 +75,13 @@ alias :q=exit
 alias :Q=exit
 alias tmp='pushd `mktemp -d`'
 alias cim=vim # Cope with my typos.
+function wim() {
+    if [ $# -gt 0 ]; then
+        vim `which $1`;
+    else
+        vim;
+    fi
+}
 
 # ZSH Options
 
