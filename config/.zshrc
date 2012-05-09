@@ -274,3 +274,8 @@ highlight() { perl -pe "s/$1/\e[1;31;43m$&\e[0m/g"; }
 if [[ "${TERM}" != "screen" ]]; then
     echo "You are not in screen/tmux..."
 fi
+
+# Ubuntu-style Command not found helper.
+if [ -f /etc/zsh_command_not_found ]; then
+    . /etc/zsh_command_not_found
+fi
