@@ -72,6 +72,13 @@ elif [ ! -L "${HOME}/.ssh/config_mattutils" ]; then
     echo "Warning: Skipping SSH config_mattutils that already exists." >&2
 fi
 
+# Link Git config.
+if [ ! -e "${HOME}/.gitconfig_mattutils" ]; then
+    ln -s "${REPO}/config/.gitconfig" "${HOME}/.gitconfig_mattutils"
+elif [ ! -L "${HOME}/.gitconfig_mattutils" ]; then
+    echo "Warning: Skipping gitconfig_mattutils that already exists." >&2
+fi
+
 # Link HTTPS Everywhere rules.
 if [ `find "${HOME}/.mozilla" -type d -name HTTPSEverywhereUserRules | wc -l` -ne 1 ]; then
     echo "Error: could not determine your HTTPS Everwhere rules directory." >&2
