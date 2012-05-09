@@ -18,11 +18,18 @@ else
 fi
 
 cd ~/
-if [ "$1" == "screen" ]; then
-    RUN="-e screen zsh"
-elif [ "$1" == "tmux" ]; then
+
+which tmux &>/dev/null
+if [ $? -eq 0 ]; then
     RUN="-e tmux"
 else
-    RUN=
+    which screen &>/dev/null
+    if [ $? -eq 0 ]; then
+        RUN="-e screen zsh"
+    else
+        # Curses...
+        RUN=
+    fi
 fi
+
 ${EMULATOR} ${RUN}
