@@ -14,7 +14,6 @@ config/ - Directory for containing my shared configuration settings.
 find-broken.sh - A script for finding broken symlinks.
 fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
-git - Wrapper to support multiple .gitconfigs.
 github-ls.sh - A script for listing the names of all your github repos. I use
     this to generate a manifest to pass to my backup script.
 giveem.sh - Creates a setuid binary for a given shell command. This is a quick
@@ -80,6 +79,7 @@ reset-perms.sh - Script for reseting the permissions on a folder recursively.
 sendmail.py - Script for sending mail from the command line. I got tired of
     configuring Postfix and other MTAs, when all I wanted to do was script a
     simple email.
-ssh - Wrapper to ssh for supporting multiple config files.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
+update-configs.sh - Script for updating configurations that are generated from
+   multiple files.
 vimall.sh - Quick way of opening everything in a directory in vim.

@@ -1,8 +1,0 @@
-#!/bin/zsh
-
-# Do some magic to support multiple SSH configs. Unfortunately this needs to be
-# a script rather than a ZSH alias so things that exec ssh directly (e.g. git,
-# hg, etc.) get this wrapper as well. Note that the system-wide config needs to
-# be explicitly included because -F disables it.
-/usr/bin/ssh -F <(cat ~/.ssh/config* /etc/ssh/ssh_config) "$@"
-

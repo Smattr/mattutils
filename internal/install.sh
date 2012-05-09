@@ -19,7 +19,6 @@ for i in bashd.sh \
          fwdmail.py \
          generate-passwd \
          gg \
-         git \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
@@ -28,7 +27,7 @@ for i in bashd.sh \
          mediawatch.py \
          pdfcrop.sh \
          reset-perms.sh \
-         ssh \
+         update-configs.sh \
          wh ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
