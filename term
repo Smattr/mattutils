@@ -1,5 +1,22 @@
 #!/bin/bash
 
+WIDTH=180 # Characters
+HEIGHT=45 # Lines
+
+# Priority of terminal emulators:
+which pterm &>/dev/null
+if [ $? -eq 0 ]; then
+    EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn a14"
+else
+    which lxterminal &>/dev/null
+    if [ $? -eq 0 ]; then
+        EMULATOR="lxterminal --geometry=${WIDTH}x${HEIGHT}"
+    else
+        # Well this is unpleasant...
+        EMULATOR="gnome-terminal"
+    fi
+fi
+
 cd ~/
 if [ "$1" == "screen" ]; then
     RUN="-e screen zsh"
@@ -8,4 +25,4 @@ elif [ "$1" == "tmux" ]; then
 else
     RUN=
 fi
-pterm -geometry 200x70 -sb- -fn a14 ${RUN}
+${EMULATOR} ${RUN}
