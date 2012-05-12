@@ -1,0 +1,19 @@
+--- /home/matthew/.config/openbox/lubuntu-rc.xml	2012-05-12 14:45:19.451198813 +1000
++++ /home/matthew/.config/openbox/lubuntu-rc.xml	2012-05-09 22:36:06.607745601 +1000
+@@ -453,6 +453,16 @@
+         <command>lubuntu-logout</command>
+       </action>
+     </keybind>
++    <keybind key="W-z">
++      <action name="Execute">
++        <command>firefox</command>
++      </action>
++    </keybind>
++    <keybind key="W-x">
++      <action name="Execute">
++        <command>/home/matthew/bin/term</command>
++      </action>
++    </keybind>
+   </keyboard>
+   <mouse>
+     <dragThreshold>8</dragThreshold>
