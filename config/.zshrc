@@ -33,7 +33,7 @@ limit coredumpsize 0
 
 LOCAL_PROMPT="[%n@%m %{[1;31m%}%(?..%?)%{[0m%}%~] "
 REMOTE_PROMPT="[%n@%m %{[1;31m%}%(?..%?)%{[0m%}%~ %{[1;32m%}#%{[0m%}]"
-export PATH="$HOME/bin:$HOME/bin/shared:$PATH"
+export PATH="$HOME/bin:$PATH"
 export EDITOR="vim"
 export LESS="-i -R -n -S -FRX"
 export PYTHONSTARTUP="$HOME/.python"
@@ -256,6 +256,12 @@ esac
 
 if [ -e ~/.zshrc_local ]; then
 	source ~/.zshrc_local
+fi
+if [ -e ~/.zshrc_mattbin ]; then
+    source ~/.zshrc_mattbin
+fi
+if [ -e ~/.zshrc_nictabin ]; then
+    source ~/.zshrc_nictabin
 fi
 
 
