@@ -13,6 +13,9 @@ if [ $# -ne 1 ]; then
 fi
 
 # Commit message:
+if [ -z "${USER}" ]; then
+    USER=${LOGNAME}
+fi
 COMMIT_MESSAGE="Auto-commit from ${USER}@`uname --nodename`."
 
 # Move into the repo.
