@@ -6,6 +6,13 @@ parameters you specify. You can accomplish the same thing with a local MTA, but
 you will almost certainly run into difficulties if your machine is not
 externally-facing and does not have an FQDN.
 
+Getting local mail working at all seems to be a fiddly process. A
+non-exhaustive list of things I often need to do is:
+ - Configure postfix (or whatever mail server you're using) to deliver local
+   mail. sudo dpkg-reconfigure postfix if necessary.
+ - sudo chmod a+w /var/mail
+ - touch /var/mail/${USER}
+
 All code in this script is in the public domain. You may use it for any purpose
 (including commercial) with or without attribution to the original author.
 
