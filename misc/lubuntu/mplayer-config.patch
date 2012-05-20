@@ -1,0 +1,11 @@
+diff --git a/config/.mplayer/config b/config/.mplayer/config
+index e712364..8ef00bc 100644
+--- a/config/.mplayer/config
++++ b/config/.mplayer/config
+@@ -8,3 +8,6 @@ zoom=yes
+ # this doesn't matter as the local disk is typically fast.
+ cache=8192
+ cache-min=80.0
++
++# Deactivate screensaver on LXDE, where it doesn't understand XAPI.
++heartbeat-cmd="/usr/bin/xscreensaver-command -deactivate > /dev/null"
