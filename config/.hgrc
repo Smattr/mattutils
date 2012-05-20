@@ -15,9 +15,9 @@ color =
 pager =
 purge =
 record =
-# Remember to `hg clone https://bitbucket.org/edgimar/crecord ${HOME}/bin/crecord`
+# Remember to `hg clone https://bitbucket.org/edgimar/crecord /opt/crecord`
 hgext.crecord = /opt/crecord/crecord
-# Remember to `hg clone https://bitbucket.org/parren/hg-pbranch ${HOME}/bin/hg-pbranch`
+# Remember to `hg clone https://bitbucket.org/parren/hg-pbranch /opt/hg-pbranch`
 pbranch = /opt/hg-pbranch/hgext/pbranch.py
 
 [pager]
