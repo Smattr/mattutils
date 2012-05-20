@@ -1,0 +1,10 @@
+# Keep the mplayer window on top.
+ontop=yes
+
+# Some video codecs don't zoom properly, so always enable software zooming.
+zoom=yes
+
+# File caching to mask patchy networks. These are on even for local files, but
+# this doesn't matter as the local disk is typically fast.
+cache=8192
+cache-min=80.0

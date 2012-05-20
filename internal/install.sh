@@ -47,6 +47,7 @@ fi
 for i in .dircolors \
          .gdbinit \
          .hgrc \
+         .mplayer \
          .screenrc \
          .tmux.conf \
          .vimrc \
