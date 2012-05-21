@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Searches for everywhere some pesky command could be hiding.
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 command" >&2
+    exit 1
+fi
+
+for i in \
+        "which" \
+        "apt-cache search" \
+        "gem search" \
+        "gem search -r" \
+        "cabal list --simple-output" \
+        ; do
+    # Get the first word of the command to check for existence.
+    cmd=${i%% *}
+    which ${cmd} &>/dev/null
+    if [ $? -eq 0 ]; then
+        $i "$1" 2>/dev/null | \
+            while read line; do
+                echo "[$i]: ${line}"
+            done
+    else
+        echo "${cmd} not found, skipping." >&2
+    fi
+done

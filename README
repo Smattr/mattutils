@@ -82,6 +82,7 @@ remove-ubuntu-games.sh - Shortcut for removing all the default Ubuntu games.
 reset-perms.sh - Script for reseting the permissions on a folder recursively.
     This is awkward to do with chmod when you want to set different permissions
     for the directories and files.
+search - Bash script for doing a souped up `which`.
 sendmail.py - Script for sending mail from the command line. I got tired of
     configuring Postfix and other MTAs, when all I wanted to do was script a
     simple email.
