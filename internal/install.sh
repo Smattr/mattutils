@@ -52,6 +52,7 @@ for i in .dircolors \
          .tmux.conf \
          .vimrc \
          .wgetrc \
+         .xmonad \
          .zsh \
          .zshrc; do
     if [ ! -e "${REPO}/config/$i" ]; then
