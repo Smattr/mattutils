@@ -43,55 +43,35 @@ void test_foo() {
  * argument of different types.
  */
 
-/* First we setup an array that we're going to use as a jump table indexed by
- * BAR_INT and BAR_DOUBLE.
- */
-#define BAR_INT    0
-#define BAR_DOUBLE 1
-static void (*bar_call_table[2])(void*) = { NULL };
-
 /* Invoke the relevant version of bar based on the type of the argument. */
-#define call_bar(arg) \
+#define fn_bar_call(arg) \
     do { \
         typeof(arg) _a = 1.1; \
         if (_a != 1.1) { \
             /* The argument is an int. */ \
-            ((void(*)(int))bar_call_table[BAR_INT])(arg); \
+            fn_bar_int(arg); \
         } else { \
             /* The argument is a double. */ \
-            ((void(*)(double))bar_call_table[BAR_DOUBLE])(arg); \
+            fn_bar_double(arg); \
         } \
     } while (0)
 
-/* Define the relevant version of bar. Note that this expands into two function
- * definitions. The easiest way to see what's going on may be to run CPP over
- * this file and check out the output.
+/* Now we need to define bar such that it expands into the definition of
+ * fn_bar_int, the definition of fn_bar_double or an invocation of either
+ * depending on the context. I'm not even going to try to explain what's going
+ * on below. If it doesn't make sense try running CPP over it several times
+ * with different #defines commented out.
+ *
+ * [Note that there are several significant limitations to this technique. For
+ * example, you can't invoke the function with a literal.]
+ *
+ * I picked up the _check_... trick via G+ user comex .
  */
-#define bar(arg) \
-    JOIN(bar, __LINE__)(arg);                                                 \
-        /* Function prototype that we're about to reference. */               \
-                                                                              \
-    void JOIN(_fill_bar_call_table, __LINE__)(void)                           \
-        __attribute__((constructor));                                         \
-        /* Make this function run when the program starts up. */              \
-                                                                              \
-    /* We're going to use this function to fill the bar_call_table with    */ \
-    /* relevant function pointers.                                         */ \
-    void JOIN(_fill_bar_call_table, __LINE__)(void) {                         \
-        typedef arg, _type_alias; /* Ignore parameter name, but alias the  */ \
-                                  /* type. May require staring at for a    */ \
-                                  /* bit before it becomes clear.          */ \
-        _type_alias _test_var = 1.1;                                          \
-        if (_test_var != 1.1) {                                               \
-            /* This is the int version. */                                    \
-            bar_call_table[BAR_INT] = (void(*)(void*))&JOIN(bar, __LINE__);   \
-        } else {                                                              \
-            /* This is the double version. */                                 \
-            bar_call_table[BAR_DOUBLE] = (void(*)(void*))&JOIN(bar, __LINE__);\
-        }                                                                     \
-    }                                                                         \
-    void JOIN(bar, __LINE__)(arg) /* This should match up nicely with the  */ \
-                                  /* { and body of the function.           */
+#define __bar(original, _, arg, ...) JOIN(fn_bar_, arg)(original)
+#define _bar(args...) __bar(args)
+#define _check_int ,int,
+#define _check_double ,double,
+#define bar(arg) _bar(arg, _check_##arg, call)
 
 void bar(int i) {
     printf("I am bar with an int parameter.\n");
@@ -101,16 +81,12 @@ void bar(double i) {
     printf("I am bar with a double parameter.\n");
 }
 
-/* FIXME: This is a bit of an irritation. If we could get away with no
- * pre-processor operations between the function definitions and calls all the
- * yuck could be abstracted into a header.
- */
-#undef bar
-#define bar call_bar
-
 void test_bar() {
-    bar(1);
-    bar(1.1);
+    int i = 1;
+    double j = 1.1;
+
+    bar(i);
+    bar(j);
 }
 
 
