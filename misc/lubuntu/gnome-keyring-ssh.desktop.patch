@@ -1,0 +1,11 @@
+--- /etc/xdg/autostart/gnome-keyring-ssh.desktop	2012-05-20 16:48:23.226280183 +1000
++++ /etc/xdg/autostart/gnome-keyring-ssh.desktop	2012-05-20 16:49:36.836235832 +1000
+@@ -3,7 +3,7 @@ Type=Application
+ Name=SSH Key Agent
+ Comment=GNOME Keyring: SSH Agent
+ Exec=/usr/bin/gnome-keyring-daemon --start --components=ssh
+-OnlyShowIn=GNOME;Unity;
++OnlyShowIn=GNOME;Unity;LXDE;Lubuntu;
+ X-GNOME-Autostart-Phase=Initialization
+ X-GNOME-AutoRestart=false
+ X-GNOME-Autostart-Notify=true
