@@ -7,9 +7,19 @@
 # multiple machines. It has some gotchas, so I take no responsibility if you
 # use it without understanding it and destroy your repo.
 
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 repo_path" >&2
+if [ $# -le 1 ]; then
+    echo "Usage: $0 repo_path [ check_server ]" >&2
     exit 1
+fi
+
+# Set a server to ping to check we are online before pushing and pulling to the
+# given repo. You usually want this to be the hostname of the remote. This can
+# be retrieved from git, but then we would also need to parse the user's SSH
+# config to figure out where the hostname actually pointed.
+if [ $# -gt 1 ]; then
+    PING_SERVER=$2
+else
+    PING_SERVER=www.google.com
 fi
 
 # Commit message:
@@ -37,7 +47,7 @@ git commit -m "${COMMIT_MESSAGE}" >/dev/null
 # same error code for failure as for "nothing to commit."
 
 # Check if we have a network.
-ping -c 1 -w 1 www.google.com &>/dev/null
+ping -c 1 -w 5 ${PING_SERVER} &>/dev/null
 if [ $? -ne 0 ]; then
     # No network.
     exit 0
