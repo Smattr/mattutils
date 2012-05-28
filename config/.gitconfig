@@ -1,4 +1,4 @@
-# Shared parts of .gitconfig.
+# Sourced from mattutils:
 
 [user]
 	name = Matthew Fernandez
