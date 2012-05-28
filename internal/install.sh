@@ -46,6 +46,7 @@ fi
 # Link configurations.
 for i in .dircolors \
          .gdbinit \
+         .gnomerc \
          .hgrc \
          .mplayer \
          .screenrc \
