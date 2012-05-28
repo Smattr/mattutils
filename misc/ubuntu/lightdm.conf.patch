@@ -1,0 +1,7 @@
+--- /etc/lightdm/lightdm.conf	2012-05-28 23:58:28.114388217 +1000
++++ /etc/lightdm/lightdm.conf	2012-05-28 23:57:23.443604442 +1000
+@@ -2,3 +2,4 @@
+ [SeatDefaults]
+ user-session=ubuntu
+ greeter-session=unity-greeter
++greeter-hide-users=true
