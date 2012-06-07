@@ -79,7 +79,6 @@ mediawatch.py - A python script I use for monitoring directories on various
 mplayerfs - Wrapper for starting mplayer in full screen mode and accounting for
     network playback.
 npq.sh - Check a print queue and send a notification to the desktop.
-remove-ubuntu-games.sh - Shortcut for removing all the default Ubuntu games.
 reset-perms.sh - Script for reseting the permissions on a folder recursively.
     This is awkward to do with chmod when you want to set different permissions
     for the directories and files.
