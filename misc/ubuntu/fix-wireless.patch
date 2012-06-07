@@ -1,0 +1,4 @@
+--- /dev/null	2012-06-06 21:36:35.724294957 +1000
++++ /etc/modprobe.d/options.conf	2012-06-04 18:52:47.522501845 +1000
+@@ -0,0 +1 @@
++options iwlwifi wd_disable=1
