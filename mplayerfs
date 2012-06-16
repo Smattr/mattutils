@@ -9,5 +9,9 @@ else
     FNAME=$@
 fi
 
+which mplayer &>/dev/null || {
+    echo "mplayer not found" >&2;
+    exit 1;
+}
 mplayer -fs -cache 5000 "${FNAME}"
 
