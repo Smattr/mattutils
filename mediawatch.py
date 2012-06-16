@@ -19,8 +19,8 @@ READ_BUFFER = 10240
 
 def parseArguments(options):
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'd:p:', ['database=', \
-            'path='])
+        opts, args = getopt.getopt(sys.argv[1:], 'd:p:r:', ['database=', \
+            'path=', 'replace='])
         if args:
             raise 'Extra arguments on command line'
         for o, a in opts:
@@ -28,6 +28,10 @@ def parseArguments(options):
                 options['database'] = a
             elif o in ['-p', '--path']:
                 options['paths'].append(a)
+            elif o in ['-r', '--replace']:
+                if '=' not in a:
+                    raise 'Malformed replace argument'
+                options['replacements'][a.split('=')[0]] = '='.join(a.split('=')[1:])
             else:
                 raise 'Unexpected argument'
     except:
@@ -86,6 +90,7 @@ def main():
     options = {
         'database':None,
         'paths':[],
+        'replacements':{},
     }
 
     if not parseArguments(options) or \
@@ -96,6 +101,7 @@ def main():
  Options:
   -d file | --database=file   File to read/write file information from/to, recording data from last time and this pass. This option is required.
   -p path | --path=path       A path to examine. This option must be used at least once, but can also be used multiple times.
+  -r find=replace | --replace=find=replace Replace the prefix 'find' if at the start of a modified file with the prefix 'replace'. This argument can be used multiple times.
 """ % sys.argv[0])
         return -1
 
@@ -131,6 +137,11 @@ def main():
             if files[key]['state'] != REMOVED_FILE:
                 f.write('%s|%s|%s\n' % (files[key]['hash'], key,
                     files[key]['modified']))
+            # Do prefix replacements if necessary.
+            for prefix in options['replacements']:
+                if key.startswith(prefix):
+                    key = '%s%s' % (options['replacements'][prefix], key[len(prefix):])
+                    break
             if files[key]['state'] == NEW_FILE:
                 sys.stdout.write('+ %s\n' % key)
             elif files[key]['state'] == MODIFIED_FILE:
