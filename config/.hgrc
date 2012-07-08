@@ -5,7 +5,7 @@
 ignore = ${HOME}/.hgignore
 
 [diff]
-git = 1
+#git = 1
 
 [extensions]
 rebase =
@@ -23,7 +23,7 @@ pbranch = /opt/hg-pbranch/hgext/pbranch.py
 [pager]
 pager = less
 quiet = True
-attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog
+attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog,incoming
 
 [merge-tools]
 vimdiff.executable = /usr/bin/vimdiff
