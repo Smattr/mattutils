@@ -38,3 +38,17 @@ set laststatus=2
 " Search incrementally while doing an i-search.
 set incsearch
 
+" Bodhi's options for spell checking
+"set spell spelllang=en_au
+"setlocal spell spelllang=en_au
+nm <F7> :setlocal spell! spelllang=en_au<CR>
+imap <F7> <C-o>:setlocal spell! spelllang=en_au<CR>
+highlight clear SpellBad
+highlight SpellBad term=standout ctermfg=1 term=underline cterm=underline
+highlight clear SpellCap
+highlight SpellCap term=underline cterm=underline
+highlight clear SpellRare
+highlight SpellRare term=underline cterm=underline
+highlight clear SpellLocal
+highlight SpellLocal term=underline cterm=underline
+let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
