@@ -85,6 +85,13 @@ def updateFileTable(table, path):
         sys.stderr.write('Warning: failed reading from directory %s: %s\n' % \
             (path, sys.exc_info()[0]))
 
+def apply_replacements(path, replacements):
+    for prefix in replacements:
+        if path.startswith(prefix):
+            path = '%s%s' % (replacements[prefix], path[len(prefix):])
+                break
+    return path
+
 def main():
     # Setup some default options.
     options = {
@@ -137,17 +144,15 @@ def main():
             if files[key]['state'] != REMOVED_FILE:
                 f.write('%s|%s|%s\n' % (files[key]['hash'], key,
                     files[key]['modified']))
-            # Do prefix replacements if necessary.
-            for prefix in options['replacements']:
-                if key.startswith(prefix):
-                    key = '%s%s' % (options['replacements'][prefix], key[len(prefix):])
-                    break
             if files[key]['state'] == NEW_FILE:
-                sys.stdout.write('+ %s\n' % key)
+                sys.stdout.write('+ %s\n' % \
+                    apply_replacements(key, options['replacements']))
             elif files[key]['state'] == MODIFIED_FILE:
-                sys.stdout.write('M %s\n' % key)
+                sys.stdout.write('M %s\n' % \
+                    apply_replacements(key, options['replacements']))
             elif files[key]['state'] == REMOVED_FILE:
-                sys.stdout.write('- %s\n' % key)
+                sys.stdout.write('- %s\n' % \
+                    apply_replacements(key, options['replacements']))
         f.close()
     except:
         sys.stderr.write('Failed to write to database %s: %s.\n' % \
