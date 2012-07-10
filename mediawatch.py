@@ -89,7 +89,7 @@ def apply_replacements(path, replacements):
     for prefix in replacements:
         if path.startswith(prefix):
             path = '%s%s' % (replacements[prefix], path[len(prefix):])
-                break
+            break
     return path
 
 def main():
