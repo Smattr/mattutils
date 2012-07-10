@@ -12,6 +12,11 @@ if [ $# -le 1 ]; then
     exit 1
 fi
 
+TMP_DIR=`mktemp -d`
+LOG=${TMP_DIR}/log.txt
+echo "$0 log" >${LOG}
+trap "rm -rf ${TMP_DIR}" SIGINT SIGTERM EXIT
+
 # Set a server to ping to check we are online before pushing and pulling to the
 # given repo. You usually want this to be the hostname of the remote. This can
 # be retrieved from git, but then we would also need to parse the user's SSH
@@ -35,14 +40,17 @@ cd "$1" &>/dev/null || {
 }
 
 # Add all outstanding changes.
-git add --all . >/dev/null
+echo " * git add *" >${LOG}
+git add --all . &>${LOG}
 if [ $? -ne 0 ]; then
     echo "Adding new files failed" >&2
+    cat ${LOG} >&2
     exit 1
 fi
 
 # Commit outstanding changes.
-git commit -m "${COMMIT_MESSAGE}" >/dev/null
+echo " * git commit *" >${LOG}
+git commit -m "${COMMIT_MESSAGE}" &>${LOG}
 # We should probably attempt to detect commit failure here, but git returns the
 # same error code for failure as for "nothing to commit."
 
@@ -54,18 +62,23 @@ if [ $? -ne 0 ]; then
 fi
 
 # Pull in new changes.
-git pull --rebase --ff-only origin master &>/dev/null
+echo " * git pull *" >${LOG}
+git pull --rebase --ff-only --tags origin master &>${LOG}
 if [ $? -ne 0 ]; then
     # If the pull failed, we may have been asked to resolve a conflict.
-    git rebase --abort &>/dev/null
+    echo " * git rebase abort *" >${LOG}
+    git rebase --abort &>${LOG}
     echo "Rebase pull failed. Merge probably required." >&2
+    cat ${LOG}
     exit 4
 fi
 
 # Push any changes we just committed.
-git push origin master &>/dev/null
+echo " * git push *" >${LOG}
+git push --tags origin master &>${LOG}
 if [ $? -ne 0 ]; then
     echo "Pushing to remote failed. Merge probably required." >&2
+    cat ${LOG}
     exit 5
 fi
 
