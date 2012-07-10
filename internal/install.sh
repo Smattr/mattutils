@@ -52,6 +52,7 @@ for i in .dircolors \
          .screenrc \
          .tmux.conf \
          .vimrc \
+         .vim \
          .wgetrc \
          .xmonad \
          .zsh \
