@@ -120,6 +120,7 @@ the command line.
     message = """To: %(to)s
 From: %(from)s
 Subject: %(subject)s
+
 %(body)s""" % {'to':', '.join(options['to']),
               'from':options['from'],
               'subject':options['subject'] or '',
