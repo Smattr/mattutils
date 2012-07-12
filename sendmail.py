@@ -7,8 +7,7 @@ This script provides the ability to send mail from the command line.
 While there are existing Linux utilities to do this, they typically involve a
 complete mail server (or at least MTA) configured. When you just want to send
 a one-off email without configuring an email client or need to script
-notification emails, this script can be handy. Note that it has limited support
-for email features (e.g. no CC/BCC options). If you need extra features, email
+notification emails, this script can be handy. If you need extra features, email
 me and I'll probably be happy to add them.
 
 Run with no arguments to see valid options.
@@ -39,13 +38,17 @@ Parse command line options.
 """
 def parseArguments(options):
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'f:h:l:p:t:s:',
-            ['debug', 'empty', 'from=', 'host=', 'login=', 'password=', 'port=',
-            'tls', 'to=', 'subject='])
+        opts, args = getopt.getopt(sys.argv[1:], 'b:c:f:h:l:p:t:s:',
+            ['bcc=', 'cc=', 'debug', 'empty', 'from=', 'host=', 'login=',
+            'password=', 'port=', 'tls', 'to=', 'subject='])
         if args:
             raise 'Extra arguments on command line'
         for o, a in opts:
-            if o == '--debug':
+            if o in ['-b', '--bcc']:
+                options['bcc'].append(a)
+            elif o in ['-c', '--cc']:
+                options['cc'].append(a)
+            elif o == '--debug':
                 options['debug'] = True
             elif o == '--empty':
                 options['empty-cancel'] = True
@@ -75,6 +78,8 @@ def parseArguments(options):
 def main():
     # Setup some default options.
     options = {
+        'bcc':[],
+        'cc':[],
         'debug':False,
         'empty-cancel':False,
         'from':None,
@@ -95,6 +100,8 @@ def main():
         sys.stderr.write("""Usage: %(prog)s options
 Reads an email body from STDIN and sends it using the parameters provided on
 the command line.
+ [ -b address | --bcc=address ]        Add a BCC recipient.
+ [ -c address | --cc=address ]         Add a CC recipient.
  [ --empty ]                           Don't send email and quit with success
                                        if an empty body is supplied.
  [ --debug ]                           Print the body that would be sent and
@@ -118,10 +125,12 @@ the command line.
     if options['empty-cancel'] and not message:
         return 0
     message = """To: %(to)s
+CC: %(cc)s
 From: %(from)s
 Subject: %(subject)s
 
 %(body)s""" % {'to':', '.join(options['to']),
+              'cc':', '.join(options['cc']),
               'from':options['from'],
               'subject':options['subject'] or '',
               'body':message}
@@ -138,7 +147,8 @@ Subject: %(subject)s
             smtpObj.starttls()
         if options['login']:
             smtpObj.login(options['login'], options['password'])
-        smtpObj.sendmail(options['from'], options['to'], message)
+        smtpObj.sendmail(options['from'], \
+            options['to'] + options['cc'] + options['bcc'], message)
         smtpObj.quit()
     except:
         sys.stderr.write('Failed while sending: %s.\n' % str(sys.exc_info()[0]))
