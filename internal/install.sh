@@ -22,11 +22,13 @@ for i in bashd.sh \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
+         timestamp \
          toggle-screensaver \
          term \
          mediawatch.py \
          pdfcrop.sh \
          reset-perms.sh \
+         search \
          update-configs.sh \
          wh ; do
     if [ ! -e "${REPO}/$i" ]; then
