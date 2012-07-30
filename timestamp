@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Timestamp each output line from a program passed as an argument or piped in.
+
+if [ $# -lt 1 ]; then
+    cat -
+else
+    $@
+fi | while read i; do
+    echo "[`date "+%H:%M:%S"`]: ${i}"
+done
+exit ${PIPESTATUS[0]}
+
