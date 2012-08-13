@@ -145,6 +145,13 @@ WHITE="%{[1;37m%}"
 # Version control status.
 setopt PROMPT_SUBST
 function vcs_prompt {
+    for i in git hg svn; do
+        which $i &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo "zshrc: $i not found; vcs_prompt bailing out." 1>&2
+            exit 1
+        fi
+    done
     timeout 1 git branch &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-git-'
