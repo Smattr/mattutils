@@ -11,6 +11,7 @@ syn keyword IsabelleCommand datatype
 syn keyword IsabelleCommand declare
 syn keyword IsabelleCommand definition
 syn keyword IsabelleCommand fun
+syn keyword IsabelleCommand function
 syn keyword IsabelleCommand typedecl
 syn keyword IsabelleCommand types
 syn keyword IsabelleCommand typedef
