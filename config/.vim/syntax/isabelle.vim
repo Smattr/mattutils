@@ -2,6 +2,8 @@ syn clear
 syn sync fromstart
 syn case match
 
+syn keyword IsabelleCommand term
+syn keyword IsabelleComment abbreviation
 syn keyword IsabelleCommand theory
 syn keyword IsabelleCommand theorem
 syn keyword IsabelleCommand lemma

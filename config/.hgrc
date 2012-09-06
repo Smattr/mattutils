@@ -35,3 +35,5 @@ meld.args=--label='local' $local --label='base' $base --label='other' $other
 meld.diffargs=-a --label='$plabel1' $parent --label='$clabel' $child
 meld.priority = 1
 
+[hooks]
+pretxncommit.acl = python:hgext.acl.hook
