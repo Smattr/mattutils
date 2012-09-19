@@ -29,6 +29,13 @@ except ImportError:
     sys.stderr.write('Failed to import getopt. Is it installed?\n')
     sys.exit(1)
 
+# Import function for encoding message body.
+try:
+    from email.mime.text import MIMEText
+except ImportError:
+    sys.stderr.write('Failed to import email.mime.text. Is it installed?\n')
+    sys.exit(1)
+
 
 """
 Parse command line options.
@@ -124,16 +131,11 @@ the command line.
     message = sys.stdin.read()
     if options['empty-cancel'] and not message:
         return 0
-    message = """To: %(to)s
-CC: %(cc)s
-From: %(from)s
-Subject: %(subject)s
-
-%(body)s""" % {'to':', '.join(options['to']),
-              'cc':', '.join(options['cc']),
-              'from':options['from'],
-              'subject':options['subject'] or '',
-              'body':message}
+    message = MIMEText(message, 'plain', _charset='utf-8')
+    message['To'] = ', '.join(options['to'])
+    message['From'] = options['from']
+    message['CC'] = ', '.join(options['cc'])
+    message['Subject'] = options['subject'] or ''
 
     # If we're in debugging mode, bail out without sending the email.
     if options['debug']:
@@ -148,7 +150,7 @@ Subject: %(subject)s
         if options['login']:
             smtpObj.login(options['login'], options['password'])
         smtpObj.sendmail(options['from'], \
-            options['to'] + options['cc'] + options['bcc'], message)
+            options['to'] + options['cc'] + options['bcc'], message.as_string())
         smtpObj.quit()
     except:
         sys.stderr.write('Failed while sending: %s.\n' % str(sys.exc_info()[0]))
