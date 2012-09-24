@@ -6,7 +6,8 @@ HEIGHT=45 # Lines
 # Priority of terminal emulators:
 which pterm &>/dev/null
 if [ $? -eq 0 ]; then
-    EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn a14"
+    # To lookup fonts: xlsfonts
+    EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn -misc-fixed-medium-r-normal--15-140-75-75-c-90-iso10646-1"
 else
     which lxterminal &>/dev/null
     if [ $? -eq 0 ]; then
