@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# Generate a random password.
+
 if [ "$1" == "" ]; then
-    PWD_LEN=8
+    PWD_LEN=10
 else
     PWD_LEN=$1
 fi
