@@ -12,7 +12,9 @@ REPO=`readlink -f "${REPO}/.."`
 mkdir -p "${HOME}/bin"
 
 # Link useful scripts.
-for i in bashd.sh \
+for i in \
+         addcert.sh \
+         bashd.sh \
          defn.sh \
          compresspdf.sh \
          find-broken.sh \
