@@ -1,1 +1,0 @@
-main(c,v){while(v=~getchar())putchar(v+40||++c%2?~v:96);}
