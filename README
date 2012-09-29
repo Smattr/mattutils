@@ -90,6 +90,4 @@ sendmail.py - Script for sending mail from the command line. I got tired of
     simple email.
 timestamp - Timestamp console stdout.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
-update-configs.sh - Script for updating configurations that are generated from
-   multiple files.
 vimall.sh - Quick way of opening everything in a directory in vim.
