@@ -15,6 +15,7 @@ mkdir -p "${HOME}/bin"
 for i in \
          addcert.sh \
          bashd.sh \
+         dd.py \
          defn.sh \
          compresspdf.sh \
          find-broken.sh \

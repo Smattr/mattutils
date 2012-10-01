@@ -15,6 +15,7 @@ auto-commit.sh - A script for automatically syncing a git repository across
 bashd.sh - A script for connecting bash to a local port. Handy for probing
     environments where you don't have a PTY.
 config/ - Directory for containing my shared configuration settings.
+dd.py - Wrapper around dd to provide progress output.
 find-broken.sh - A script for finding broken symlinks.
 fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
