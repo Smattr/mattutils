@@ -3,7 +3,7 @@
 # Generate a random password.
 
 if [ "$1" == "" ]; then
-    PWD_LEN=10
+    PWD_LEN=15
 else
     PWD_LEN=$1
 fi
