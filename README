@@ -14,6 +14,7 @@ auto-commit.sh - A script for automatically syncing a git repository across
     machines.
 bashd.sh - A script for connecting bash to a local port. Handy for probing
     environments where you don't have a PTY.
+bitbucket-ls.sh - The BitBucket equivalent of github-ls.sh.
 config/ - Directory for containing my shared configuration settings.
 dd.py - Wrapper around dd to provide progress output.
 find-broken.sh - A script for finding broken symlinks.

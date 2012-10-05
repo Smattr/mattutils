@@ -15,6 +15,7 @@ mkdir -p "${HOME}/bin"
 for i in \
          addcert.sh \
          bashd.sh \
+         bitbucket-ls.sh \
          dd.py \
          defn.sh \
          compresspdf.sh \
