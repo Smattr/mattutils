@@ -14,10 +14,6 @@ cnoreabbrev WQ wq
 set display+=lastline
 set bg=dark
 
-" Isabelle syntax.
-au BufRead,BufNewFile *.thy set filetype=isabelle
-au! Syntax isabelle source $HOME/.vim/syntax/isabelle.vim
-
 " Map Up and Down the way you would expect them to work with wrapped lines.
 imap <silent> <Down> <C-o>gj
 imap <silent> <Up> <C-o>gk
