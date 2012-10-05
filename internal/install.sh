@@ -33,6 +33,7 @@ for i in \
          pdfcrop.sh \
          reset-perms.sh \
          search \
+         sendmail.py \
          update-configs.sh \
          wh ; do
     if [ ! -e "${REPO}/$i" ]; then
