@@ -321,3 +321,13 @@ function foralld() {
         _forall d $@
     fi
 }
+
+# Wrapper around vim to convert Isabelle symbols if possible.
+function v() {
+    which xsymbol.py &>/dev/null
+    if [[ $? -eq 0 && "${1##*.}" = "thy" ]]; then
+        xsymbol.py "$1" | tail --bytes=+`xsymbol.py /dev/null | wc -c` | view -c "set syntax=isabelle" -
+    else
+        vim "$1"
+    fi
+}
