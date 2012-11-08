@@ -31,6 +31,8 @@ for i in \
          term \
          mediawatch.py \
          pdfcrop.sh \
+         prefix \
+         qdrop \
          reset-perms.sh \
          search \
          sendmail.py \

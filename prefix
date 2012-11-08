@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Prefix the output of a command with some given text.
+
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 text command" >&2
+    exit 1
+fi
+
+PREFIX=$1
+shift
+
+$@ | while read line; do
+    echo "${PREFIX}${line}"
+done
+exit ${PIPESTATUS[0]}
