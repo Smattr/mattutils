@@ -10,8 +10,8 @@ Getting local mail working at all seems to be a fiddly process. A
 non-exhaustive list of things I often need to do is:
  - Configure postfix (or whatever mail server you're using) to deliver local
    mail. sudo dpkg-reconfigure postfix if necessary.
- - sudo chmod a+w /var/mail
- - touch /var/mail/${USER}
+ - sudo usermod -aG mail ${USER}
+ - sudo touch /var/mail/${USER} && sudo chown ${USER} /var/mail/${USER}
 
 All code in this script is in the public domain. You may use it for any purpose
 (including commercial) with or without attribution to the original author.
