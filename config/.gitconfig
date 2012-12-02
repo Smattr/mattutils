@@ -9,3 +9,6 @@
 [github]
 	user = Smattr
 
+[alias]
+    co = clone
+    st = status
