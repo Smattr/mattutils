@@ -78,6 +78,7 @@ mediawatch.py - A python script I use for monitoring directories on various
 mplayerfs - Wrapper for starting mplayer in full screen mode and accounting for
     network playback.
 npq.sh - Check a print queue and send a notification to the desktop.
+prefix - Preface each output line from a command with some given text.
 reset-perms.sh - Script for reseting the permissions on a folder recursively.
     This is awkward to do with chmod when you want to set different permissions
     for the directories and files.
