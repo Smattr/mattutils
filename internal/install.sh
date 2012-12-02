@@ -32,7 +32,6 @@ for i in \
          mediawatch.py \
          pdfcrop.sh \
          prefix \
-         qdrop \
          reset-perms.sh \
          search \
          sendmail.py \
