@@ -35,7 +35,6 @@ for i in \
          reset-perms.sh \
          search \
          sendmail.py \
-         update-configs.sh \
          wh ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
