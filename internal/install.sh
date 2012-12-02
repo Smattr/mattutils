@@ -90,18 +90,3 @@ if [ ! -e "${HOME}/.gitconfig_mattutils" ]; then
 elif [ ! -L "${HOME}/.gitconfig_mattutils" ]; then
     echo "Warning: Skipping gitconfig_mattutils that already exists." >&2
 fi
-
-# Link HTTPS Everywhere rules.
-if [ `find "${HOME}/.mozilla" -type d -name HTTPSEverywhereUserRules | wc -l` -ne 1 ]; then
-    echo "Error: could not determine your HTTPS Everwhere rules directory." >&2
-else
-    HTTPS_RULES=`find "${HOME}/.mozilla" -type d -name HTTPSEverywhereUserRules`
-    for i in `find "${REPO}/config/HTTPSEverywhereUserRules" -type f -iname "*.xml" -exec echo "{}" \;`; do
-        DEST=${HTTPS_RULES}/`basename "$i"`
-        if [ ! -e "${DEST}" ]; then
-            ln -s "$i" "${DEST}"
-        else
-            echo "Warning: Skipping HTTPS Everywhere rule "`basename "$i"`" that already exists." >&2
-        fi
-    done
-fi
