@@ -15,7 +15,7 @@ fi
 TMP_DIR=`mktemp -d`
 LOG=${TMP_DIR}/log.txt
 echo "$0 log" >${LOG}
-trap "rm -rf ${TMP_DIR}" SIGINT SIGTERM EXIT
+trap "rm -rf ${TMP_DIR} ; exit" SIGINT SIGTERM EXIT
 
 # Set a server to ping to check we are online before pushing and pulling to the
 # given repo. You usually want this to be the hostname of the remote. This can
@@ -40,8 +40,8 @@ cd "$1" &>/dev/null || {
 }
 
 # Add all outstanding changes.
-echo " * git add *" >${LOG}
-git add --all . &>${LOG}
+echo " * git add *" >>${LOG}
+git add --all . &>>${LOG}
 if [ $? -ne 0 ]; then
     echo "Adding new files failed" >&2
     cat ${LOG} >&2
@@ -49,8 +49,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Commit outstanding changes.
-echo " * git commit *" >${LOG}
-git commit -m "${COMMIT_MESSAGE}" &>${LOG}
+echo " * git commit *" >>${LOG}
+git commit -m "${COMMIT_MESSAGE}" &>>${LOG}
 # We should probably attempt to detect commit failure here, but git returns the
 # same error code for failure as for "nothing to commit."
 
@@ -62,23 +62,22 @@ if [ $? -ne 0 ]; then
 fi
 
 # Pull in new changes.
-echo " * git pull *" >${LOG}
-git pull --rebase --ff-only --tags origin master &>${LOG}
+echo " * git pull *" >>${LOG}
+git pull --rebase --ff-only --tags origin master &>>${LOG}
 if [ $? -ne 0 ]; then
     # If the pull failed, we may have been asked to resolve a conflict.
-    echo " * git rebase abort *" >${LOG}
-    git rebase --abort &>${LOG}
+    echo " * git rebase abort *" >>${LOG}
+    git rebase --abort &>>${LOG}
     echo "Rebase pull failed. Merge probably required." >&2
-    cat ${LOG}
+    cat ${LOG} >&2
     exit 4
 fi
 
 # Push any changes we just committed.
-echo " * git push *" >${LOG}
-git push --tags origin master &>${LOG}
+echo " * git push *" >>${LOG}
+git push --tags origin master &>>${LOG}
 if [ $? -ne 0 ]; then
     echo "Pushing to remote failed. Merge probably required." >&2
-    cat ${LOG}
+    cat ${LOG} >&2
     exit 5
 fi
-
