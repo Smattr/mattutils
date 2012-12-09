@@ -42,6 +42,8 @@ misc/alloc-monitor.c - Yet another LD_PRELOAD hack for instrumenting calls to
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
 misc/detectvm.c - Code to detect whether it is running in a virtual machine or
     natively.
+misc/error-handling.c - An example (experiment?) of out-of-line error handling
+    in C.
 misc/is-bound.c - Program for checking whether a socket is currently bound.
 misc/linked_list.[ch] - An implementation of a linked list in C. This was some
     code from when I was learning C. If you want a linked list, you are
