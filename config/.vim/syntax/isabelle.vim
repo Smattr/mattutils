@@ -17,6 +17,7 @@ syn keyword IsabelleCommand function
 syn keyword IsabelleCommand typedecl
 syn keyword IsabelleCommand types
 syn keyword IsabelleCommand typedef
+syn keyword IsabelleCommand type_synonym
 syn keyword IsabelleCommand consts
 syn keyword IsabelleCommand constdefs
 syn keyword IsabelleCommand inductive
