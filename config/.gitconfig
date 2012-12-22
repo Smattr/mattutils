@@ -12,3 +12,7 @@
 [alias]
     co = clone
     st = status
+    incoming = "!git fetch origin master && git log ..origin/master"
+    outgoing = "!git getch origin master && git log origin/master.."
+    in = incoming
+    out = outgoing
