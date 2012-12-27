@@ -27,6 +27,15 @@ limit coredumpsize 0
 # Enable directory colours
 [[ $OSTYPE == "linux" ]] && eval `dircolors -b ~/.dircolors`
 
+# Ensure HOST == HOSTNAME and both are set. Some finicky scripts expect one or
+# the other.
+if [ -z "${HOST}" ]; then
+    export HOST=${HOSTNAME}
+fi
+if [ -z "${HOSTNAME}" ]; then
+    export HOSTNAME=${HOST}
+fi
+
 #
 # Environment Variables
 #
