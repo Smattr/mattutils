@@ -44,15 +44,24 @@ def main():
 
         if line.startswith('PLAY '):
             if proc:
-                proc.terminate()
+                try:
+                    proc.terminate()
+                except:
+                    pass
             proc = play(line[len('PLAY '):])
 
         elif line == 'QUIT':
-            proc.stdin.write('q')
+            try:
+                proc.stdin.write('q')
+            except:
+                pass
             proc = None
 
         elif line in COMMANDS:
-            proc.stdin.write(COMMANDS[line])
+            try:
+                proc.stdin.write(COMMANDS[line])
+            except:
+                pass
 
     return 0
 
