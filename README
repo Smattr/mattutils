@@ -34,6 +34,7 @@ internal/ - A directory for scripts for managing operations specific to this
     repository.
 internal/install.sh - A script to symlink all the relevant bits I use into my
     ~/bin directory.
+mediad.py - Quick daemon for remotely controlling mplayer.
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/alloc/ - Fragments of a half-finished allocation library.
