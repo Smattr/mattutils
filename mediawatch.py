@@ -48,11 +48,11 @@ def getHash(filepath):
             data = f.read(READ_BUFFER)
         f.close()
         return hash.hexdigest()
-    except:
+    except Exception as inst:
         # If we can't read the file, that's not a critical error.
         # FIXME: command line opts for these msgs.
         sys.stderr.write('Warning: failed to hash %s: %s\n' % \
-            (filepath, sys.exc_info()[0]))
+            (filepath, str(inst)))
         return ''
 
 def updateFileTable(table, path):
@@ -81,9 +81,9 @@ def updateFileTable(table, path):
                                'modified':str(os.path.getmtime(file)), \
                                'hash':getHash(file), \
                                'state':NEW_FILE}
-    except:
+    except Exception as inst:
         sys.stderr.write('Warning: failed reading from directory %s: %s\n' % \
-            (path, sys.exc_info()[0]))
+            (path, str(inst)))
 
 def apply_replacements(path, replacements):
     for prefix in replacements:
