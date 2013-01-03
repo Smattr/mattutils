@@ -52,6 +52,7 @@ fi
 
 # Link configurations.
 for i in .dircolors \
+         .emacs \
          .gdbinit \
          .gnomerc \
          .hgrc \
