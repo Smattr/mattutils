@@ -82,5 +82,23 @@
 #define TODO(x) IGNORE(x)
 #define FIXME(x) IGNORE(x)
 
+/* When working on a simple project I wanted to use some nice syntax like the
+ * following to indicate atomic sections:
+ *
+ *  atomic {
+ *      // Do something stuff
+ *  }
+ *
+ * Assuming you have the following functions for your lock:
+ *  void lock(void);
+ *  void unlock(void);
+ *  int have_lock(void);
+ * you can do something like the following:
+ */
+#define atomic for(;(!have_lock() && ({lock();1;})) || ({unlock();0;});)
+/* It ain't pretty or well-tested, but it can make demonstrative code easier to
+ * read.
+ */
+
 #endif /* _MACROS_H_ */
 
