@@ -7,6 +7,7 @@ syn region Foldable start="{" end="}" fold transparent
 syn match CamkesMultiLineComment "\/\*\_.\{-}\*\/"
 syn match CamkesSingleLineComment "\/\/.*$"
 syn region CamkesString start='"' end='"'
+syn region CamkesBuiltin start='<' end='>'
 
 hi def link CamkesKeyword Statement
 hi def link CamkesType Type
@@ -16,3 +17,4 @@ hi def link CamkesImport PreProc
 hi def link CamkesMultiLineComment Comment
 hi def link CamkesSingleLineComment Comment
 hi def link CamkesString Constant
+hi def link CamkesBuiltin Constant
