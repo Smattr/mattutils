@@ -16,3 +16,6 @@
     outgoing = "!git getch origin master && git log origin/master.."
     in = incoming
     out = outgoing
+
+[merge]
+    conflictstyle = diff3
