@@ -3,6 +3,7 @@
 
 [ui]
 ignore = ${HOME}/.hgignore
+merge = diff3
 
 [diff]
 #git = 1
