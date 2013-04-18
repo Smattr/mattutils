@@ -100,5 +100,17 @@
  * read.
  */
 
+/* The ability of a compiler to optimise your code is constrained by what it
+ * can determine about the code. If there's a particular fact that will help
+ * the compiler, you can provide it with __builtin_unreachable. This macro
+ * makes such code a bit clearer.
+ */
+#define ASSUME(fact) \
+    do { \
+        if (!(fact)) { \
+            __builtin_unreachable(); \
+        } \
+    } while (0)
+
 #endif /* _MACROS_H_ */
 
