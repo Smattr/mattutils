@@ -84,6 +84,7 @@ alias :q=exit
 alias :Q=exit
 alias tmp='pushd `mktemp -d`'
 alias cim=vim # Cope with my typos.
+alias cd..="cd .."
 alias evince="dbus-launch /usr/bin/evince" # Mask evince problems in newer Ubuntu.
 function wim() {
     if [ $# -gt 0 ]; then
