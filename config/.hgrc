@@ -3,6 +3,7 @@
 
 [ui]
 ignore = ${HOME}/.hgignore
+merge = diff3
 
 [diff]
 #git = 1
@@ -15,7 +16,8 @@ color =
 pager =
 purge =
 record =
-# Remember to `hg clone https://bitbucket.org/tksoh/hgshelve /opt/hgshelve`
+transplant =
+# Remember to `hg clone https://bitbucket.org/astiob/hgshelve /opt/hgshelve`
 shelve = /opt/hgshelve/hgshelve.py
 # Remember to `hg clone https://bitbucket.org/edgimar/crecord /opt/crecord`
 hgext.crecord = /opt/crecord/crecord

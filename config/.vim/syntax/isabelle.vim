@@ -171,7 +171,7 @@ syn match IsabelleSpecial /\./
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
 syn match IsabelleComment "(\*\_.\{-}\*)"
-syn match IsabelleComment "text {\*\_.\{-}\*}"
+syn match IsabelleComment "\(text\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
 hi def link IsabelleComment Comment
 
 hi IsabelleCommand           ctermfg=3 cterm=bold guifg=yellow gui=bold
