@@ -28,6 +28,13 @@ syn keyword IsabelleCommand defs
 syn keyword IsabelleCommand axclass
 syn keyword IsabelleCommand instance
 syn keyword IsabelleCommand axioms
+syn keyword IsabelleCommand locale
+syn keyword IsabelleCommand sublocale
+syn keyword IsabelleCommand class
+syn keyword IsabelleCommand interpretation
+syn keyword IsabelleCommand instantiation
+syn keyword IsabelleCommand context
+
 syn keyword IsabelleCommandPart and is
 syn keyword IsabelleCommandPart assumes shows fixes
 syn keyword IsabelleCommandPart where for
