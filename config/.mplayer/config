@@ -8,3 +8,6 @@ zoom=yes
 # this doesn't matter as the local disk is typically fast.
 cache=8192
 cache-min=80.0
+
+# Disable subtitles by default.
+noautosub=yes
