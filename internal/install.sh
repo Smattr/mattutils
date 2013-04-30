@@ -62,6 +62,7 @@ for i in .dircolors \
          .vimrc \
          .vim \
          .wgetrc \
+         .Xdefaults \
          .xmonad \
          .zsh \
          .zshrc; do
