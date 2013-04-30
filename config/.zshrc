@@ -108,6 +108,10 @@ export HISTFILE="${HOME}/.zsh_history"
 export HISTSIZE=1000000
 export SAVEHIST=1000000
 
+autoload history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+
 # Mouse Support
 
 if [ -e ~/.zsh/mouse.zsh ]; then
@@ -118,6 +122,8 @@ fi
 # Key Bindings
 
 bindkey -e
+bindkey '\e[A' history-beginning-search-backward-end
+bindkey '\e[B' history-beginning-search-forward-end
 bindkey '\e[1~' beginning-of-line
 bindkey '\e[2~' overwrite-mode
 bindkey '\e[3~' delete-char

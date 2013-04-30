@@ -54,6 +54,7 @@ fi
 # Link configurations.
 for i in .dircolors \
          .emacs \
+         .fonts.conf \
          .gdbinit \
          .gnomerc \
          .hgrc \
@@ -63,6 +64,7 @@ for i in .dircolors \
          .vimrc \
          .vim \
          .wgetrc \
+         .Xdefaults \
          .xmonad \
          .zsh \
          .zshrc; do
