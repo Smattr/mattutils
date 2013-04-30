@@ -53,6 +53,7 @@ fi
 # Link configurations.
 for i in .dircolors \
          .emacs \
+         .fonts.conf \
          .gdbinit \
          .gnomerc \
          .hgrc \
