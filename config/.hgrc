@@ -14,6 +14,7 @@ mq =
 graphlog =
 color = 
 pager =
+progress =
 purge =
 record =
 transplant =
@@ -28,6 +29,9 @@ pbranch = /opt/hg-pbranch/hgext/pbranch.py
 pager = less
 quiet = True
 attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog,incoming
+
+[progress]
+delay = 1
 
 [merge-tools]
 vimdiff.executable = /usr/bin/vimdiff
