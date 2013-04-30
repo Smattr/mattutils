@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Lazy vim `which foo`.
+
+if [ $# -gt 0 ]; then
+    # Cope with the fact that $1 may be a zsh/bash macro.
+    ITEM=`sh -c "which $1"`
+    if [ -z "${ITEM}" ]; then
+        echo "$1 not found" >&2
+        exit 1
+    fi
+    vim "${ITEM}"
+else
+    vim
+fi
