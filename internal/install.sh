@@ -19,6 +19,7 @@ for i in \
          dd.py \
          defn.sh \
          compresspdf.sh \
+         fifi.sh \
          find-broken.sh \
          fwdmail.py \
          generate-passwd \
