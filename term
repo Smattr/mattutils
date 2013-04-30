@@ -4,33 +4,27 @@ WIDTH=180 # Characters
 HEIGHT=45 # Lines
 
 # Priority of terminal emulators:
-which pterm &>/dev/null
-if [ $? -eq 0 ]; then
+if [ $(which rxvt) ]; then
+    EMULATOR="rxvt -geometry ${WIDTH}x${HEIGHT}"
+elif [ $(which pterm) ]; then
     # To lookup fonts: xlsfonts
     EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn -misc-fixed-medium-r-normal--15-140-75-75-c-90-iso10646-1"
+elif [ $(which lxterminal) ]; then
+    EMULATOR="lxterminal --geometry=${WIDTH}x${HEIGHT}"
 else
-    which lxterminal &>/dev/null
-    if [ $? -eq 0 ]; then
-        EMULATOR="lxterminal --geometry=${WIDTH}x${HEIGHT}"
-    else
-        # Well this is unpleasant...
-        EMULATOR="gnome-terminal"
-    fi
+    # Well this is unpleasant...
+    EMULATOR="gnome-terminal --geometry=${WIDTH}x${HEIGHT}"
 fi
 
 cd ~/
 
-which tmux &>/dev/null
-if [ $? -eq 0 ]; then
+if [ $(which tmux) ]; then
     RUN="-e tmux"
+elif [ $(which screen) ]; then
+    RUN="-e screen zsh"
 else
-    which screen &>/dev/null
-    if [ $? -eq 0 ]; then
-        RUN="-e screen zsh"
-    else
-        # Curses...
-        RUN=
-    fi
+    # Curses...
+    RUN=
 fi
 
 ${EMULATOR} ${RUN}
