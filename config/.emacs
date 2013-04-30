@@ -20,4 +20,4 @@
 (load-library "~/l4.verified/misc/site-lisp/proof-indent.el")
 (global-set-key (kbd "C-c i") 'auto-proof-indent)
 (global-set-key (kbd "C-c o") 'auto-proof-cancel-indent)
-
+(set-fontset-font "fontset-default" 'unicode "Cambria Math 11")
