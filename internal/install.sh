@@ -36,6 +36,7 @@ for i in \
          reset-perms.sh \
          search \
          sendmail.py \
+         tb \
          wh \
          wim ; do
     if [ ! -e "${REPO}/$i" ]; then
