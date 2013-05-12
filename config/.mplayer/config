@@ -11,3 +11,7 @@ cache-min=80.0
 
 # Disable subtitles by default.
 noautosub=yes
+
+# Override volume hardware management.
+softvol=yes
+softvol-max=400
