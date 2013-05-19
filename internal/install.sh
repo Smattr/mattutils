@@ -19,6 +19,7 @@ for i in \
          dd.py \
          defn.sh \
          compresspdf.sh \
+         fifi.sh \
          find-broken.sh \
          fwdmail.py \
          generate-passwd \
@@ -35,7 +36,9 @@ for i in \
          reset-perms.sh \
          search \
          sendmail.py \
-         wh ; do
+         tb \
+         wh \
+         wim ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
         exit 1

@@ -1,4 +1,4 @@
-syn keyword CamkesKeyword assembly composition from to configuration control
+syn keyword CamkesKeyword assembly composition from to configuration control procedure
 syn keyword CamkesType component connection attribute connector
 syn keyword CamkesCType int string smallstring char unsigned signed void long
 syn keyword CamkesDependency uses provides emits consumes

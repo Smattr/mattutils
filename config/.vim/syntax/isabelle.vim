@@ -48,7 +48,7 @@ syn keyword IsabelleCommandProofProve proof
 syn keyword IsabelleCommandProofProve apply
 syn keyword IsabelleCommandProofProve prefer defer
 syn keyword IsabelleCommandProofDone done by qed
-syn keyword IsabelleCommandProofFail sorry
+syn keyword IsabelleCommandProofFail sorry oops
 syn keyword IsabelleCommandProofIsar assume show have from then thus hence
 syn keyword IsabelleCommandProofIsar with next using note
 syn keyword IsabelleCommandProofIsar let
@@ -73,7 +73,7 @@ syn keyword IsabelleCommandMethod atomize atomize_elim
 syn keyword IsabelleCommandMethod neg_clausify finish_clausify
 syn keyword IsabelleCommandMethod contradiction
 syn keyword IsabelleCommandMethod cut_tac
-syn keyword IsabelleCommandMethod fold unfold unfold_locales
+syn keyword IsabelleCommandMethod fold unfold unfold_locales unfolding
 syn keyword IsabelleCommandMethod normalization sring_norm
 syn match IsabelleCommandMethodMod /\<add!\?:/
 syn match IsabelleCommandMethodMod /\<del!\?:/
@@ -171,7 +171,7 @@ syn match IsabelleSpecial /\./
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
 syn match IsabelleComment "(\*\_.\{-}\*)"
-syn match IsabelleComment "\(text\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
+syn match IsabelleComment "\(text\|header\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
 hi def link IsabelleComment Comment
 
 hi IsabelleCommand           ctermfg=3 cterm=bold guifg=yellow gui=bold
