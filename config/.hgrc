@@ -3,10 +3,6 @@
 
 [ui]
 ignore = ${HOME}/.hgignore
-merge = diff3
-
-[diff]
-#git = 1
 
 [extensions]
 rebase =
@@ -36,12 +32,16 @@ delay = 1
 [merge-tools]
 vimdiff.executable = /usr/bin/vimdiff
 vimdiff.args = $base $local $other -o $output
-vimdiff.priority = 2
+vimdiff.priority = 4
 
 meld.gui=True
 meld.args=--label='local' $local --label='base' $base --label='other' $other
 meld.diffargs=-a --label='$plabel1' $parent --label='$clabel' $child
 meld.priority = 1
+
+kdiff3.gui = True
+kdiff3.args = $base $local $other -o $output
+kdiff3.priority = 3
 
 [hooks]
 pretxncommit.acl = python:hgext.acl.hook
