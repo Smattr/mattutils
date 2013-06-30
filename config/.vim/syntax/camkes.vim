@@ -2,7 +2,7 @@ syn keyword CamkesKeyword assembly composition from to configuration control pro
 syn keyword CamkesType component connection attribute connector
 syn keyword CamkesCType int string smallstring char unsigned signed void long
 syn keyword CamkesDependency uses provides emits consumes
-syn keyword CamkesImport import
+syn keyword CamkesImport import include
 syn region Foldable start="{" end="}" fold transparent
 syn match CamkesMultiLineComment "\/\*\_.\{-}\*\/"
 syn match CamkesSingleLineComment "\/\/.*$"

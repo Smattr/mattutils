@@ -9,7 +9,7 @@ URxvt.font: xft:Lucida Console:antialias=false:hinting=true:size=11, xft:Cambria
 URxvt.intensityStyles: true
 URxvt.boldFont: xft:Lucida Console:antialias=false:size=11, xft:Cambria Math:antialias=false
 URxvt.background: Black
-URxvt.foreground: Grey65
+URxvt.foreground: Grey85
 URxvt.fading: 10
 URxvt.scrollBar: false
 URxvt.saveLines: 1000

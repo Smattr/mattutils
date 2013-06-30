@@ -4,11 +4,11 @@ WIDTH=180 # Characters
 HEIGHT=45 # Lines
 
 # Priority of terminal emulators:
-if [ $(which rxvt) ]; then
-    EMULATOR="rxvt -geometry ${WIDTH}x${HEIGHT}"
-elif [ $(which pterm) ]; then
+if [ $(which pterm) ]; then
     # To lookup fonts: xlsfonts
     EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn -misc-fixed-medium-r-normal--15-140-75-75-c-90-iso10646-1"
+elif [ $(which rxvt) ]; then
+    EMULATOR="rxvt -geometry ${WIDTH}x${HEIGHT}"
 elif [ $(which lxterminal) ]; then
     EMULATOR="lxterminal --geometry=${WIDTH}x${HEIGHT}"
 else

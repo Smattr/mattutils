@@ -112,5 +112,14 @@
         } \
     } while (0)
 
+/* Evaluating a pre-processor symbol at compiler time. Clagged from
+ * http://article.gmane.org/gmane.linux.kernel/1281138
+ */
+#define is_set(macro) is_set_(macro)
+#define macrotest_1 ,
+#define is_set_(value) is_set__(macrotest_##value)
+#define is_set__(comma) is_set___(comma 1, 0)
+#define is_set___(_, v, ...) v
+
 #endif /* _MACROS_H_ */
 
