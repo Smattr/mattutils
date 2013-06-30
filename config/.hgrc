@@ -3,7 +3,7 @@
 
 [ui]
 ignore = ${HOME}/.hgignore
-merge = diff3
+#merge = diff3
 
 [diff]
 #git = 1
@@ -24,6 +24,12 @@ shelve = /opt/hgshelve/hgshelve.py
 hgext.crecord = /opt/crecord/crecord
 # Remember to `hg clone https://bitbucket.org/parren/hg-pbranch /opt/hg-pbranch`
 pbranch = /opt/hg-pbranch/hgext/pbranch.py
+# `hg clone ssh://hg@bitbucket.org/smattr/hgidentities /opt/hgidentities`
+hgext.identities = /opt/hgidentities/identities.py
+
+[identities]
+bitbucket.org = Matthew Fernandez <matthew.fernandez@gmail.com>
+bitbucket = Matthew Fernandez <matthew.fernandez@gmail.com>
 
 [pager]
 pager = less
