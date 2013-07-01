@@ -61,7 +61,6 @@ for i in .dircolors \
          .gnomerc \
          .hgrc \
          .mplayer \
-         .rss2email \
          .screenrc \
          .tmux.conf \
          .vimrc \
