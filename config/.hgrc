@@ -56,3 +56,7 @@ kdiff3.priority = 3
 
 [hooks]
 pretxncommit.acl = python:hgext.acl.hook
+
+[alias]
+# `hg out` functionality for when you can't reach the default remote.
+out-offline = log --rev 'sort(draft(),-rev)'
