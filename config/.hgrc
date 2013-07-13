@@ -35,7 +35,7 @@ bitbucket = Matthew Fernandez <matthew.fernandez@gmail.com>
 [pager]
 pager = less
 quiet = True
-attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog,incoming
+attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog,incoming, out-offline
 
 [progress]
 delay = 1
