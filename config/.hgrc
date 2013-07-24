@@ -1,5 +1,6 @@
 # Include local hg settings.
 %include ${HOME}/.hgrc_local
+%include ${HOME}/.hgrc_nictabin
 
 [ui]
 ignore = ${HOME}/.hgignore
@@ -34,7 +35,7 @@ bitbucket = Matthew Fernandez <matthew.fernandez@gmail.com>
 [pager]
 pager = less
 quiet = True
-attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog,incoming
+attend = diff,status,log,qdiff,qseries,blame,annotate,outgoing,glog,incoming, out-offline
 
 [progress]
 delay = 1
@@ -55,3 +56,7 @@ kdiff3.priority = 3
 
 [hooks]
 pretxncommit.acl = python:hgext.acl.hook
+
+[alias]
+# `hg out` functionality for when you can't reach the default remote.
+out-offline = log --rev 'sort(draft(),-rev)'
