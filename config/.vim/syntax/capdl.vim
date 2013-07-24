@@ -2,7 +2,7 @@ syn keyword CapDLKeyword arch caps objects arm11 ia32
 syn keyword CapDLObject aep asid_pool cnode ep frame pd pt tcb
 syn keyword CapDLAttribute addr badge elf G guard guard_size init ip prio sp R RG RW RWG W WG
 syn match CapDLCPP "[ \t]*#.*$"
-syn match CapDLLiteral "\(0x\)\?[0-9]\+k\?\( bits\)\?"
+syn match CapDLLiteral "\(0x\)\?[0-9]\+\(k\|M\)\?\( bits\)\?"
 syn match CapDLLiteral "0x[0-f]\+"
 
 syn region Foldable start="{" end="}" fold transparent
