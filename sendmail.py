@@ -13,123 +13,65 @@ me and I'll probably be happy to add them.
 Run with no arguments to see valid options.
 """
 
-import getopt, smtplib, sys
+import argparse, smtplib, sys
 from email.mime.text import MIMEText
 
-"""
-Parse command line options.
-
- @param options A default dictionary of settings.
- @return True on success, False on failure.
-"""
-def parseArguments(options):
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'b:c:f:h:l:p:t:s:',
-            ['bcc=', 'cc=', 'debug', 'empty', 'from=', 'host=', 'login=',
-            'password=', 'port=', 'tls', 'to=', 'subject='])
-        if args:
-            raise 'Extra arguments on command line'
-        for o, a in opts:
-            if o in ['-b', '--bcc']:
-                options['bcc'].append(a)
-            elif o in ['-c', '--cc']:
-                options['cc'].append(a)
-            elif o == '--debug':
-                options['debug'] = True
-            elif o == '--empty':
-                options['empty-cancel'] = True
-            elif o in ['-f', '--from']:
-                options['from'] = a
-            elif o in ['-h', '--host']:
-                options['host'] = a
-            elif o in ['-l', '--login']:
-                options['login'] = a
-            elif o in ['-p', '--password']:
-                options['password'] = a
-            elif o == '--port':
-                options['port'] = int(a)
-            elif o == '--tls':
-                options['tls'] = True
-            elif o in ['-t', '--to']:
-                options['to'].append(a)
-            elif o in ['-s', '--subject']:
-                options['subject'] = a
-            else:
-                raise 'Unexpected argument'
-    except:
-        sys.stderr.write('While parsing arguments: %s\n' % str(sys.exc_info()[0]))
-        return False
-    return True
-
 def main():
-    # Setup some default options.
-    options = {
-        'bcc':[],
-        'cc':[],
-        'debug':False,
-        'empty-cancel':False,
-        'from':None,
-        'host':None,
-        'login':None,
-        'password':None,
-        'port':25,
-        'tls':False,
-        'to':[],
-        'subject':None,
-    }
-
-    # Parse the command line options.
-    if not parseArguments(options) or \
-        not options['from'] or \
-        not options['host'] or \
-        not options['to']:
-        sys.stderr.write("""Usage: %(prog)s options
-Reads an email body from STDIN and sends it using the parameters provided on
-the command line.
- [ -b address | --bcc=address ]        Add a BCC recipient.
- [ -c address | --cc=address ]         Add a CC recipient.
- [ --empty ]                           Don't send email and quit with success
-                                       if an empty body is supplied.
- [ --debug ]                           Print the body that would be sent and
-                                       exit without sending.
- [ -f address | --from=address ]       Sender's address.
- [ -h hostname | --host=hostname ]     SMTP server.
- [ -l login | --login=login ]          Username.
- [ -p password | --password=password ] Password.
- [ --port=port ]                       SMTP port.
- [ --tls ]                             Use TLS security.
- [ -t address | --to=address ]         Add a recipient.
- [ -s subject | --subject=subject ]    Message subject.
-""" % {'prog':sys.argv[0]})
-        return -1
+    options = argparse.ArgumentParser(description='Reads an email body from ' + \
+        'STDIN and sends it using the parameters provided on the command line.')
+    options.add_argument('--bcc', '-b', action='append', default=[],
+        help='add a BCC recipient')
+    options.add_argument('--cc', '-c', action='append', default=[],
+        help='add a CC recipient')
+    options.add_argument('--debug', action='store_true',
+        help='print the body that would be sent and exit without sending')
+    options.add_argument('--empty', action='store_true',
+        help='don\'t send email and quit with success if an empty body is supplied')
+    options.add_argument('--from', '-f', required=True,
+        help='sender\'s address')
+    options.add_argument('--host', required=True,
+        help='SMTP server')
+    options.add_argument('--login', '-l',
+        help='username')
+    options.add_argument('--password', '-p',
+        help='password')
+    options.add_argument('--port', type=int, default=25,
+        help='SMTP port')
+    options.add_argument('--tls', action='store_true',
+        help='use TLS security')
+    options.add_argument('--to', '-t', action='append', default=[], required=True,
+        help='add a recipient')
+    options.add_argument('--subject', '-s',
+        help='message subject')
+    args = options.parse_args()
 
     # Read the message body. It's possible to do this inline below when
     # actually sending the email, but if there is any delay in reading the
     # input (e.g. if the user is calling this script interactively) the
     # connection could timeout.
     message = sys.stdin.read()
-    if options['empty-cancel'] and not message:
+    if args.empty and not message:
         return 0
     message = MIMEText(message, 'plain', _charset='utf-8')
-    message['To'] = ', '.join(options['to'])
-    message['From'] = options['from']
-    message['CC'] = ', '.join(options['cc'])
-    message['Subject'] = options['subject'] or ''
+    message['To'] = ', '.join(args.to)
+    message['From'] = args.__dict__['from']
+    message['CC'] = ', '.join(args.cc)
+    message['Subject'] = args.subject or ''
 
     # If we're in debugging mode, bail out without sending the email.
-    if options['debug']:
+    if args.debug:
         sys.stdout.write('%s\n' % message)
         return 0
 
     # Send the email.
     try:
-        smtpObj = smtplib.SMTP(options['host'], options['port'])
-        if options['tls']:
+        smtpObj = smtplib.SMTP(args.host, args.port)
+        if args.tls:
             smtpObj.starttls()
-        if options['login']:
-            smtpObj.login(options['login'], options['password'])
-        smtpObj.sendmail(options['from'], \
-            options['to'] + options['cc'] + options['bcc'], message.as_string())
+        if args.login:
+            smtpObj.login(args.login, args.password)
+        smtpObj.sendmail(args.__dict__['from'], \
+            args.to + args.cc + args.bcc, message.as_string())
         smtpObj.quit()
     except:
         sys.stderr.write('Failed while sending: %s.\n' % str(sys.exc_info()[0]))
