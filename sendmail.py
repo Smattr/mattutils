@@ -13,29 +13,8 @@ me and I'll probably be happy to add them.
 Run with no arguments to see valid options.
 """
 
-import sys
-
-# Import library for sending email.
-try:
-    import smtplib
-except ImportError:
-    sys.stderr.write('Failed to import smtplib. Is it installed?\n')
-    sys.exit(1)
-
-# Import library for parsing command line options.
-try:
-    import getopt
-except ImportError:
-    sys.stderr.write('Failed to import getopt. Is it installed?\n')
-    sys.exit(1)
-
-# Import function for encoding message body.
-try:
-    from email.mime.text import MIMEText
-except ImportError:
-    sys.stderr.write('Failed to import email.mime.text. Is it installed?\n')
-    sys.exit(1)
-
+import getopt, smtplib, sys
+from email.mime.text import MIMEText
 
 """
 Parse command line options.
