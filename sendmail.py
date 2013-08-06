@@ -23,6 +23,8 @@ def main():
         help='add a BCC recipient')
     options.add_argument('--cc', '-c', action='append', default=[],
         help='add a CC recipient')
+    options.add_argument('--date',
+        help='set date header of the mail')
     options.add_argument('--debug', action='store_true',
         help='print the body that would be sent and exit without sending')
     options.add_argument('--empty', action='store_true',
@@ -57,6 +59,8 @@ def main():
     message['From'] = args.__dict__['from']
     message['CC'] = ', '.join(args.cc)
     message['Subject'] = args.subject or ''
+    if args.date:
+        message['Date'] = args.date
 
     # If we're in debugging mode, bail out without sending the email.
     if args.debug:
