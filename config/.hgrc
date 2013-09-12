@@ -27,6 +27,8 @@ hgext.crecord = /opt/crecord/crecord
 pbranch = /opt/hg-pbranch/hgext/pbranch.py
 # `hg clone ssh://hg@bitbucket.org/smattr/hgidentities /opt/hgidentities`
 hgext.identities = /opt/hgidentities/identities.py
+# `hg clone https://bitbucket.org/lantiq/onsub`
+onsub = /opt/onsub/onsub.py
 
 [identities]
 bitbucket.org = Matthew Fernandez <matthew.fernandez@gmail.com>
