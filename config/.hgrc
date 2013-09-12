@@ -29,6 +29,8 @@ pbranch = /opt/hg-pbranch/hgext/pbranch.py
 hgext.identities = /opt/hgidentities/identities.py
 # `hg clone https://bitbucket.org/lantiq/onsub`
 onsub = /opt/onsub/onsub.py
+# `hg clone ssh://hg@bitbucket.org/smattr/hgswitch /opt/hgswitch`
+switch = /opt/hgswitch/switch.py
 
 [identities]
 bitbucket.org = Matthew Fernandez <matthew.fernandez@gmail.com>
@@ -62,3 +64,7 @@ pretxncommit.acl = python:hgext.acl.hook
 [alias]
 # `hg out` functionality for when you can't reach the default remote.
 out-offline = log --rev 'sort(draft(),-rev)'
+
+[switch]
+path = ~/bin/hg
+default = /usr/bin/hg
