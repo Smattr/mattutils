@@ -77,8 +77,8 @@ def main():
         smtpObj.sendmail(args.__dict__['from'], \
             args.to + args.cc + args.bcc, message.as_string())
         smtpObj.quit()
-    except:
-        sys.stderr.write('Failed while sending: %s.\n' % str(sys.exc_info()[0]))
+    except Exception as e:
+        sys.stderr.write('Failed while sending: %s\n' % e)
         return -1
 
     return 0
