@@ -20,6 +20,8 @@ config/ - Directory for containing my shared configuration settings.
 dd.sh - Wrapper around dd to provide progress output.
 find-broken.sh - A script for finding broken symlinks.
 fwdmail.py - A script for forwarding your local mail to an external address.
+fuckit-cc - A script for violently suppressing errors in your C code.
+    Considered harmful.
 generate-passwd - A script for generating random passwords.
 github-ls.sh - A script for listing the names of all your github repos. I use
     this to generate a manifest to pass to my backup script.

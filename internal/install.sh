@@ -21,6 +21,7 @@ for i in \
          compresspdf.sh \
          fifi.sh \
          find-broken.sh \
+         fuckit-cc \
          fwdmail.py \
          generate-passwd \
          gg \

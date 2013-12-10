@@ -1,0 +1,133 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# C compiler error steamroller.
+#
+# When I first encountered fuckitjs and friends all I felt was abhorrence.
+# Flash forwards to a dark and stormy night when I was called upon to build
+# some C code of questionnable provenance and I really just didn't have time
+# for this shit. Facing a torrent of errors in code that I wasn't even calling,
+# I gave in to the dark side. The code that follows attempts to do whatever it
+# takes to continue on in the face of the slings and arrows of outrageous
+# fortune. All the same disclaimers from fuckitjs apply. If you use this in a
+# production environment, do not be surprised when you get fired.
+#
+
+import os, re, subprocess, sys, time
+
+REPAIR_ERRORS, FAKE_OUTPUT, SUPPRESS_WERROR, SUPPRESS_EXIT_CODE, ORIGINAL = range(5)
+
+# Error handlers should be declared like the following function, to accepts a
+# list of regexp matches and return a string of C code that, when seen prior to
+# the error, will suppress it.
+def undeclared(groups):
+    assert len(groups) == 1
+    return 'void *%s();' % groups[0]
+
+# Known repair actions. A list of tuples where the first member is a regexp to
+# match against the error to handle and the second member should be a handler
+# function like the above. Feel free to extend this list with more handlers.
+REPAIRS = [
+    (re.compile(r'.*error: [‘\'](.*)[’\'] undeclared \(first use in this function\)'), undeclared),
+]
+
+def main():
+    # Assume we are being invoked as if we ourselves are the C compiler.
+    args = sys.argv[1:]
+
+    # Take our configuration arguments from environment variables. The
+    # assumption is that we are being invoked from a complicated build system
+    # and you don't want to modify every invocation of the compiler. It's far
+    # easier to just export the following variables.
+
+    # FUCKIT_FUCKS_GIVEN roughly maps to how authentically you want to imitate
+    # the underlying compiler. At ORIGINAL, we should act exactly like the
+    # underlying compiler right down to failing when it does. At the other
+    # extreme, REPAIR_ERRORS (a.k.a. not giving a single fuck), we'll always
+    # return success, fake output files and repeatedly re-run the compiler with
+    # bits of injected C attempting to shut it up.
+    try:
+        fucks_given = int(os.environ.get('FUCKIT_FUCKS_GIVEN', SUPPRESS_WERROR))
+    except ValueError:
+        print >>sys.stderr, 'FUCKIT_FUCKS_GIVEN was not an integer'
+        return -1
+
+    # Set this to your underlying compiler. E.g. '/opt/local/clang-trunk/clang'
+    cc = os.environ.get('FUCKIT_COMPILER', 'gcc')
+    args = [cc] + args
+
+    # Take down our arch-nemesis.
+    if fucks_given <= SUPPRESS_WERROR:
+        args = filter(lambda x: not x.startswith('-Werror'), args)
+
+    # Set up a way of injecting C into the compiler invocation.
+    repairs = set()
+    if fucks_given <= REPAIR_ERRORS:
+        args += ['-include', '/dev/stdin']
+
+    while True:
+
+        # Run the underlying compiler.
+        proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate('\n'.join(repairs))
+        if proc.returncode == 0:
+            # Holy shit, we didn't get an error.
+            break
+
+        # Scan the compiler errors for ones we can handle.
+        new_repairs = set()
+        if fucks_given <= REPAIR_ERRORS:
+            for l in stderr.split('\n'):
+                for r in REPAIRS:
+                    m = r[0].match(l)
+                    if m is not None:
+                        fix = r[1](m.groups())
+                        if fix is not None:
+                            print >>sys.stderr, 'fuckit-cc: suppressing \'%s\'' % l
+                            new_repairs.add(fix)
+                            break
+        else:
+            # The cowardly user didn't even want us to handle errors.
+            break
+
+        if len(new_repairs) == 0:
+            # Well, you can't win them all.
+            print >>sys.stderr, 'fuckit-cc: ran out of repair actions without ' \
+                'resolving all errors'
+            break
+
+        if len(repairs.intersection(new_repairs)) != 0:
+            # This can happen if we have an incorrect repair handler (i.e. one
+            # that returns some code that doesn't resolve its matched error) or
+            # the compiler is being invoked in an unconventional way.
+            print >>sys.stderr, 'fuckit-cc: detected attempted repairs that ' \
+                'are not working'
+            break
+
+        # Excellent; we found some tricks to play. Loop round and re-run the
+        # compiler.
+        repairs.update(new_repairs)
+
+    sys.stdout.write(stdout)
+    sys.stderr.write(stderr)
+
+    # Touch any output files that weren't created by the compiler.
+    if fucks_given <= FAKE_OUTPUT:
+        outputs = []
+        for i, a in enumerate(args):
+            if a == '-o' and i < len(args) - 1:
+                outputs.append(args[i + 1])
+        for o in outputs:
+            if not os.path.exists(o):
+                with open(o, 'w'):
+                    pass
+
+    if fucks_given <= SUPPRESS_EXIT_CODE:
+        return 0
+    else:
+        return proc.returncode
+
+if __name__ == '__main__':
+    sys.exit(main())
