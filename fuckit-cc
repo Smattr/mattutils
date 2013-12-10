@@ -4,7 +4,7 @@
 #
 # C compiler error steamroller.
 #
-# When I first encountered fuckitjs and friends all I felt was abhorrence.
+# When I first encountered fuckitjs and friends, all I felt was abhorrence.
 # Flash forwards to a dark and stormy night when I was called upon to build
 # some C code of questionnable provenance and I really just didn't have time
 # for this shit. Facing a torrent of errors in code that I wasn't even calling,
@@ -18,7 +18,7 @@ import os, re, subprocess, sys, time
 
 REPAIR_ERRORS, FAKE_OUTPUT, SUPPRESS_WERROR, SUPPRESS_EXIT_CODE, ORIGINAL = range(5)
 
-# Error handlers should be declared like the following function, to accepts a
+# Error handlers should be declared like the following function, to accept a
 # list of regexp matches and return a string of C code that, when seen prior to
 # the error, will suppress it.
 def undeclared(groups):
