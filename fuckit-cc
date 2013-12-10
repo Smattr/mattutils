@@ -14,7 +14,7 @@
 # production environment, do not be surprised when you get fired.
 #
 
-import os, re, subprocess, sys, time
+import os, re, string, subprocess, sys, time
 
 REPAIR_ERRORS, FAKE_OUTPUT, SUPPRESS_WERROR, SUPPRESS_EXIT_CODE, ORIGINAL = range(5)
 
@@ -25,11 +25,16 @@ def undeclared(groups):
     assert len(groups) == 1
     return 'void *%s();' % groups[0]
 
+def unknowntype(groups):
+    assert len(groups) == 1
+    return 'typedef struct {} %s;' % groups[0]
+
 # Known repair actions. A list of tuples where the first member is a regexp to
 # match against the error to handle and the second member should be a handler
 # function like the above. Feel free to extend this list with more handlers.
 REPAIRS = [
     (re.compile(r'.*error: [‘\'](.*)[’\'] undeclared \(first use in this function\)'), undeclared),
+    (re.compile(r'.*error: unknown type name [‘\'](.*)[’\']'), unknowntype),
 ]
 
 def main():
@@ -83,7 +88,8 @@ def main():
                 for r in REPAIRS:
                     m = r[0].match(l)
                     if m is not None:
-                        fix = r[1](m.groups())
+                        fix = r[1](map(lambda g: \
+                            filter(lambda x: x in string.printable, g), m.groups()))
                         if fix is not None:
                             print >>sys.stderr, 'fuckit-cc: suppressing \'%s\'' % l
                             new_repairs.add(fix)
