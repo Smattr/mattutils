@@ -19,8 +19,8 @@ import os, re, string, subprocess, sys, time
 REPAIR_ERRORS, FAKE_OUTPUT, SUPPRESS_WERROR, SUPPRESS_EXIT_CODE, ORIGINAL = range(5)
 
 # Error handlers should be declared like the following function, to accept a
-# list of regexp matches and return a string of C code that, when seen prior to
-# the error, will suppress it.
+# list of regexp match groups and return a string of C code that, when seen
+# prior to the error, will suppress it.
 def undeclared(groups):
     assert len(groups) == 1
     return 'void *%s();' % groups[0]
