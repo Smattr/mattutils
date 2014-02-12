@@ -1,3 +1,13 @@
+" Vim syntax highlighting for THY files.
+"
+" Licensing: The original version of this file was released on the Isabelle
+" user's list by Jens-Wolfhard Schicke <drahflow@gmx.de> in 2008 and
+" subsequently extended by Timothy Bourke and Matthew Fernandez. It's unclear
+" to me (Matt) what licence Jens intended and I disclaim any right to it
+" myself, but note that this is not NICTA_CORE. Feel free to use it locally if
+" it helps you.
+"
+
 syn clear
 syn sync fromstart
 syn case match
@@ -30,10 +40,12 @@ syn keyword IsabelleCommand instance
 syn keyword IsabelleCommand axioms
 syn keyword IsabelleCommand locale
 syn keyword IsabelleCommand sublocale
+syn keyword IsabelleCommand theorems
 syn keyword IsabelleCommand class
 syn keyword IsabelleCommand interpretation
 syn keyword IsabelleCommand instantiation
 syn keyword IsabelleCommand context
+syn keyword IsabelleCommand rep_datatype
 
 syn keyword IsabelleCommandPart and is
 syn keyword IsabelleCommandPart assumes shows fixes

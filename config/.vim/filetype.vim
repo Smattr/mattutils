@@ -15,4 +15,7 @@ augroup filetypedetect
     au BufRead,BufNewFile *.promela setfiletype promela
     au BufRead,BufNewFile ROOT setfiletype root
     au BufRead,BufNewFile CMakeLists setfiletype cmake
+    au BufRead,BufNewFile *.bf setfiletype bf
+    au BufRead,BufNewFile *.pbf setfiletype bf
+    au BufRead,BufNewFile *.ML setfiletype sml
 augroup END
