@@ -7,9 +7,11 @@
 
 syn match CamkesCPP "[ \t]*#.*$"
 syn keyword CamkesKeyword assembly composition from to configuration control
-    \ procedure hardware maybe flatten dma_pool has mutex semaphore
+    \ procedure hardware maybe dma_pool has mutex semaphore group tcb_pool
+    \ ep_pool aep_pool from_access to_access
 syn keyword CamkesType component connection attribute connector
-syn keyword CamkesCType int string smallstring char unsigned signed void long
+syn keyword CamkesCType int string smallstring char character unsigned signed
+    \ void long in out inout
 syn keyword CamkesDependency uses provides emits consumes
 syn keyword CamkesImport import include
 syn region Foldable start="{" end="}" fold transparent

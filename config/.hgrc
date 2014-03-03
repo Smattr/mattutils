@@ -7,11 +7,12 @@ ignore = ${HOME}/.hgignore
 
 [diff]
 #git = 1
-#merge = diff3
+merge = meld
 
 [extensions]
 rebase =
 mq =
+churn =
 graphlog =
 color = 
 pager =

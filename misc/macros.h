@@ -68,11 +68,6 @@
                                                 * this expansion.
                                                 */
 #define DEBUG_FAIL(x) assert(!("Forced debug failure" ##x))
-#define RUNTIME_FAIL(x) \
-    do { \
-        volatile int _a = 0; \
-        _a = ((int)##x) / _a; /* Force division by 0. */ \
-    } while (0)
 #define EXIT(x) exit(1)
 #define BLOCK(x) \
     do { \
@@ -81,24 +76,6 @@
 /* Now define TODO and FIXME to the behaviour you want. */
 #define TODO(x) IGNORE(x)
 #define FIXME(x) IGNORE(x)
-
-/* When working on a simple project I wanted to use some nice syntax like the
- * following to indicate atomic sections:
- *
- *  atomic {
- *      // Do something stuff
- *  }
- *
- * Assuming you have the following functions for your lock:
- *  void lock(void);
- *  void unlock(void);
- *  int have_lock(void);
- * you can do something like the following:
- */
-#define atomic for(;(!have_lock() && ({lock();1;})) || ({unlock();0;});)
-/* It ain't pretty or well-tested, but it can make demonstrative code easier to
- * read.
- */
 
 /* The ability of a compiler to optimise your code is constrained by what it
  * can determine about the code. If there's a particular fact that will help
