@@ -14,6 +14,7 @@ mkdir -p "${HOME}/bin"
 # Link useful scripts.
 for i in \
          addcert.sh \
+         after \
          bashd.sh \
          bitbucket-ls.sh \
          colour-dump \
