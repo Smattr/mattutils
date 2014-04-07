@@ -18,7 +18,6 @@ for i in \
          bashd.sh \
          bitbucket-ls.sh \
          colour-dump \
-         dd.py \
          defn.sh \
          compresspdf.sh \
          fifi.sh \
