@@ -7,7 +7,7 @@
 # multiple machines. It has some gotchas, so I take no responsibility if you
 # use it without understanding it and destroy your repo.
 
-if [ $# -le 1 ]; then
+if [ $# -lt 1 ]; then
     echo "Usage: $0 repo_path [ check_server ]" >&2
     exit 1
 fi
