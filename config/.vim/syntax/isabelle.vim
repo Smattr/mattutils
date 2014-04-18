@@ -48,7 +48,7 @@ syn keyword IsabelleCommand context
 syn keyword IsabelleCommand rep_datatype
 
 syn keyword IsabelleCommandPart and is
-syn keyword IsabelleCommandPart assumes shows fixes
+syn keyword IsabelleCommandPart assumes shows fixes notes
 syn keyword IsabelleCommandPart where for
 syn keyword IsabelleCommandPart begin end
 syn keyword IsabelleCommandPart imports

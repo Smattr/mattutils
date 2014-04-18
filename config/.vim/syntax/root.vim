@@ -4,7 +4,7 @@
 " sections 3.1, 3.2 of the Isabelle System Manual.
 
 " From section 3.1:
-syn keyword RootKeyword description files in options session theories
+syn keyword RootKeyword chapter description files in options session theories
 
 " From ~~/etc/options
 syn keyword RootOption browser_info document document_output document_variants
