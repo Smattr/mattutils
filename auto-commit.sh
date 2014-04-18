@@ -63,7 +63,7 @@ fi
 
 # Pull in new changes.
 echo " * git pull *" >>${LOG}
-git pull --rebase --ff-only --tags bitbucket master &>>${LOG}
+git pull --rebase --ff-only --tags origin master &>>${LOG}
 if [ $? -ne 0 ]; then
     # If the pull failed, we may have been asked to resolve a conflict.
     echo " * git rebase abort *" >>${LOG}
@@ -75,7 +75,7 @@ fi
 
 # Push any changes we just committed.
 echo " * git push *" >>${LOG}
-git push --tags bitbucket master &>>${LOG}
+git push --tags origin master &>>${LOG}
 if [ $? -ne 0 ]; then
     echo "Pushing to remote failed. Merge probably required." >&2
     cat ${LOG} >&2
