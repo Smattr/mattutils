@@ -165,7 +165,7 @@ function vcs_prompt {
     done
     timeout 1 git branch &>/dev/null
     if [ $? -eq 0 ]; then
-        echo -n '-git-'
+        echo -n '-±-'
         if [ -z "`timeout 1 git status --short 2>/dev/null`" ]; then
             # Working directory is clean.
             echo -n "${GREEN}"
@@ -181,7 +181,7 @@ function vcs_prompt {
     fi
     timeout 1 hg root &>/dev/null
     if [ $? -eq 0 ]; then
-        echo -n '-hg-'
+        echo -n '-☿-'
         if [ -z "`timeout 1 hg status 2>/dev/null`" ]; then
             # Working directory is clean.
             echo -n "${GREEN}"
@@ -197,7 +197,7 @@ function vcs_prompt {
     fi
     timeout 1 svn list &>/dev/null
     if [ $? -eq 0 ]; then
-        echo -n '-svn-'
+        echo -n '-S-'
         if [ -z "`timeout 1 svn status 2>/dev/null`" ]; then
             # Working directory is clean.
             echo -n "${GREEN}"
