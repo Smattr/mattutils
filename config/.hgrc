@@ -57,7 +57,7 @@ meld.priority = 1
 
 kdiff3.gui = True
 kdiff3.args = $base $local $other -o $output
-kdiff3.priority = 3
+kdiff3.priority = 5
 
 [hooks]
 pretxncommit.acl = python:hgext.acl.hook
