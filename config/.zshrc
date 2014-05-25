@@ -342,3 +342,7 @@ function v() {
         vim "$1"
     fi
 }
+
+# Unmap Ctrl-s and Ctrl-q. Thank you http://feedproxy.google.com/~r/catonmat/~3/pbN7TgpMiyg/annoying-keypress-in-linux.
+stty stop undef
+stty start undef
