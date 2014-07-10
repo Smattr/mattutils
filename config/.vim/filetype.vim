@@ -19,4 +19,5 @@ augroup filetypedetect
     au BufRead,BufNewFile *.ML setfiletype sml
     au BufRead,BufNewFile *.bf setfiletype bf
     au BufRead,BufNewFile *.pbf setfiletype bf
+    au BufRead,BufNewFile *.sal setfiletype sal
 augroup END
