@@ -20,4 +20,5 @@ augroup filetypedetect
     au BufRead,BufNewFile *.bf setfiletype bf
     au BufRead,BufNewFile *.pbf setfiletype bf
     au BufRead,BufNewFile *.sal setfiletype sal
+    au BufRead,BufNewFile *.m setfiletype murphi
 augroup END
