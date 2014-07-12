@@ -48,3 +48,9 @@ highlight SpellRare term=underline cterm=underline
 highlight clear SpellLocal
 highlight SpellLocal term=underline cterm=underline
 let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
+
+" Enable our friend, the mouse. Though ttymouse supposedly supports pterm (my
+" weapon of choice), xterm2 seems to work where pterm does not. Cheers,
+" kristopolous@HN, for the tip.
+set ttymouse=xterm2
+set mouse=a
