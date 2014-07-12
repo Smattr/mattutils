@@ -1,0 +1,63 @@
+#!/usr/bin/python
+
+# Hello, I am Pieman! Defender of the innocent! Propagator of political
+# discontent! Occasional dog walker.
+#
+# Er, anyway, here's man for Python.
+
+import sys
+
+def main(argv):
+    if len(argv) < 2 or argv[1] == '--help':
+        print >>sys.stderr, 'Usage: %s function' % argv[0]
+        return -1
+
+    call = argv[1]
+
+    # If there's a period in the path, the first component indicates the module
+    # in which this function is contained.
+    module = None
+    if '.' in call:
+        m, call = call.split('.', 1)
+        try:
+            module = __import__(m)
+        except Exception as e:
+            print >>sys.stderr, 'Failed to import \'%s\'' % m
+            return -1
+
+    # Now the function could be either (a) a built-in, (b) a global function,
+    # or (c) a function in a module.
+    fn = None
+    if module is None:
+        try:
+            fn = getattr(__builtins__, call) # (a)
+        except AttributeError:
+            fn = globals().get(call) # (b)
+    else: # (c)
+        try:
+            bits = call.split('.')
+            for b in bits:
+                if fn is None:
+                    fn = getattr(module, b)
+                else:
+                    fn = getattr(fn, b)
+        except AttributeError:
+            pass
+    if fn is None:
+        print >>sys.stderr, 'Failed to find \'%s\'' % argv[1]
+        return -1
+
+    try:
+        doc = fn.__doc__
+        if doc is None:
+            raise AttributeError
+    except AttributeError:
+        print >>sys.stderr, 'No documentation associated with \'%s\'' % argv[1]
+        return -1
+
+    print doc
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

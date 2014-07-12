@@ -35,6 +35,7 @@ for i in \
          mediawatch.py \
          pdfcrop.sh \
          prefix \
+         pyman \
          reset-perms.sh \
          search \
          sendmail.py \
