@@ -13,11 +13,12 @@ syn sync fromstart
 syn case match
 
 syn keyword IsabelleCommand term
-syn keyword IsabelleComment abbreviation
+syn keyword IsabelleCommand abbreviation
 syn keyword IsabelleCommand theory
 syn keyword IsabelleCommand theorem
 syn keyword IsabelleCommand lemma
 syn keyword IsabelleCommand lemmas
+syn keyword IsabelleCommand schematic_lemma
 syn keyword IsabelleCommand primrec
 syn keyword IsabelleCommand datatype
 syn keyword IsabelleCommand declare
@@ -38,6 +39,7 @@ syn keyword IsabelleCommand defs
 syn keyword IsabelleCommand axclass
 syn keyword IsabelleCommand instance
 syn keyword IsabelleCommand axioms
+syn keyword IsabelleCommand axiomatization
 syn keyword IsabelleCommand locale
 syn keyword IsabelleCommand sublocale
 syn keyword IsabelleCommand theorems
@@ -46,14 +48,35 @@ syn keyword IsabelleCommand interpretation
 syn keyword IsabelleCommand instantiation
 syn keyword IsabelleCommand context
 syn keyword IsabelleCommand rep_datatype
+syn keyword IsabelleCommand export_code
+syn keyword IsabelleCommand code_const
+syn keyword IsabelleCommand ML_file
+syn keyword IsabelleCommand setup
+syn keyword IsabelleCommand thm
+syn keyword IsabelleCommand print_theorems
+
+" Do some juggling to give us ML highlighting inside an Isabelle/ML block.
+if exists('b:current_syntax')
+  let s:current_syntax=b:current_syntax
+  unlet b:current_syntax
+endif
+syntax include @SML syntax/sml.vim
+if exists('s:current_syntax')
+  let b:current_syntax=s:current_syntax
+else
+  unlet b:current_syntax
+endif
+syntax region IsabelleCommand matchgroup=SpecialComment start="ML[ ]*{\*" end="\*}" contains=@SML
+
 
 syn keyword IsabelleCommandPart and is
 syn keyword IsabelleCommandPart assumes shows fixes notes
 syn keyword IsabelleCommandPart where for
 syn keyword IsabelleCommandPart begin end
 syn keyword IsabelleCommandPart imports
+syn keyword IsabelleCommandPart keywords
 syn keyword IsabelleCommandPart monos overloaded
-syn keyword IsabelleCommandMod simp iff rule_format cong
+syn keyword IsabelleCommandMod code simp iff rule_format cong
 syn match IsabelleCommandMod /\<intro\>!\?/
 syn match IsabelleCommandMod /\<dest\>!\?/
 syn keyword IsabelleCommandProofProve proof
@@ -98,10 +121,10 @@ syn match IsabelleCommandMethodMod /\<arbitrary!\?:/
 syn keyword IsabelleCommandMethodMod in no_asm_use
 syn keyword IsabelleCommandMethodMod thin_tac
 syn keyword IsabelleCommandBigMethod simp simp_all
-syn keyword IsabelleCommandBigMethod blast force auto fast best slow deepen
-syn keyword IsabelleCommandBigMethod arith algebra
+syn keyword IsabelleCommandBigMethod blast force auto fast best slow deepen fastforce
+syn keyword IsabelleCommandBigMethod unat_arith arith algebra
 syn keyword IsabelleCommandBigMethod bestsimp fastsimp simplesubst slowsimp
-syn keyword IsabelleCommandBigMethod clarify safe clarsimp
+syn keyword IsabelleCommandBigMethod clarify safe clarsimp default
 syn keyword IsabelleCommandBigMethod eprover eproverF eproverH
 syn keyword IsabelleCommandBigMethod iprover
 syn keyword IsabelleCommandBigMethod metis metisF metisH
@@ -169,7 +192,7 @@ syn keyword IsabelleCommandRule mono_def monoI monoD
 syn keyword IsabelleCommandRule lfp_unfold lfp_induct lfp_induct_set
 syn keyword IsabelleCommandRule lfp_lowerbound
 syn keyword IsabelleCommandRule gfp_unfold coinduct
-syn keyword IsabelleCommandRuleMod of OF THEN simplified where
+syn keyword IsabelleCommandRuleMod of OF THEN simplified where symmetric standard
 syn match IsabelleCommandRule /\<[a-zA-Z]\+_def\>/
 syn match IsabelleCommandPart /|/
 
@@ -183,7 +206,8 @@ syn match IsabelleSpecial /\./
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
 syn match IsabelleComment "(\*\_.\{-}\*)"
-syn match IsabelleComment "\(chapter\|text\|header\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
+syn match IsabelleComment "--.*$"
+syn match IsabelleComment "\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
 hi def link IsabelleComment Comment
 
 hi IsabelleCommand           ctermfg=3 cterm=bold guifg=yellow gui=bold
