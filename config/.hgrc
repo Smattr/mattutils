@@ -15,6 +15,7 @@ mq =
 churn =
 graphlog =
 color = 
+convert =
 pager =
 progress =
 purge =
@@ -32,6 +33,7 @@ hgext.identities = /opt/hgidentities/identities.py
 onsub = /opt/onsub/onsub.py
 # `hg clone ssh://hg@bitbucket.org/smattr/hgswitch /opt/hgswitch`
 switch = /opt/hgswitch/switch.py
+git =
 
 [identities]
 bitbucket.org = Matthew Fernandez <matthew.fernandez@gmail.com>
