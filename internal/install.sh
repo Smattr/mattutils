@@ -29,6 +29,7 @@ for i in \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
+         repty \
          timestamp \
          toggle-screensaver \
          term \
