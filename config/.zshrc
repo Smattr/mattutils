@@ -156,6 +156,10 @@ WHITE="%{[1;37m%}"
 # Version control status.
 setopt PROMPT_SUBST
 function vcs_prompt {
+    if [ -n "${DISABLE_VCS_PROMPT+x}" ]; then
+        echo "-${MAGENTA}DISABLED${NORMAL}"
+        exit 0
+    fi
     for i in git hg svn; do
         which $i &>/dev/null
         if [ $? -ne 0 ]; then
@@ -163,52 +167,52 @@ function vcs_prompt {
             exit 1
         fi
     done
-    timeout 1 git branch &>/dev/null
+    git branch &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-±-'
-        if [ -z "`timeout 1 git status --short 2>/dev/null`" ]; then
+        if [ -z "`git status --short 2>/dev/null`" ]; then
             # Working directory is clean.
             echo -n "${GREEN}"
-        elif [ -z "`timeout 1 git status --short 2>/dev/null | grep -v '^?'`" ]; then
+        elif [ -z "`git status --short 2>/dev/null | grep -v '^?'`" ]; then
             # Working directory only contains changes to untracked files.
             echo -n "${YELLOW}"
         else
             # Working directory contains changes to tracked files.
             echo -n "${RED}"
         fi
-        echo -n `timeout 1 git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2`
+        echo -n `git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2`
         echo -n "${NORMAL}"
     fi
-    timeout 1 hg root &>/dev/null
+    hg root &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-☿-'
-        if [ -z "`timeout 1 hg status 2>/dev/null`" ]; then
+        if [ -z "`hg status 2>/dev/null`" ]; then
             # Working directory is clean.
             echo -n "${GREEN}"
-        elif [ -z "`timeout 1 hg status 2>/dev/null | grep -v '^?'`" ]; then
+        elif [ -z "`hg status 2>/dev/null | grep -v '^?'`" ]; then
             # Working directory only contains changes to untracked files.
             echo -n "${YELLOW}"
         else
             # Working directory contains changes to tracked files.
             echo -n "${RED}"
         fi
-        echo -n `timeout 1 hg branch 2>/dev/null`
+        echo -n `hg branch 2>/dev/null`
         echo -n "${NORMAL}"
     fi
-    timeout 1 svn list &>/dev/null
+    svn list &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-S-'
-        if [ -z "`timeout 1 svn status 2>/dev/null`" ]; then
+        if [ -z "`svn status 2>/dev/null`" ]; then
             # Working directory is clean.
             echo -n "${GREEN}"
-        elif [ -z "`timeout 1 svn status 2>/dev/null | grep -v '^?'`" ]; then
+        elif [ -z "`svn status 2>/dev/null | grep -v '^?'`" ]; then
             # Working directory only contains changes to untracked files.
             echo -n "${YELLOW}"
         else
             # Working directory contains changes to tracked files.
             echo -n "${RED}"
         fi
-        echo -n `timeout 1 svn info 2>/dev/null | grep URL | sed 's/.*\/\(.*\)/\1/g'`
+        echo -n `svn info 2>/dev/null | grep URL | sed 's/.*\/\(.*\)/\1/g'`
         echo -n "${NORMAL}"
     fi
 }
