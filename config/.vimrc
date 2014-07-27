@@ -53,4 +53,6 @@ let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
 " weapon of choice), xterm2 seems to work where pterm does not. Cheers,
 " kristopolous@HN, for the tip.
 set ttymouse=xterm2
-set mouse=a
+" Only visual and normal modes so that we get pane resizing, text selection and
+" middle button paste.
+set mouse=vn
