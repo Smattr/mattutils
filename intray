@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+'''
+A tool for saving a queue of commands to be run later. Useful for when you want
+to queue up a bunch of things while you're offline.
+'''
+
+import argparse, os, StringIO, subprocess, sys
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='save something to be done later when you have a network connection')
+    parser.add_argument('--mode', '-m', choices=['save', 'run'], required=True,
+        help='action to take')
+    parser.add_argument('--command', '-c', metavar='COMMAND', nargs=argparse.REMAINDER,
+        help='command to save for later')
+    parser.add_argument('--config', metavar='FILE',
+        help='command file to manipulate', default=os.path.expanduser('~/.intray'))
+    parser.add_argument('--force', '-f', action='store_true',
+        help='do not confirm commands before executing them')
+    opts = parser.parse_args()
+
+    if opts.mode == 'save':
+        if opts.command is None or len(opts.command) == 0:
+            print >>sys.stderr, 'Command is required when saving'
+            return -1
+
+        with open(opts.config, 'a') as f:
+            print >>f, ' '.join(map(lambda x: '"%s"' % x, opts.command))
+
+        lines = 0
+        with open(opts.config, 'r') as f:
+            for line in f:
+                if line.strip() != '':
+                    lines += 1
+        print ' [intray] your queue has %d entries' % lines
+
+    else:
+        assert opts.mode == 'run'
+
+        remaining = StringIO.StringIO()
+        with open(opts.config, 'r') as f:
+            for command in f:
+                if command.strip() == '':
+                    continue
+                print ' [intray] Command: %s' % command,
+                if not opts.force:
+                    confirm = raw_input(' [intray] Run [y/N] ? ')
+                    if confirm != 'y':
+                        print >>remaining, command
+                        continue
+                ret = subprocess.call(command, shell=True)
+                if ret != 0:
+                    print >>sys.stderr, ' [intray] Exiting due to non-zero exit code; your queue has not been modified'
+                    return ret
+        with open(opts.config, 'w') as f:
+            print >>f, remaining.getvalue()
+            
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

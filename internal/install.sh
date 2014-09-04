@@ -30,11 +30,14 @@ for i in \
          github-ls.sh \
          has-changed.sh \
          have-lib.sh \
+         intray \
          repty \
          timestamp \
          toggle-screensaver \
          term \
+         later \
          mediawatch.py \
+         now \
          pdfcrop.sh \
          prefix \
          pyman \
