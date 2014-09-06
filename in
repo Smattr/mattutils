@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 dir command args..." >&2
+    exit 1
+fi
+
+cd "$1"
+shift
+"$@"

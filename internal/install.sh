@@ -28,6 +28,7 @@ for i in \
          generate-passwd \
          gg \
          github-ls.sh \
+         in \
          has-changed.sh \
          have-lib.sh \
          intray \
