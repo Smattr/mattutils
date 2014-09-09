@@ -5,7 +5,7 @@
 #
 # Er, anyway, here's man for Python.
 
-import sys
+import re, sys
 
 def main(argv):
     if len(argv) < 2 or argv[1] == '--help':
@@ -55,7 +55,7 @@ def main(argv):
         print >>sys.stderr, 'No documentation associated with \'%s\'' % argv[1]
         return -1
 
-    print doc
+    print re.sub(r'^    ', '', doc, flags=re.MULTILINE)
 
     return 0
 
