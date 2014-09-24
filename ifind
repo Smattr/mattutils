@@ -15,7 +15,7 @@ class Item(object):
         self.path = path.decode('utf-8')
         self.marked = False
         buf = os.stat(path)
-        self.permissions = '' # TODO: clag filemode function from Python 3.3
+        self.permissions = str(stat.filemode(buf.st_mode))
         self.hardlinks = buf.st_nlink
         self.owner = pwd.getpwuid(buf.st_uid).pw_name[:8].ljust(8)
         self.group = grp.getgrgid(buf.st_gid).gr_name[:8].ljust(8)
