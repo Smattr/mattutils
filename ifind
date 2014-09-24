@@ -49,7 +49,7 @@ def refresh(screen, found, errors, selected):
         screen.addstr(2 + i, 2, '[%s] ' % ('X' if f.marked else ' '), style)
         screen.addstr(2 + i, 6, ('%(permissions)s %(hardlinks)2d %(owner)s %(group)s %(size)6d %(timestamp)s %(path)s' % f.__dict__)[:width - 8].ljust(width - 8),
             style)
-    screen.addstr(height - 2, 1, 'a = select all | d = delete | e = edit | n = select none | q = quit | s = shuffle | v = view | x = execute | space = mark/unmark',
+    screen.addstr(height - 2, 1, 'a = select all | d = delete | e = edit | n = select none | q = quit | r = -exec | s = shuffle | v = view | x = execute | space = mark/unmark',
         curses.A_BOLD)
     if errors > 0:
         warning = '%d errors' % errors
@@ -136,6 +136,19 @@ def main():
                 f.marked = False
         elif c == ord('q'):
             break
+        elif c == ord('r'):
+            files = get_files(found, selected)
+            deinit(scr)
+            base = input('command: ')
+            if base:
+                for i, cmd in enumerate([base.replace('{}', x.path) for x in files]):
+                    print('Running %s (%d/%d)...' % (cmd, i + 1, len(files)))
+                    try:
+                        subprocess.call(cmd, shell=True)
+                    except:
+                        pass
+                input(' -- Done -- ')
+            scr = init()
         elif c == ord('s'):
             random.shuffle(found)
         elif c == ord('v'):
