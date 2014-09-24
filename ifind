@@ -4,7 +4,7 @@
 An ncurses wrapper around `find`.
 '''
 
-import curses, grp, os, pwd, shutil, stat, subprocess, sys, time
+import curses, grp, os, pwd, random, shutil, stat, subprocess, sys, time
 
 EDITOR = os.environ.get('EDITOR', 'vim')
 PDF_VIEWER = 'evince'
@@ -49,7 +49,7 @@ def refresh(screen, found, errors, selected):
         screen.addstr(2 + i, 2, '[%s] ' % ('X' if f.marked else ' '), style)
         screen.addstr(2 + i, 6, ('%(permissions)s %(hardlinks)2d %(owner)s %(group)s %(size)6d %(timestamp)s %(path)s' % f.__dict__)[:width - 8].ljust(width - 8),
             style)
-    screen.addstr(height - 2, 1, 'a = select all | d = delete | e = edit | n = select none | q = quit | v = view | x = execute | space = mark/unmark',
+    screen.addstr(height - 2, 1, 'a = select all | d = delete | e = edit | n = select none | q = quit | s = shuffle | v = view | x = execute | space = mark/unmark',
         curses.A_BOLD)
     if errors > 0:
         warning = '%d errors' % errors
@@ -136,6 +136,8 @@ def main():
                 f.marked = False
         elif c == ord('q'):
             break
+        elif c == ord('s'):
+            random.shuffle(found)
         elif c == ord('v'):
             files = get_files(found, selected)
             cmds = []
