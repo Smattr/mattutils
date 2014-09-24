@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 An ncurses wrapper around `find`.
@@ -12,7 +12,7 @@ VIEWER = os.environ.get('VIEWER', 'view')
 
 class Item(object):
     def __init__(self, path):
-        self.path = path
+        self.path = path.decode('utf-8')
         self.marked = False
         buf = os.stat(path)
         self.permissions = '' # TODO: clag filemode function from Python 3.3
@@ -41,7 +41,7 @@ def deinit(screen):
 def refresh(screen, found, errors, selected):
     height, width = screen.getmaxyx()
     limit = height - 4
-    page = selected / limit
+    page = int(selected / limit)
     screen.clear()
     screen.addstr(1, 1, ' '.join(sys.argv), curses.A_BOLD)
     for i, f in enumerate(found[page * limit:(page + 1) * limit]):
@@ -65,8 +65,8 @@ def refresh(screen, found, errors, selected):
 def run(commands, screen):
     deinit(screen)
     for i, c in enumerate(commands):
-        print 'Running %s (%d/%d)...' % \
-            (' '.join(c), i + 1, len(commands))
+        print('Running %s (%d/%d)...' % \
+            (' '.join(c), i + 1, len(commands)))
         try:
             subprocess.call(c)
         except:
@@ -76,27 +76,28 @@ def run(commands, screen):
 
 def get_files(found, selected):
     if found[selected].marked:
-        return filter(lambda x: x.marked, found)
+        return [x for x in found if x.marked]
     return [found[selected]]
 
 def main():
 
-    print 'Running %s...' % ' '.join(sys.argv)
+    print('Running %s...' % ' '.join(sys.argv))
     
     p = subprocess.Popen(['find'] + sys.argv[1:] + ['-print0'],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
-    print >>sys.stderr, stderr,
+    if stderr:
+        print(stderr.decode('utf-8'), end='', file=sys.stderr)
     
-    found = map(Item, filter(lambda x: x != '', stdout.split('\x00')))
-    errors = stderr.count('\n')
+    found = list(map(Item, [x for x in stdout.split(b'\x00') if x != b'']))
+    errors = stderr.count(b'\n')
     selected = 0
 
     if len(found) == 0:
         if errors:
-            print >>sys.stderr, stderr,
+            print(stderr, end='', file=sys.stderr)
             return -1
-        print 'nothing relevant found'
+        print('nothing relevant found')
         return 0
     
     scr = init()
@@ -110,8 +111,8 @@ def main():
         elif c == ord('d'):
             files = get_files(found, selected)
             deinit(scr)
-            confirm = raw_input('The following will be removed:\n %s\nAre you sure [y/N]? ' \
-                % '\n '.join(map(lambda x: x.path, files)))
+            confirm = input('The following will be removed:\n %s\nAre you sure [y/N]? ' \
+                % '\n '.join([x.path for x in files]))
             if confirm == 'y':
                 for f in files:
                     if os.path.isdir(f.path):
@@ -150,7 +151,7 @@ def main():
             scr = run(cmds, scr)
         elif c == ord('x'):
             files = get_files(found, selected)
-            scr = run(map(lambda x: [x.path], files), scr)
+            scr = run([[x.path] for x in files], scr)
         elif c == ord(' '):
             found[selected].marked = not found[selected].marked
         elif c == curses.KEY_UP:
