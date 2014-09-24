@@ -1,0 +1,167 @@
+#!/usr/bin/env python
+
+'''
+An ncurses wrapper around `find`.
+'''
+
+import curses, grp, os, pwd, shutil, stat, subprocess, sys, time
+
+EDITOR = os.environ.get('EDITOR', 'vim')
+PDF_VIEWER = 'evince'
+VIEWER = os.environ.get('VIEWER', 'view')
+
+class Item(object):
+    def __init__(self, path):
+        self.path = path
+        self.marked = False
+        buf = os.stat(path)
+        self.permissions = '' # TODO: clag filemode function from Python 3.3
+        self.hardlinks = buf.st_nlink
+        self.owner = pwd.getpwuid(buf.st_uid).pw_name[:8].ljust(8)
+        self.group = grp.getgrgid(buf.st_gid).gr_name[:8].ljust(8)
+        self.size = buf.st_size
+        self.timestamp = time.ctime(buf.st_mtime)
+
+def init():
+    '''Initialise curses'''
+    stdscr = curses.initscr()
+    curses.start_color()
+    curses.noecho()
+    curses.cbreak()
+    stdscr.keypad(1)
+    curses.curs_set(0)
+    return stdscr
+
+def deinit(screen):
+    curses.nocbreak()
+    screen.keypad(0)
+    curses.echo()
+    curses.endwin()
+
+def refresh(screen, found, errors, selected):
+    height, width = screen.getmaxyx()
+    limit = height - 4
+    page = selected / limit
+    screen.clear()
+    screen.addstr(1, 1, ' '.join(sys.argv), curses.A_BOLD)
+    for i, f in enumerate(found[page * limit:(page + 1) * limit]):
+        style = curses.A_REVERSE if page * limit + i == selected else 0
+        screen.addstr(2 + i, 2, '[%s] ' % ('X' if f.marked else ' '), style)
+        screen.addstr(2 + i, 6, ('%(permissions)s %(hardlinks)2d %(owner)s %(group)s %(size)6d %(timestamp)s %(path)s' % f.__dict__)[:width - 8].ljust(width - 8),
+            style)
+    screen.addstr(height - 2, 1, 'a = select all | d = delete | e = edit | n = select none | q = quit | v = view | x = execute | space = mark/unmark',
+        curses.A_BOLD)
+    if errors > 0:
+        warning = '%d errors' % errors
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        screen.addstr(height - 2, width - len(warning) - 1, warning,
+            curses.A_BOLD|curses.color_pair(1))
+    if page > 0 and len(found) > limit:
+        screen.addstr(2, width - 3, '/\\')
+    if (page + 1) * limit < len(found):
+        screen.addstr(2 + limit, width - 3, '\\/')
+    screen.refresh()
+
+def run(commands, screen):
+    deinit(screen)
+    for i, c in enumerate(commands):
+        print 'Running %s (%d/%d)...' % \
+            (' '.join(c), i + 1, len(commands))
+        try:
+            subprocess.call(c)
+        except:
+            pass
+    scr = init()
+    return scr
+
+def get_files(found, selected):
+    if found[selected].marked:
+        return filter(lambda x: x.marked, found)
+    return [found[selected]]
+
+def main():
+
+    print 'Running %s...' % ' '.join(sys.argv)
+    
+    p = subprocess.Popen(['find'] + sys.argv[1:] + ['-print0'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    print >>sys.stderr, stderr,
+    
+    found = map(Item, filter(lambda x: x != '', stdout.split('\x00')))
+    errors = stderr.count('\n')
+    selected = 0
+
+    if len(found) == 0:
+        if errors:
+            print >>sys.stderr, stderr,
+            return -1
+        print 'nothing relevant found'
+        return 0
+    
+    scr = init()
+
+    while True:
+        refresh(scr, found, errors, selected)
+        c = scr.getch()
+        if c == ord('a'):
+            for f in found:
+                f.marked = True
+        elif c == ord('d'):
+            files = get_files(found, selected)
+            deinit(scr)
+            confirm = raw_input('The following will be removed:\n %s\nAre you sure [y/N]? ' \
+                % '\n '.join(map(lambda x: x.path, files)))
+            if confirm == 'y':
+                for f in files:
+                    if os.path.isdir(f.path):
+                        shutil.rmtree(f.path)
+                    else:
+                        os.remove(f.path)
+            scr = init()
+        elif c == ord('e'):
+            files = get_files(found, selected)
+            cmds = []
+            for f in files:
+                ext = os.path.splitext(f.path)[1].lower()
+                if ext in ['.mp3', '.ogg', '.flac', '.wav']:
+                    prog = ['audacity']
+                else:
+                    prog = [EDITOR]
+                cmds.append(prog + [f.path])
+            scr = run(cmds, scr)
+        elif c == ord('n'):
+            for f in found:
+                f.marked = False
+        elif c == ord('q'):
+            break
+        elif c == ord('v'):
+            files = get_files(found, selected)
+            cmds = []
+            for f in files:
+                ext = os.path.splitext(f.path)[1].lower()
+                if ext == '.pdf':
+                    prog = [PDF_VIEWER]
+                elif ext in ['.mp3', '.ogg', '.ogv', '.mp4', '.avi', '.flv', '.flac', '.wav']:
+                    prog = ['mplayer', '-fs']
+                else:
+                    prog = [VIEWER]
+                cmds.append(prog + [f.path])
+            scr = run(cmds, scr)
+        elif c == ord('x'):
+            files = get_files(found, selected)
+            scr = run(map(lambda x: [x.path], files), scr)
+        elif c == ord(' '):
+            found[selected].marked = not found[selected].marked
+        elif c == curses.KEY_UP:
+            if selected > 0:
+                selected -= 1
+        elif c == curses.KEY_DOWN:
+            if selected < len(found) - 1:
+                selected += 1
+
+    deinit(scr)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

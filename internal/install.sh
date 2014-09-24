@@ -31,6 +31,7 @@ for i in \
          in \
          has-changed.sh \
          have-lib.sh \
+         ifind \
          intray \
          repty \
          timestamp \
