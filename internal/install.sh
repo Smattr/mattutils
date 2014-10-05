@@ -47,6 +47,7 @@ for i in \
          search \
          sendmail.py \
          tb \
+         validate.py \
          wh \
          wim ; do
     if [ ! -e "${REPO}/$i" ]; then
