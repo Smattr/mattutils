@@ -70,7 +70,7 @@ syntax region IsabelleCommand matchgroup=SpecialComment start="ML[ ]*{\*" end="\
 
 
 syn keyword IsabelleCommandPart and is
-syn keyword IsabelleCommandPart assumes shows fixes notes
+syn keyword IsabelleCommandPart assumes defines shows fixes notes
 syn keyword IsabelleCommandPart where for
 syn keyword IsabelleCommandPart begin end
 syn keyword IsabelleCommandPart imports
