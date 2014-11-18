@@ -4,11 +4,12 @@
 An ncurses wrapper around `find`.
 '''
 
-import curses, grp, os, pwd, random, shutil, stat, subprocess, sys, time
+import curses, grp, os, pwd, random, shutil, stat, subprocess, sys, tempfile, time
 
 EDITOR = os.environ.get('EDITOR', 'vim')
 PDF_VIEWER = 'evince'
 VIEWER = os.environ.get('VIEWER', 'view')
+MPLAYABLE = ['.mp3', '.ogg', '.ogv', '.mp4', '.avi', '.flv', '.flac', '.wav']
 
 class Item(object):
     def __init__(self, path):
@@ -153,17 +154,30 @@ def main():
             random.shuffle(found)
         elif c == ord('v'):
             files = get_files(found, selected)
+            files = [(f, os.path.splitext(f.path)[1].lower()) for f in files]
             cmds = []
-            for f in files:
-                ext = os.path.splitext(f.path)[1].lower()
-                if ext == '.pdf':
-                    prog = [PDF_VIEWER]
-                elif ext in ['.mp3', '.ogg', '.ogv', '.mp4', '.avi', '.flv', '.flac', '.wav']:
-                    prog = ['mplayer', '-fs']
-                else:
-                    prog = [VIEWER]
-                cmds.append(prog + [f.path])
+            playlist = None
+            if len(files) == len(list(filter(lambda x: x[1] in MPLAYABLE, files))):
+                # Everything will be opened by mplayer, so put it in a playlist
+                # so the user can easily navigate within mplayer.
+                _, playlist = tempfile.mkstemp()
+                with open(playlist, 'w') as p:
+                    p.write('\n'.join([f[0].path for f in files]))
+                cmds.append(['mplayer', '-fs', '-playlist', playlist])
+            else:
+                for f in files:
+                    ext = f[1]
+                    if ext == '.pdf':
+                        prog = [PDF_VIEWER]
+                    elif ext in MPLAYABLE:
+                        prog = ['mplayer', '-fs']
+                    else:
+                        prog = [VIEWER]
+                    cmds.append(prog + [f[0].path])
             scr = run(cmds, scr)
+            if playlist is not None:
+                # Delete the temporary playlist we created.
+                os.remove(playlist)
         elif c == ord('x'):
             files = get_files(found, selected)
             scr = run([[x.path] for x in files], scr)
