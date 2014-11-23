@@ -14,6 +14,7 @@ Run with no arguments to see valid options.
 """
 
 import argparse, smtplib, sys
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 def main():
@@ -51,10 +52,12 @@ def main():
     # actually sending the email, but if there is any delay in reading the
     # input (e.g. if the user is calling this script interactively) the
     # connection could timeout.
-    message = sys.stdin.read()
-    if args.empty and not message:
+    content = sys.stdin.read()
+    if args.empty and not content:
         return 0
-    message = MIMEText(message, 'plain', _charset='utf-8')
+    message = MIMEMultipart()
+    body = MIMEText(content, 'plain', _charset='utf-8')
+    message.attach(body)
     message['To'] = ', '.join(args.to)
     message['From'] = args.__dict__['from']
     message['CC'] = ', '.join(args.cc)
