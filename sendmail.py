@@ -13,13 +13,19 @@ me and I'll probably be happy to add them.
 Run with no arguments to see valid options.
 """
 
-import argparse, smtplib, sys
+import argparse, mimetypes, os, smtplib, sys
+from email import encoders
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 def main():
     options = argparse.ArgumentParser(description='Reads an email body from ' + \
         'STDIN and sends it using the parameters provided on the command line.')
+    options.add_argument('--attach', '-a', action='append', default=[],
+        help='attach a file')
     options.add_argument('--bcc', '-b', action='append', default=[],
         help='add a BCC recipient')
     options.add_argument('--cc', '-c', action='append', default=[],
@@ -55,9 +61,41 @@ def main():
     content = sys.stdin.read()
     if args.empty and not content:
         return 0
+
     message = MIMEMultipart()
+
+    # Add the body of the message.
     body = MIMEText(content, 'plain', _charset='utf-8')
     message.attach(body)
+
+    # Add any attachments.
+    for a in args.attach:
+        if not os.path.exists(a):
+            print >>sys.stderr, 'Attachment %s does not exist' % a
+            return -1
+        content_type, encoding = mimetypes.guess_type(a)
+        if content_type is None or encoding is not None:
+            # Unknown content type or compressed.
+            content_type = 'application/octet-stream'
+        type, subtype = content_type.split('/', 1)
+        if type == 'text':
+            with open(a, 'r') as f:
+                data = MIMEText(f.read(), _subtype=subtype)
+        elif type == 'image':
+            with open(a, 'rb') as f:
+                data = MIMEImage(f.read(), _subtype=subtype)
+        elif type == 'audio':
+            with open(a, 'rb') as f:
+                data = MIMEAudio(f.read(), _subtype=subtype)
+        else:
+            # Unknown content.
+            data = MIMEBase(type, subtype)
+            with open(a, 'rb') as f:
+                data.set_payload(f.read())
+            encoders.encode_base64(data)
+        data.add_header('Content-Disposition', 'attachment', filename=os.path.basename(a))
+        message.attach(data)
+
     message['To'] = ', '.join(args.to)
     message['From'] = args.__dict__['from']
     message['CC'] = ', '.join(args.cc)
