@@ -162,7 +162,7 @@ def main():
                 # so the user can easily navigate within mplayer.
                 _, playlist = tempfile.mkstemp()
                 with open(playlist, 'w') as p:
-                    p.write('\n'.join([f[0].path for f in files]))
+                    p.write('\n'.join([os.path.abspath(f[0].path) for f in files]))
                 cmds.append(['mplayer', '-fs', '-playlist', playlist])
             else:
                 for f in files:
