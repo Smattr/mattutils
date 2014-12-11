@@ -39,6 +39,7 @@ def main():
         assert opts.mode == 'run'
 
         remaining = StringIO.StringIO()
+        failed = False
         with open(opts.config, 'r') as f:
             for command in f:
                 if command.strip() == '':
@@ -51,10 +52,13 @@ def main():
                         continue
                 ret = subprocess.call(command, shell=True)
                 if ret != 0:
-                    print >>sys.stderr, ' [intray] Exiting due to non-zero exit code; your queue has not been modified'
-                    return ret
+                    failed = True
+                    print >>sys.stderr, ' [intray] Failed; leaving in queue'
+                    print >>remaining, command
         with open(opts.config, 'w') as f:
             print >>f, remaining.getvalue()
+        if failed:
+            return -1
             
     return 0
 

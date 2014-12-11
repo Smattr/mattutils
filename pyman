@@ -5,7 +5,21 @@
 #
 # Er, anyway, here's man for Python.
 
-import re, sys
+import inspect, re, sys
+
+def signature(name, argspec):
+    args = []
+    defaults = argspec[3]
+    for i, arg in enumerate(argspec[0]):
+        if defaults is not None and len(argspec[0]) - i <= len(defaults):
+            args.append('%s=%s' % (arg, defaults[i + len(defaults) - len(argspec[0])]))
+        else:
+            args.append(arg)
+    if argspec[1] is not None:
+        args.append('*%s' % argspec[1])
+    if argspec[2] is not None:
+        args.append('**%s' % argspec[2])
+    return '%s(%s)' % (name, ', '.join(args))
 
 def main(argv):
     if len(argv) < 2 or argv[1] == '--help':
@@ -55,6 +69,12 @@ def main(argv):
         print >>sys.stderr, 'No documentation associated with \'%s\'' % argv[1]
         return -1
 
+    if inspect.isfunction(fn):
+        print signature(fn.__name__, inspect.getargspec(fn))
+        print ''
+    elif inspect.isclass(fn):
+        print signature('%s.__init__' % fn.__name__, inspect.getargspec(fn.__init__))
+        print ''
     print re.sub(r'^    ', '', doc, flags=re.MULTILINE)
 
     return 0

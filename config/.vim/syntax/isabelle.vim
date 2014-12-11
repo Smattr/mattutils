@@ -12,19 +12,21 @@ syn clear
 syn sync fromstart
 syn case match
 
-syn keyword IsabelleCommand term
+syn keyword IsabelleCommand term typ prop prf full_prf pr value
 syn keyword IsabelleCommand abbreviation
 syn keyword IsabelleCommand theory
-syn keyword IsabelleCommand theorem
+syn keyword IsabelleCommand theorem schematic_theorem corollary
+    \ schematic_corollary
 syn keyword IsabelleCommand lemma
 syn keyword IsabelleCommand lemmas
 syn keyword IsabelleCommand schematic_lemma
 syn keyword IsabelleCommand primrec
 syn keyword IsabelleCommand datatype
-syn keyword IsabelleCommand declare
+syn keyword IsabelleCommand declare declaration syntax_declaration
 syn keyword IsabelleCommand definition
+syn keyword IsabelleCommand method_setup
 syn keyword IsabelleCommand fun
-syn keyword IsabelleCommand function
+syn keyword IsabelleCommand function termination
 syn keyword IsabelleCommand typedecl
 syn keyword IsabelleCommand types
 syn keyword IsabelleCommand typedef
@@ -43,8 +45,8 @@ syn keyword IsabelleCommand axiomatization
 syn keyword IsabelleCommand locale
 syn keyword IsabelleCommand sublocale
 syn keyword IsabelleCommand theorems
-syn keyword IsabelleCommand class
-syn keyword IsabelleCommand interpretation
+syn keyword IsabelleCommand class subclass
+syn keyword IsabelleCommand interpretation interpret
 syn keyword IsabelleCommand instantiation
 syn keyword IsabelleCommand context
 syn keyword IsabelleCommand rep_datatype
@@ -53,7 +55,10 @@ syn keyword IsabelleCommand code_const
 syn keyword IsabelleCommand ML_file
 syn keyword IsabelleCommand setup
 syn keyword IsabelleCommand thm
-syn keyword IsabelleCommand print_theorems
+syn keyword IsabelleCommand print_theorems print_locale print_locales
+    \ print_dependencies print_interps print_classes class_deps print_abbrevs
+    \ print_statement print_trans_rules print_cases print_induct_rules
+syn keyword IsabelleCommand notepad
 
 " Do some juggling to give us ML highlighting inside an Isabelle/ML block.
 if exists('b:current_syntax')
@@ -70,25 +75,27 @@ syntax region IsabelleCommand matchgroup=SpecialComment start="ML[ ]*{\*" end="\
 
 
 syn keyword IsabelleCommandPart and is
-syn keyword IsabelleCommandPart assumes defines shows fixes notes
+syn keyword IsabelleCommandPart assumes constrains defines shows fixes notes
+    \ obtains
 syn keyword IsabelleCommandPart where for
 syn keyword IsabelleCommandPart begin end
 syn keyword IsabelleCommandPart imports
-syn keyword IsabelleCommandPart keywords
+syn keyword IsabelleCommandPart keywords uses
 syn keyword IsabelleCommandPart monos overloaded
 syn keyword IsabelleCommandMod code simp iff rule_format cong
 syn match IsabelleCommandMod /\<intro\>!\?/
 syn match IsabelleCommandMod /\<dest\>!\?/
 syn keyword IsabelleCommandProofProve proof
 syn keyword IsabelleCommandProofProve apply
-syn keyword IsabelleCommandProofProve prefer defer
-syn keyword IsabelleCommandProofDone done by qed
+syn keyword IsabelleCommandProofProve prefer defer back
+syn keyword IsabelleCommandProofDone done by qed apply_end
 syn keyword IsabelleCommandProofFail sorry oops
 syn keyword IsabelleCommandProofIsar assume show have from then thus hence
+    \ presume def
 syn keyword IsabelleCommandProofIsar with next using note
 syn keyword IsabelleCommandProofIsar let
 syn keyword IsabelleCommandProofIsar moreover ultimately also finally
-syn keyword IsabelleCommandProofIsar fix obtain where case
+syn keyword IsabelleCommandProofIsar fix obtain where case guess
 syn keyword IsabelleCommandMethod assumption fact this
 syn keyword IsabelleCommandMethod rule erule drule frule
 syn keyword IsabelleCommandMethod elim
