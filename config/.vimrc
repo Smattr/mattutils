@@ -49,6 +49,17 @@ highlight clear SpellLocal
 highlight SpellLocal term=underline cterm=underline
 let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
 
+" Toggle conceallevel setting. Useful for Isabelle.
+function! ToggleConceal()
+  if &conceallevel == 0
+    set conceallevel=2
+  else
+    set conceallevel=0
+  endif
+endfunction
+nm <F6> :call ToggleConceal()<CR>
+imap <F6> <C-o>:call ToggleConceal()<CR>
+
 " Enable our friend, the mouse. Though ttymouse supposedly supports pterm (my
 " weapon of choice), xterm2 seems to work where pterm does not. Cheers,
 " kristopolous@HN, for the tip.
