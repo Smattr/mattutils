@@ -2,6 +2,7 @@ if exists("did_load_filetypes")
     finish
 endif
 augroup filetypedetect
+    au BufRead,BufNewFile *.c_pp setfiletype c
     au BufRead,BufNewFile *.camkes setfiletype camkes
     au BufRead,BufNewFile *.cdl setfiletype capdl
     au BufRead,BufNewFile *.idl4 setfiletype idl4
