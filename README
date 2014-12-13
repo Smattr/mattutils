@@ -44,6 +44,7 @@ misc/ - A directory for miscellaneous half-finished bits or tools that I don't
 misc/alloc/ - Fragments of a half-finished allocation library.
 misc/alloc-monitor.c - Yet another LD_PRELOAD hack for instrumenting calls to
     malloc and free.
+misc/balloon.c - A memory balloon application.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
 misc/detectvm.c - Code to detect whether it is running in a virtual machine or
     natively.
