@@ -72,7 +72,9 @@ api = {
 
 def main(argv):
     parser = argparse.ArgumentParser(description='shortcut gateway')
-    parser.add_argument('shortcut', help='shortcut to invoke')
+    parser.add_argument('--list', '-l', action='store_true',
+        help='show available shortcuts')
+    parser.add_argument('shortcut', nargs='?', help='shortcut to invoke')
     opts = parser.parse_args(argv[1:])
 
     try:
@@ -82,6 +84,26 @@ def main(argv):
 
     if shortcuts is None:
         error('no shortcuts defined')
+        return -1
+
+    if opts.list:
+        available = []
+        for k, v in shortcuts.__dict__.items():
+            if k.startswith('__'):
+                continue
+            if isinstance(v, str):
+                available.append('%s - exec "%s"' % (k, v))
+            elif isinstance(v, list):
+                available.append('%s - exec "%s"' % (k, ' '.join(v)))
+            elif hasattr(v, '__call__'):
+                available.append('%s - %s' % (k, v.__doc__))
+            else:
+                available.append('%s - unknown' % k)
+        notify('\n'.join(available))
+        return 0
+
+    if opts.shortcut is None:
+        error('no shortcut specified')
         return -1
 
     if opts.shortcut.startswith('__'):
