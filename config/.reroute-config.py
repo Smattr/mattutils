@@ -24,6 +24,11 @@ def meta_h(api):
         api[1]['notify']('enabling unclutter')
         return api[1]['run']('unclutter')
 
+def meta_p(api):
+    '''type password'''
+    import os
+    return api[1]['run']([os.path.expanduser('~/bin/pw'), 'gui-type'])
+
 def meta_u(api):
     '''unmount all user drives we currently have mounted'''
     import os
