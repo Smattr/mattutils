@@ -51,7 +51,13 @@ def meta_u(api):
         api[1]['notify']('nothing to unmount')
 
 def meta_x(api):
+    '''terminal'''
     import os
     return api[1]['run'](os.path.expanduser('~/bin/term'))
 
-meta_z = ['chromium-browser', '--incognito']
+def meta_z(api):
+    '''browser'''
+    import os
+    return api[1]['run'](['chromium-browser',
+        '--proxy-pac-url=file://%s' % os.path.expanduser('~/bin/nictabin/nicta-proxy.pac'),
+        '--incognito'])
