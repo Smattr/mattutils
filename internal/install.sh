@@ -72,6 +72,7 @@ for i in .dircolors \
          .gnomerc \
          .hgrc \
          .mplayer \
+         .reroute-config.py \
          .screenrc \
          .tmux.conf \
          .vimrc \
