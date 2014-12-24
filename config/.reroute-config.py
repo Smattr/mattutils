@@ -33,17 +33,22 @@ def meta_u(api):
     '''unmount all user drives we currently have mounted'''
     import os
     USER_MOUNT_ROOT = '/media/%s/' % os.environ['USER']
-    umounted = []
+    unmounted = []
+    errored = []
     for d in os.listdir(USER_MOUNT_ROOT):
         m = os.path.join(USER_MOUNT_ROOT, d)
         if not os.path.ismount(m):
             continue
         if api[1]['run'](['umount', m]) == 0:
-            umounted.append(m)
+            unmounted.append(m)
         else:
-            api[1]['error']('failed to unmount %s' % m,)
-    if len(umounted) > 0:
-        api[1]['notify']('unmounted %s' % ', '.join(umounted))
+            errored.append(m)
+    if len(errored) > 0:
+        api[1]['error']('failed to unmount %s' % ', '.join(errored))
+    if len(unmounted) > 0:
+        api[1]['notify']('unmounted %s' % ', '.join(unmounted))
+    if len(errored) == 0 and len(unmounted) == 0:
+        api[1]['notify']('nothing to unmount')
 
 def meta_x(api):
     import os
