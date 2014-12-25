@@ -24,6 +24,8 @@ def meta_h(api):
         api[1]['notify']('enabling unclutter')
         return api[1]['run']('unclutter')
 
+meta_l = ['gnome-screensaver-command', '--lock']
+
 def meta_p(api):
     '''type password'''
     import os
