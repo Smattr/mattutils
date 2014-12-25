@@ -67,3 +67,6 @@ set ttymouse=xterm2
 " Only visual and normal modes so that we get pane resizing, text selection and
 " middle button paste.
 set mouse=vn
+
+" Standard trick for saving edits to a file that you forgot to open with sudo.
+cmap w!! w !sudo tee >/dev/null %
