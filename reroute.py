@@ -90,6 +90,9 @@ def main(argv):
         shortcuts = imp.load_source('', os.path.expanduser('~/.reroute-config.py'))
     except (ImportError, IOError):
         shortcuts = None
+    except SyntaxError:
+        error('malformed configuration file')
+        return -1
 
     if shortcuts is None:
         error('no shortcuts defined')
@@ -125,14 +128,18 @@ def main(argv):
         error('shortcut %s not found' % opts.shortcut)
         return -1
 
-    if isinstance(cmd, str):
-        return subprocess.call(cmd, shell=True)
-    elif isinstance(cmd, list):
-        return subprocess.call(cmd)
-    elif hasattr(cmd, '__call__'):
-        return cmd(api)
-    else:
-        error('unrecognised type of shortcut %s' % opts.shortcut)
+    try:
+        if isinstance(cmd, str):
+            return subprocess.call(cmd, shell=True)
+        elif isinstance(cmd, list):
+            return subprocess.call(cmd)
+        elif hasattr(cmd, '__call__'):
+            return cmd(api)
+        else:
+            error('unrecognised type of shortcut %s' % opts.shortcut)
+            return -1
+    except Exception as e:
+        error('failed to run %s: %s' % (opts.shortcut, e))
         return -1
 
 if __name__ == '__main__':
