@@ -54,6 +54,12 @@ def ps(proc):
             procs.append(p)
     return procs
 
+def run(cmd):
+    p = subprocess.Popen(cmd, shell=isinstance(cmd, str),
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    return p.returncode, stdout, stderr
+
 def which(cmd):
     try:
         return subprocess.check_output(['which', cmd], stderr=subprocess.PIPE)
@@ -68,6 +74,9 @@ api = {
         'run':subprocess.call,
         'which':which,
     },
+    2:{
+        'run':run,
+    }
 }
 
 def main(argv):
