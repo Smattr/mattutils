@@ -8,6 +8,13 @@ def meta_c(api):
     api[1]['run'](['killall', '--quiet', '--wait', 'thunderbird'])
     return api[1]['run'](['thunderbird'])
 
+def meta_g(api):
+    '''news'''
+    import feedparser
+    entry = feedparser.parse('http://downloads.bbc.co.uk/podcasts/worldservice/globalnews/rss.xml').entries[0]
+    url = entry['media_content'][0]['url']
+    return api[2]['run'](['mplayer', url])[0]
+
 def meta_h(api):
     '''Toggle unclutter'''
     import os, signal
