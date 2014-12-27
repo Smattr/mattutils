@@ -55,7 +55,8 @@ def ps(proc):
     return procs
 
 def run(cmd):
-    p = subprocess.Popen(cmd, shell=isinstance(cmd, str),
+    p = subprocess.Popen(cmd,
+        shell=(isinstance(cmd, str) or isinstance(cmd, unicode)),
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
     return p.returncode, stdout, stderr
