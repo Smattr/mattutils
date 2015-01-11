@@ -19,6 +19,7 @@ def meta_g(api):
         return -1
     entry = feedparser.parse('http://downloads.bbc.co.uk/podcasts/worldservice/globalnews/rss.xml').entries[0]
     url = entry['media_content'][0]['url']
+    api[1]['notify']('streaming BBC Global News')
     return api[2]['run']('wget %s -O - | mplayer -' % url)[0]
 
 def meta_h(api):
