@@ -39,6 +39,7 @@ for i in \
          term \
          later \
          mediawatch.py \
+         notate.py \
          now \
          pdfcrop.sh \
          prefix \
