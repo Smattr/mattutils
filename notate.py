@@ -60,6 +60,16 @@ def main(argv):
         print >>sys.stderr, '%s not found' % opts.file
         return -1
 
+    with open(os.devnull, 'w') as null:
+        ret = subprocess.call(['which', 'pdftk'], stdout=null, stderr=null)
+        if ret != 0:
+            print >>sys.stderr, 'pdftk not found'
+            return -1
+        ret = subprocess.call(['which', 'inkscape'], stdout=null, stderr=null)
+        if ret != 0:
+            print >>sys.stderr, 'inkscape not found'
+            return -1
+
     opts.file = os.path.abspath(opts.file)
 
     metadir = os.path.join(os.path.dirname(opts.file), '.notate',
