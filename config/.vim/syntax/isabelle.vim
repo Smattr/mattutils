@@ -73,6 +73,11 @@ else
 endif
 syntax region IsabelleCommand matchgroup=SpecialComment start="ML[ ]*{\*" end="\*}" contains=@SML
 
+" Excessively complicated way of matching (* ... *) comments to support nested
+" blocks.
+syntax region IsabelleComment matchgroup=IsabelleComment start="(\*" end="\*)" contains=IsabelleCommentStart
+syntax match IsabelleCommentStart "(\*" contained nextgroup=IsabelleCommentContent contains=IsabelleCommentStart
+syntax match IsabelleCommentContent ".*" contained
 
 syn keyword IsabelleCommandPart and is
 syn keyword IsabelleCommandPart assumes constrains defines shows fixes notes
@@ -563,10 +568,11 @@ syn match IsabelleSpecial /\\<four>/ conceal cchar=𝟰
 
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
-syn match IsabelleComment "(\*\_.\{-}\*)"
 syn match IsabelleComment "--.*$"
 syn match IsabelleComment "\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
 hi def link IsabelleComment Comment
+hi def link IsabelleCommentStart Comment
+hi def link IsabelleCommentContent Comment
 
 hi IsabelleCommand           ctermfg=3 cterm=bold guifg=yellow gui=bold
 hi IsabelleCommandPart       ctermfg=3 cterm=none guifg=yellow
