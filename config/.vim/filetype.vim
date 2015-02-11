@@ -24,4 +24,5 @@ augroup filetypedetect
     au BufRead,BufNewFile *.sal setfiletype sal
     au BufRead,BufNewFile *.m setfiletype murphi
     au BufRead,BufNewFile .hgignore setfiletype hgignore
+    au BufRead,BufNewFile *.lds setfiletype ld
 augroup END
