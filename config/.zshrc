@@ -88,6 +88,7 @@ alias cim=vim # Cope with my typos.
 alias cd..="cd .."
 alias ..='cd ..'
 alias evince="dbus-launch /usr/bin/evince" # Mask evince problems in newer Ubuntu.
+alias ffs='sudo $(fc -ln -1)'
 
 # ZSH Options
 
