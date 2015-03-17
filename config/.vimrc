@@ -82,3 +82,6 @@ set mouse=vn
 
 " Standard trick for saving edits to a file that you forgot to open with sudo.
 cmap w!! w !sudo tee >/dev/null %
+
+" Enable Pathogen
+execute pathogen#infect()
