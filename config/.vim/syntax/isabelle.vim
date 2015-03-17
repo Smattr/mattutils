@@ -54,7 +54,7 @@ syn keyword IsabelleCommand export_code
 syn keyword IsabelleCommand code_const
 syn keyword IsabelleCommand ML_file
 syn keyword IsabelleCommand setup
-syn keyword IsabelleCommand thm
+syn keyword IsabelleCommand thm find_theorems
 syn keyword IsabelleCommand print_theorems print_locale print_locales
     \ print_dependencies print_interps print_classes class_deps print_abbrevs
     \ print_statement print_trans_rules print_cases print_induct_rules
@@ -73,6 +73,49 @@ else
 endif
 syntax region IsabelleCommand matchgroup=SpecialComment start="ML[ ]*{\*" end="\*}" contains=@SML
 
+" Excessively complicated way of matching (* ... *) comments to support nested
+" blocks.
+syntax region IsabelleComment matchgroup=IsabelleComment start="(\*" end="\*)" contains=IsabelleCommentStart
+syntax match IsabelleCommentStart "(\*" contained nextgroup=IsabelleCommentContent contains=IsabelleCommentStart
+syntax match IsabelleCommentContent ".*" contained
+
+" You can use LaTeX within text {* ... *} blocks and friends and sometimes it
+" is useful to have syntax highlighting enabled within these blocks when
+" working on a PDF-destined theory. This is off by default because it can be a
+" little distracting when not working on documentation. You can put something
+" like the following in your ~/.vimrc for easy toggling of LaTeX syntax:
+"
+"   function! ToggleIsabelleTex()
+"     if exists('g:isabelle_tex')
+"       let g:isabelle_tex = !g:isabelle_tex
+"     else
+"       let g:isabelle_tex=1
+"     endif
+"     syntax off
+"     syntax on
+"   endfunction
+"   nm <F8> :call ToggleIsabelleTex()<CR>
+"   imap <F8> <C-o>:call ToggleIsabelleTex()<CR>
+"
+if exists('g:isabelle_tex') && g:isabelle_tex == 1
+  if exists('b:current_syntax')
+    let s:current_syntax=b:current_syntax
+    unlet b:current_syntax
+  endif
+  " FIXME: The TeX syntax meddles with iskeyword and thereby screws up syntax
+  " highlighting for anything involving an underscore after it has been loaded.
+  syntax include @TEX syntax/tex.vim
+  if exists('s:current_syntax')
+    let b:current_syntax=s:current_syntax
+  else
+    unlet b:current_syntax
+  endif
+  syntax region IsabelleCommand matchgroup=IsabelleComment start="\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*" end="\*}" contains=@TEX
+else
+  " If g:isabelle_tex is not set, just highlight these blocks as normal
+  " comments.
+  syn match IsabelleComment "\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
+endif
 
 syn keyword IsabelleCommandPart and is
 syn keyword IsabelleCommandPart assumes constrains defines shows fixes notes
@@ -563,10 +606,10 @@ syn match IsabelleSpecial /\\<four>/ conceal cchar=𝟰
 
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
-syn match IsabelleComment "(\*\_.\{-}\*)"
 syn match IsabelleComment "--.*$"
-syn match IsabelleComment "\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
 hi def link IsabelleComment Comment
+hi def link IsabelleCommentStart Comment
+hi def link IsabelleCommentContent Comment
 
 hi IsabelleCommand           ctermfg=3 cterm=bold guifg=yellow gui=bold
 hi IsabelleCommandPart       ctermfg=3 cterm=none guifg=yellow

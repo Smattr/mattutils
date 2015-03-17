@@ -60,6 +60,18 @@ endfunction
 nm <F6> :call ToggleConceal()<CR>
 imap <F6> <C-o>:call ToggleConceal()<CR>
 
+function! ToggleIsabelleTex()
+  if exists('g:isabelle_tex')
+    let g:isabelle_tex = !g:isabelle_tex
+  else
+    let g:isabelle_tex=1
+  endif
+  syntax off
+  syntax on
+endfunction
+nm <F8> :call ToggleIsabelleTex()<CR>
+imap <F8> <C-o>:call ToggleIsabelleTex()<CR>
+
 " Enable our friend, the mouse. Though ttymouse supposedly supports pterm (my
 " weapon of choice), xterm2 seems to work where pterm does not. Cheers,
 " kristopolous@HN, for the tip.
