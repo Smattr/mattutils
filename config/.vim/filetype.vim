@@ -26,4 +26,5 @@ augroup filetypedetect
     au BufRead,BufNewFile .hgignore setfiletype hgignore
     au BufRead,BufNewFile *.lds setfiletype ld
     au BufRead,BufNewFile *.bsh setfiletype java
+    au BufRead,BufNewFile *.conf setfiletype dosini
 augroup END
