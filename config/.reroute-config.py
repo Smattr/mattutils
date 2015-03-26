@@ -1,3 +1,5 @@
+meta_a = ['hipchat']
+
 def meta_c(api):
     '''email'''
     if not api[1]['which']('thunderbird'):
@@ -44,6 +46,17 @@ def meta_p(api):
     '''type password'''
     import os
     return api[1]['run']([os.path.expanduser('~/bin/pw'), 'gui-type'])
+
+def meta_q(api):
+    '''quit hipchat'''
+    import os, signal
+    ret, stdout, _ = api[2]['run'](['pgrep', '^hipchat$'])
+    if ret != 0:
+        api[1]['notify']('hipchat doesn\'t seem to be running')
+        return 0
+    for hipchat in map(int, stdout.split()):
+        os.kill(hipchat, signal.SIGTERM)
+    return 0
 
 def meta_s(api):
     '''toggle screensaver'''
