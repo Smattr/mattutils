@@ -7,6 +7,26 @@
 " myself, but note that this is not NICTA_CORE. Feel free to use it locally if
 " it helps you.
 "
+" This syntax will show UTF-8 Isabelle symbols if you have concealling enabled.
+" If you use this, you will probably want it automatically enabled whenever you
+" open an Isabelle theory. So whenever you detect and enable the syntax, set
+" the conceal level as well:
+"
+"  au BufRead,BufNewFile *.thy setfiletype isabelle
+"  au BufRead,BufNewFile *.thy set conceallevel=2
+"
+" If you regularly need to toggle this on and off you can bind it to a key:
+"
+"  function! ToggleConceal()
+"    if &conceallevel == 0
+"      set conceallevel=2
+"    else
+"      set conceallevel=0
+"    endif
+"  endfunction
+"  nm <F6> :call ToggleConceal()<CR>
+"  imap <F6> <C-o>:call ToggleConceal()<CR>
+"
 
 syn clear
 syn sync fromstart
@@ -253,6 +273,7 @@ syn match IsabelleSpecial /\\<circ>\|\<o\>/
 syn match IsabelleSpecial /\<O\>/
 syn match IsabelleSpecial /\./
 
+" Collapse Isabelle escape sequences.
 syn match IsabelleSpecial /\\<supseteq>/ conceal cchar=⊇
 syn match IsabelleSpecial /\\<KK>/ conceal cchar=𝔎
 syn match IsabelleSpecial /\\<up>/ conceal cchar=↑
