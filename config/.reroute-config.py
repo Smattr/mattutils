@@ -50,7 +50,7 @@ def meta_p(api):
 def meta_q(api):
     '''quit hipchat'''
     import os, signal
-    ret, stdout, _ = api[2]['run'](['pgrep', '^hipchat$'])
+    ret, stdout, _ = api[2]['run'](['pgrep', '^hipchat\.bin$'])
     if ret != 0:
         api[1]['notify']('hipchat doesn\'t seem to be running')
         return 0
