@@ -24,83 +24,32 @@ probably do it.
 Matthew Fernandez <matthew.fernandez@gmail.com>
 """
 
-import sys
-import getpass
-import mailbox
-import smtplib
-import socket
-import optparse
-
-# The default place to look for your local mail.
-DEFAULT_MBOX = '/var/mail/%s' % getpass.getuser()
-
-# The usage information string.
-USAGE = """Usage: %(prog)s options
-  Forward local mail to another address.
- [ --check_connection ]                 Exit with success if offline.
- [-f address | --from_address address]  Address to send from.
- [-t address | --to address]            Address to send to.
- [-s server | --server server]          SMTP server to forward through.
- [-p port | --port port]                Port to connect to (default 25).
- [-m file | --mbox file]                Use a specific mailbox (default %(mbox)s).
- [--login login]                        Login name for SMTP if required.
- [--password password]                  Password for SMTP if required.
- [--tls]                                Use TLS security (default off).
-"""
+import argparse, getpass, mailbox, smtplib, socket, sys
 
 def main():
-    global DEFAULT_MBOX
-    global USAGE
-
     # Parse command line arguments.
-    parser = optparse.OptionParser()
-    parser.add_option('--check_connection', \
-                      dest='check_connection', \
-                      default=False, \
-                      action='store_true', \
-                      help='Exit with success if offline')
-    parser.add_option('-f', '--from_address', \
-                      dest='from_address', \
-                      help='From address to use when forwarding')
-    parser.add_option('--login', \
-                      dest='login', \
-                      help='Login name if authentication is required for sending')
-    parser.add_option('-m', '--mbox', \
-                      dest='mbox', \
-                      default=DEFAULT_MBOX, \
-                      help='Mbox file to open if not the default')
-    parser.add_option('-p', '--port', \
-                      dest='port', \
-                      default=25, \
-                      type=int, \
-                      help='Port to send through if not 25')
-    parser.add_option('--password', \
-                      dest='password', \
-                      help='Password if authentication is required for sending')
-    parser.add_option('-s', '--server', \
-                      dest='server', \
-                      help='SMTP server to forward messages through')
-    parser.add_option('-t', '--to', \
-                      dest='to', \
-                      help='Address to forward to')
-    parser.add_option('--tls', \
-                      dest='tls', \
-                      default=False, \
-                      action='store_true', \
-                      help='Use TLS security (default is False)')
-    p = None
-    args = None
-    try:
-        (p, args) = parser.parse_args()
-        if args or not p.from_address \
-                or not p.to \
-                or not p.server:
-            raise Exception('Illegal arguments')
-    except Exception as inst:
-        print str(inst)
-        sys.stderr.write(USAGE % {'prog':sys.argv[0], \
-                                  'mbox':DEFAULT_MBOX})
-        return -1
+    parser = argparse.ArgumentParser(
+        description='Forward local mail to another address')
+    parser.add_argument('--check_connection', action='store_true',
+        help='Exit with success if offline')
+    parser.add_argument('--from_address', '-f', required=True,
+        help='From address to use when forwarding')
+    parser.add_argument('--login',
+        help='Login name if authentication is required for sending')
+    parser.add_argument('--mbox', '-m', default='/var/mail/%s' % getpass.getuser(),
+        help='Mbox file to open if not the default')
+    parser.add_argument('--port', '-p', default=25, type=int,
+        help='Port to send through')
+    parser.add_argument('--password',
+        help='Password if authentication is required for sending')
+    parser.add_argument('--server', '-s', required=True,
+        help='SMTP server to forward messages through')
+    parser.add_argument('--to', '-t', required=True,
+        help='Address to forward to')
+    parser.add_argument('--tls', action='store_true',
+        help='Use TLS security')
+
+    p = parser.parse_args()
 
     hostname = socket.gethostname()
 
@@ -109,7 +58,7 @@ def main():
     try:
         box = mailbox.mbox(p.mbox)
     except Exception as inst:
-        sys.stderr.write('Failed to open %s: %s\n' % (p.mbox, str(inst)))
+        print >>sys.stderr, 'Failed to open %s: %s' % (p.mbox, inst)
         return 1
 
     smtp = None
@@ -118,7 +67,7 @@ def main():
     try:
         box.lock()
     except Exception as inst:
-        sys.stderr.write('Failed to lock mailbox file: %s\n' % str(inst))
+        print >>sys.stderr, 'Failed to lock mailbox file: %s' % inst
         return -1
     for msg in box.items():
         if not smtp:
@@ -139,8 +88,8 @@ def main():
                 if p.login:
                     smtp.login(p.login, p.password)
             except Exception as inst:
-                sys.stderr.write('Failed to connect to %s: %s\n' % \
-                    (p.server, str(inst)))
+                print >>sys.stderr, 'Failed to connect to %s: %s' % \
+                    (p.server, inst)
                 box.flush()
                 box.unlock()
                 return 1
@@ -161,8 +110,8 @@ Forwarded email from %(hostname)s:%(mailbox)s:
                 'message':str(msg[1]) or ''})
             box.remove(msg[0])
         except Exception as inst:
-            sys.stderr.write('Failed to send/delete message %d: %s\n' % \
-                (msg[0], str(inst)))
+            print >>sys.stderr, 'Failed to send/delete message %d: %s' % \
+                (msg[0], inst)
             try:
                 smtp.quit()
             except:
