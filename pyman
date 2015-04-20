@@ -7,6 +7,9 @@
 
 import inspect, re, sys
 
+STATEMENTS = frozenset(['assert', 'break', 'continue', 'del', 'exec', 'global',
+    'import', 'pass', 'print', 'raise', 'return', 'yield'])
+
 def signature(name, argspec):
     args = []
     defaults = argspec[3]
@@ -27,6 +30,11 @@ def main(argv):
         return -1
 
     call = argv[1]
+
+    if call in STATEMENTS:
+        print >>sys.stdout, '\'%s\' is a statement; refer to online ' \
+            'documentation' % call
+        return 0
 
     # If there's a period in the path, the first component indicates the module
     # in which this function is contained.
