@@ -19,3 +19,6 @@
 
 [merge]
     conflictstyle = diff3
+
+[log]
+    decorate = True
