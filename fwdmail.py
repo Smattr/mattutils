@@ -24,11 +24,11 @@ probably do it.
 Matthew Fernandez <matthew.fernandez@gmail.com>
 """
 
-import argparse, getpass, mailbox, smtplib, socket, sys
+import argparse, functools, getpass, mailbox, smtplib, socket, sys, syslog
 
-def main():
+def main(argv, stdout, stderr):
     # Parse command line arguments.
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(prog='fwdmail.py',
         description='Forward local mail to another address')
     parser.add_argument('--check_connection', action='store_true',
         help='Exit with success if offline')
@@ -49,7 +49,7 @@ def main():
     parser.add_argument('--tls', action='store_true',
         help='Use TLS security')
 
-    p = parser.parse_args()
+    p = parser.parse_args(argv[1:])
 
     hostname = socket.gethostname()
 
@@ -58,7 +58,7 @@ def main():
     try:
         box = mailbox.mbox(p.mbox)
     except Exception as inst:
-        print >>sys.stderr, 'Failed to open %s: %s' % (p.mbox, inst)
+        stderr('Failed to open %s: %s' % (p.mbox, inst))
         return 1
 
     smtp = None
@@ -67,7 +67,7 @@ def main():
     try:
         box.lock()
     except Exception as inst:
-        print >>sys.stderr, 'Failed to lock mailbox file: %s' % inst
+        stderr('Failed to lock mailbox file: %s' % inst)
         return -1
     for msg in box.items():
         if not smtp:
@@ -88,8 +88,7 @@ def main():
                 if p.login:
                     smtp.login(p.login, p.password)
             except Exception as inst:
-                print >>sys.stderr, 'Failed to connect to %s: %s' % \
-                    (p.server, inst)
+                stderr('Failed to connect to %s: %s' % (p.server, inst))
                 box.flush()
                 box.unlock()
                 return 1
@@ -110,8 +109,7 @@ Forwarded email from %(hostname)s:%(mailbox)s:
                 'message':str(msg[1]) or ''})
             box.remove(msg[0])
         except Exception as inst:
-            print >>sys.stderr, 'Failed to send/delete message %d: %s' % \
-                (msg[0], inst)
+            stderr('Failed to send/delete message %d: %s' % (msg[0], inst))
             try:
                 smtp.quit()
             except:
@@ -126,4 +124,14 @@ Forwarded email from %(hostname)s:%(mailbox)s:
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    if sys.stdout.isatty():
+        def stdout(msg):
+            print >>sys.stdout, msg
+        def stderr(msg):
+            print >>sys.stderr, msg
+    else:
+        # We seem to be running from a crontab.
+        syslog.openlog('fwdmail', syslog.LOG_PID, syslog.LOG_MAIL)
+        stdout = syslog.syslog
+        stderr = functools.partial(syslog.syslog, syslog.LOG_ERR)
+    sys.exit(main(sys.argv, stdout, stderr))
