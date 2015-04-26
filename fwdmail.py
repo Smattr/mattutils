@@ -24,7 +24,8 @@ probably do it.
 Matthew Fernandez <matthew.fernandez@gmail.com>
 """
 
-import argparse, functools, getpass, mailbox, smtplib, socket, sys, syslog
+import argparse, functools, getpass, grp, mailbox, os, smtplib, socket, sys, \
+    syslog
 
 def main(argv, stdout, stderr):
     # Parse command line arguments.
@@ -52,6 +53,13 @@ def main(argv, stdout, stderr):
     p = parser.parse_args(argv[1:])
 
     hostname = socket.gethostname()
+
+    # Check we're part of expected groups.
+    for gid in os.getgroups():
+        if grp.getgrgid(gid).gr_name == 'mail':
+            break
+    else:
+        stderr('Warning: you are not part of the \'mail\' group')
 
     # Open the local mailbox.
     box = None
