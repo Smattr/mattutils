@@ -18,15 +18,15 @@ A shortcut in ~/.reroute-config.py can be:
  3. A Python function to run.
 '''
 
-import argparse, imp, os, psutil, pynotify, subprocess, sys
+import argparse, functools, imp, os, psutil, pynotify, re, subprocess, sys
 
 _pynotify_inited = False
 
-def error(message):
+def _error(tty, message):
     '''Output an error message, taking into account whether we are running on
     the command line or via a GUI.'''
     global _pynotify_inited
-    if sys.stderr.isatty():
+    if tty or (tty is None and sys.stderr.isatty()):
         print >>sys.stderr, message
     else:
         if not _pynotify_inited:
@@ -36,9 +36,9 @@ def error(message):
         n.set_urgency(pynotify.URGENCY_CRITICAL)
         n.show()
 
-def notify(message):
+def _notify(tty, message):
     global _pynotify_inited
-    if sys.stdout.isatty():
+    if tty or (tty is None and sys.stdout.isatty()):
         print >>sys.stdout, message
     else:
         if not _pynotify_inited:
@@ -69,8 +69,8 @@ def which(cmd):
 
 api = {
     1:{
-        'error':error,
-        'notify':notify,
+        'error':functools.partial(_error, None),
+        'notify':functools.partial(_notify, None),
         'ps':ps,
         'run':subprocess.call,
         'which':which,
@@ -84,8 +84,18 @@ def main(argv):
     parser = argparse.ArgumentParser(description='shortcut gateway')
     parser.add_argument('--list', '-l', action='store_true',
         help='show available shortcuts')
+    parser.add_argument('--tty', action='store_true', default=None,
+        help='force output to be recognised as a TTY')
+    parser.add_argument('--no-tty', dest='tty', action='store_false',
+        help='force output to not be recognised as a TTY')
     parser.add_argument('shortcut', nargs='?', help='shortcut to invoke')
     opts = parser.parse_args(argv[1:])
+
+    error = functools.partial(_error, opts.tty)
+    api[1]['error'] = error
+
+    notify = functools.partial(_notify, opts.tty)
+    api[1]['notify'] = notify
 
     try:
         shortcuts = imp.load_source('', os.path.expanduser('~/.reroute-config.py'))
