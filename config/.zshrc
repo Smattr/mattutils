@@ -75,7 +75,6 @@ alias ls="ls --color=auto"
 alias grep="grep --color=always"
 alias l="ls"
 alias cp="cp -i"
-alias diff=colordiff
 alias mv="mv -i"
 alias ll="ls -l"
 alias la="ls -A"

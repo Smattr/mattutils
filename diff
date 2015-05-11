@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+'''
+Wrapper around `diff` that calls `colordiff` when available.
+'''
+
+import os, subprocess, sys
+
+ME = os.path.abspath(__file__)
+
+def which(command):
+    '''
+    Locate the first available executable of the given name that is not us.
+    '''
+    try:
+        PATH = os.environ['PATH']
+    except KeyError:
+        return None
+
+    for prefix in PATH.split(':'):
+        candidate = os.path.abspath(os.path.join(prefix, command))
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK) and \
+                candidate != ME:
+            return candidate
+
+    return None
+
+# Support for detecting when we have recursively invoked ourselves. We don't do
+# this, but we may call `colordiff` that may inadvertently call us again.
+RECURSE_MARKER = 'COLORDIFF_WRAPPED'
+RECURSE_INDICATOR = 'yes'
+def recursing():
+    return os.environ.get(RECURSE_MARKER, '') == RECURSE_INDICATOR
+
+def main(argv):
+    # Only try to look for `colordiff` if we're not already recursing.
+    if not recursing():
+        colordiff = which('colordiff')
+        if colordiff is not None:
+            # Mark the environment, indicating that we are recursing.
+            env = dict(os.environ.items() +
+                [(RECURSE_MARKER, RECURSE_INDICATOR)])
+            return subprocess.call([colordiff] + argv[1:], env=env)
+
+    diff = which('diff')
+    if diff is not None:
+        return subprocess.call([diff] + sys.argv[1:])
+
+    print >>sys.stderr, 'diff not found'
+    return -1
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
