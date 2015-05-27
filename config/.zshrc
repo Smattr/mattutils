@@ -48,7 +48,9 @@ REMOTE_PROMPT="[%n@%m %{${fg_bold[red]}%}%(?..%?)%{${fg_no_bold[default]}%}%~ %{
 export PATH="$HOME/bin:$PATH"
 export EDITOR="vim"
 export LESS="-i -R -n -S -FRX"
-export PYTHONSTARTUP="$HOME/.python"
+if [ -e "${HOME}/.python" ]; then
+  export PYTHONSTARTUP="$HOME/.python"
+fi
 
 #
 # Determine if we are a remote login
