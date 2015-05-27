@@ -210,7 +210,14 @@ function vcs_prompt {
         echo -n "%{${fg_no_bold[default]}%}"
     fi
 }
-export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)]'
+
+function reboot_prompt {
+    if [ -e /var/run/reboot-required ]; then
+        echo -n "%{${fg[red]}%} ↺%{${fg_no_bold[default]}%}"
+    fi
+}
+
+export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)$(reboot_prompt)]'
 
 # Reload scripts
 r() {
