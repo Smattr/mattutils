@@ -89,7 +89,6 @@ alias hist='fc -RI' # Import History
 alias :q=exit
 alias :Q=exit
 alias tmp='pushd `mktemp -d`'
-alias cim=vim # Cope with my typos.
 alias cd..="cd .."
 alias ..='cd ..'
 alias evince="dbus-launch /usr/bin/evince" # Mask evince problems in newer Ubuntu.
