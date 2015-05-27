@@ -19,6 +19,7 @@ for i in \
          bitbucket-ls.sh \
          colour-dump \
          defn.sh \
+         diff \
          download \
          compresspdf.sh \
          fifi.sh \
