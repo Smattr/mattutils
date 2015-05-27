@@ -36,12 +36,15 @@ if [ -z "${HOSTNAME}" ]; then
     export HOSTNAME=${HOST}
 fi
 
+# Enable zsh colour function.
+autoload -U colors && colors
+
 #
 # Environment Variables
 #
 
-LOCAL_PROMPT="[%n@%m %{[1;31m%}%(?..%? )%{[0m%}%~] "
-REMOTE_PROMPT="[%n@%m %{[1;31m%}%(?..%?)%{[0m%}%~ %{[1;32m%}#%{[0m%}]"
+LOCAL_PROMPT="[%n@%m %{${fg_bold[red]}%}%(?..%? )%{${fg_no_bold[default]}%}%~] "
+REMOTE_PROMPT="[%n@%m %{${fg_bold[red]}%}%(?..%?)%{${fg_no_bold[default]}%}%~ %{${fg_bold[green]}%}#%{${fg_no_bold[default]}%}] "
 export PATH="$HOME/bin:$PATH"
 export EDITOR="vim"
 export LESS="-i -R -n -S -FRX"
@@ -143,22 +146,11 @@ bindkey '\e\e[5D' backward-word
 fpath=(~/.zsh $fpath)
 autoload -U ~/.zsh/*(:t)
 
-# Prompt foreground colour shortcuts.
-NORMAL="%{[0m%}"
-BLACK="%{[1;30m%}"
-RED="%{[1;31m%}"
-GREEN="%{[1;32m%}"
-YELLOW="%{[1;33m%}"
-BLUE="%{[1;34m%}"
-MAGENTA="%{[1;35m%}"
-CYAN="%{[1;36m%}"
-WHITE="%{[1;37m%}"
-
 # Version control status.
 setopt PROMPT_SUBST
 function vcs_prompt {
     if [ -n "${DISABLE_VCS_PROMPT+x}" ]; then
-        echo "-${MAGENTA}DISABLED${NORMAL}"
+        echo "-%{${fg_bold[magenta]}%}DISABLED%{${fg_no_bold[default]}%}"
         exit 0
     fi
     for i in git hg svn; do
@@ -173,51 +165,51 @@ function vcs_prompt {
         echo -n '-±-'
         if [ -z "`git status --short 2>/dev/null`" ]; then
             # Working directory is clean.
-            echo -n "${GREEN}"
+            echo -n "%{${fg_bold[green]}%}"
         elif [ -z "`git status --short 2>/dev/null | grep -v '^?'`" ]; then
             # Working directory only contains changes to untracked files.
-            echo -n "${YELLOW}"
+            echo -n "%{${fg_bold[yellow]}%}"
         else
             # Working directory contains changes to tracked files.
-            echo -n "${RED}"
+            echo -n "%{${fg_bold[red]}%}"
         fi
         echo -n `git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2`
-        echo -n "${NORMAL}"
+        echo -n "%{${fg_no_bold[default]}%}"
     fi
     hg root &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-☿-'
         if [ -z "`hg status 2>/dev/null`" ]; then
             # Working directory is clean.
-            echo -n "${GREEN}"
+            echo -n "%{${fg_bold[green]}%}"
         elif [ -z "`hg status 2>/dev/null | grep -v '^?'`" ]; then
             # Working directory only contains changes to untracked files.
-            echo -n "${YELLOW}"
+            echo -n "%{${fg_bold[yellow]}%}"
         else
             # Working directory contains changes to tracked files.
-            echo -n "${RED}"
+            echo -n "%{${fg_bold[red]}%}"
         fi
         echo -n `hg branch 2>/dev/null`
-        echo -n "${NORMAL}"
+        echo -n "%{${fg_no_bold[default]}%}"
     fi
     svn list &>/dev/null
     if [ $? -eq 0 ]; then
         echo -n '-S-'
         if [ -z "`svn status 2>/dev/null`" ]; then
             # Working directory is clean.
-            echo -n "${GREEN}"
+            echo -n "%{${fg_bold[green]}%}"
         elif [ -z "`svn status 2>/dev/null | grep -v '^?'`" ]; then
             # Working directory only contains changes to untracked files.
-            echo -n "${YELLOW}"
+            echo -n "%{${fg_bold[yellow]}%}"
         else
             # Working directory contains changes to tracked files.
-            echo -n "${RED}"
+            echo -n "%{${fg_bold[red]}%}"
         fi
         echo -n `svn info 2>/dev/null | grep URL | sed 's/.*\/\(.*\)/\1/g'`
-        echo -n "${NORMAL}"
+        echo -n "%{${fg_no_bold[default]}%}"
     fi
 }
-export RPROMPT=$'[${RED}$(jobs | wc -l | grep -v "^0")${NORMAL}%*$(vcs_prompt)]'
+export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)]'
 
 # Reload scripts
 r() {
