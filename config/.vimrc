@@ -85,3 +85,11 @@ cmap w!! w !sudo tee >/dev/null %
 
 " Enable Pathogen
 execute pathogen#infect()
+
+" YouCompleteMe tweaks
+let g:ycm_autoclose_preview_window_after_completion = 1
+let g:ycm_register_as_syntastic_checker = 0
+let g:ycm_semantic_triggers = {
+  \  'mkd':['@'],
+  \ }
+let g:ycm_filetype_blacklist = {}
