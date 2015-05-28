@@ -43,6 +43,7 @@ for i in \
          notate.py \
          now \
          pdfcrop.sh \
+         ppa-install \
          prefix \
          pyman \
          reset-perms.sh \
