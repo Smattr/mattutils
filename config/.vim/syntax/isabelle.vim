@@ -79,6 +79,8 @@ syn keyword IsabelleCommand print_theorems print_locale print_locales
     \ print_dependencies print_interps print_classes class_deps print_abbrevs
     \ print_statement print_trans_rules print_cases print_induct_rules
 syn keyword IsabelleCommand notepad
+syn keyword IsabelleCommand nonterminal syntax no_syntax translations
+    \ no_translations
 
 " Do some juggling to give us ML highlighting inside an Isabelle/ML block.
 if exists('b:current_syntax')
