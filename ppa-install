@@ -1,0 +1,19 @@
+#!/bin/bash -ex
+
+# Wrapper for adding an Ubuntu PPA, installing some packages, then removing the
+# PPA. You may want to do this if you want to grab something from a PPA you
+# don't trust to be stable long term.
+
+if [ $# -lt 2 ]; then
+    echo "usage: $0 ppa packages..." >&2
+    exit 1
+fi
+
+ppa=$1
+shift
+
+sudo add-apt-repository "${ppa}"
+sudo apt-get update
+sudo apt-get install "$@"
+sudo add-apt-repository --remove "${ppa}"
+sudo apt-get update
