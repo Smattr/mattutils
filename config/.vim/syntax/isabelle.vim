@@ -93,7 +93,7 @@ if exists('s:current_syntax')
 else
   unlet b:current_syntax
 endif
-syntax region IsabelleCommand matchgroup=SpecialComment start="ML[ ]*{\*" end="\*}" contains=@SML
+syntax region IsabelleCommand matchgroup=SpecialComment fold start="ML[ ]*{\*" end="\*}" contains=@SML
 
 " Excessively complicated way of matching (* ... *) comments to support nested
 " blocks.
@@ -132,7 +132,7 @@ if exists('g:isabelle_tex') && g:isabelle_tex == 1
   else
     unlet b:current_syntax
   endif
-  syntax region IsabelleCommand matchgroup=IsabelleComment start="\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*" end="\*}" contains=@TEX
+  syntax region IsabelleCommand matchgroup=IsabelleComment fold start="\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*" end="\*}" contains=@TEX
 else
   " If g:isabelle_tex is not set, just highlight these blocks as normal
   " comments.
@@ -634,6 +634,13 @@ syn match IsabelleSpecial /\\<four>/ conceal cchar=𝟰
 
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
+" Enable folding of proofs. Note that the starting regex needs to match with
+" zero width to preserve syntax highlighting of the opening command.
+syn region IsabelleLemmaFold
+    \ start="\(\<\(schematic_\)\?\(corollary\|lemma\|theorem\)\>\)\@<="
+    \ end="\<\(done\|by\|qed\|apply_end\|oops\|sorry\)\>"
+    \ fold keepend transparent
+
 syn match IsabelleComment "--.*$"
 hi def link IsabelleComment Comment
 hi def link IsabelleCommentStart Comment
@@ -646,7 +653,7 @@ hi IsabelleInnerMarker       ctermfg=1 cterm=none guifg=red
 hi IsabelleSpecial           ctermfg=5 cterm=none guifg=magenta
 hi IsabelleCommandProofProve ctermfg=2 cterm=none guifg=green
 hi IsabelleCommandProofIsar  ctermfg=2 cterm=none guifg=green
-hi IsabelleGoalProofIsar     ctermfg=3 cterm=none guifg=yello
+hi IsabelleGoalProofIsar     ctermfg=3 cterm=none guifg=yellow
 hi IsabelleCommandProofDone  ctermfg=2 cterm=bold guifg=green gui=bold
 hi IsabelleCommandProofFail  ctermfg=1 cterm=bold guifg=red   gui=bold
 hi IsabelleCommandProofBad   ctermfg=1 cterm=none guifg=red
