@@ -152,11 +152,15 @@ syn match IsabelleCommandMod /\<intro\>!\?/
 syn match IsabelleCommandMod /\<dest\>!\?/
 syn keyword IsabelleCommandProofProve proof
 syn keyword IsabelleCommandProofProve apply
-syn keyword IsabelleCommandProofProve prefer defer back
+syn keyword IsabelleCommandProofProve prefer defer
+syn keyword IsabelleCommandProofBad back
 syn keyword IsabelleCommandProofDone done by qed apply_end
 syn keyword IsabelleCommandProofFail sorry oops
 syn keyword IsabelleCommandProofIsar assume show have from then thus hence
     \ presume def
+syn match IsabelleGoalProofIsar /?\<thesis\>/
+syn match IsabelleGoalProofIsar /?\<case\>/
+syn keyword IsabelleGoalProofIsar assms
 syn keyword IsabelleCommandProofIsar with next using note
 syn keyword IsabelleCommandProofIsar let
 syn keyword IsabelleCommandProofIsar moreover ultimately also finally
@@ -264,7 +268,8 @@ syn keyword IsabelleCommandRule mono_def monoI monoD
 syn keyword IsabelleCommandRule lfp_unfold lfp_induct lfp_induct_set
 syn keyword IsabelleCommandRule lfp_lowerbound
 syn keyword IsabelleCommandRule gfp_unfold coinduct
-syn keyword IsabelleCommandRuleMod of OF THEN simplified where symmetric standard
+syn keyword IsabelleCommandRuleMod asm of OF THEN simplified where symmetric
+    \ standard
 syn match IsabelleCommandRule /\<[a-zA-Z][a-zA-Z0-9_']*_def\>/
 syn match IsabelleCommandPart /|/
 
@@ -641,8 +646,10 @@ hi IsabelleInnerMarker       ctermfg=1 cterm=none guifg=red
 hi IsabelleSpecial           ctermfg=5 cterm=none guifg=magenta
 hi IsabelleCommandProofProve ctermfg=2 cterm=none guifg=green
 hi IsabelleCommandProofIsar  ctermfg=2 cterm=none guifg=green
+hi IsabelleGoalProofIsar     ctermfg=3 cterm=none guifg=yello
 hi IsabelleCommandProofDone  ctermfg=2 cterm=bold guifg=green gui=bold
 hi IsabelleCommandProofFail  ctermfg=1 cterm=bold guifg=red   gui=bold
+hi IsabelleCommandProofBad   ctermfg=1 cterm=none guifg=red
 hi IsabelleCommandRule       ctermfg=7 cterm=bold guifg=white gui=bold
 hi IsabelleCommandRuleMod    ctermfg=6 cterm=none guifg=cyan
 hi IsabelleCommandMethod     ctermfg=6 cterm=none guifg=cyan
