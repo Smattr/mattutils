@@ -11,13 +11,6 @@
 #
 
 #
-# Determine operating system
-#
-OSTYPE=`uname`
-[[ $OSTYPE == "Linux" ]] && OSTYPE="linux"
-[[ $OSTYPE == "Darwin" ]] && OSTYPE="macos"
-
-#
 # General Options
 #
 
@@ -25,7 +18,7 @@ OSTYPE=`uname`
 limit coredumpsize 0
 
 # Enable directory colours
-[[ $OSTYPE == "linux" ]] && eval `dircolors -b ~/.dircolors`
+eval `dircolors -b ~/.dircolors`
 
 # Ensure HOST == HOSTNAME and both are set. Some finicky scripts expect one or
 # the other.
