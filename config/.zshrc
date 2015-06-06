@@ -10,6 +10,15 @@
 # based on ?
 #
 
+# Enable zsh colour function.
+autoload -U colors && colors
+
+# Bail out immediately if the system is overloaded, on the assumption that the
+# user just wants a shell to run some recovery commands.
+if [[ -n "$(which mpstat)" && $(($(mpstat | tail -1 | tr -s ' ' | cut -d ' ' -f 12) < 10)) != 0 ]]; then
+    export PROMPT="%{${fg_bold[red]}%}[overloaded]%{${fg_no_bold[default]}%} "
+else
+
 #
 # General Options
 #
@@ -28,9 +37,6 @@ fi
 if [ -z "${HOSTNAME}" ]; then
     export HOSTNAME=${HOST}
 fi
-
-# Enable zsh colour function.
-autoload -U colors && colors
 
 #
 # Environment Variables
@@ -333,3 +339,5 @@ function foralld() {
 # Unmap Ctrl-s and Ctrl-q. Thank you http://feedproxy.google.com/~r/catonmat/~3/pbN7TgpMiyg/annoying-keypress-in-linux.
 stty stop undef
 stty start undef
+
+fi # Close overload detection
