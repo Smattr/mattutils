@@ -93,3 +93,6 @@ let g:ycm_semantic_triggers = {
   \  'mkd':['@'],
   \ }
 let g:ycm_filetype_blacklist = {}
+
+set foldmethod=syntax
+set foldlevelstart=20
