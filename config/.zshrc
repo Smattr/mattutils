@@ -15,8 +15,14 @@ autoload -U colors && colors
 
 # Bail out immediately if the system is overloaded, on the assumption that the
 # user just wants a shell to run some recovery commands.
-if [[ -n "$(which mpstat)" && $(($(mpstat | tail -1 | tr -s ' ' | cut -d ' ' -f 12) < 10)) != 0 ]]; then
-    export PROMPT="%{${fg_bold[red]}%}[overloaded]%{${fg_no_bold[default]}%} "
+which mpstat &>/dev/null
+if [ $? -eq 0 ]; then
+  OVERLOAD=$(($(mpstat | tail -1 | tr -s ' ' | cut -d ' ' -f 12) < 10))
+else
+  OVERLOAD=0
+fi
+if [ ${OVERLOAD} -ne 0 ]; then
+  export PROMPT="%{${fg_bold[red]}%}[overloaded]%{${fg_no_bold[default]}%} "
 else
 
 #
