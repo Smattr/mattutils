@@ -634,11 +634,15 @@ syn match IsabelleSpecial /\\<four>/ conceal cchar=𝟰
 
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
-" Enable folding of proofs. Note that the starting regex needs to match with
-" zero width to preserve syntax highlighting of the opening command.
+" Enable folding of proofs and locales. Note that the starting regex needs to
+" match with zero width to preserve syntax highlighting of the opening command.
 syn region IsabelleLemmaFold
     \ start="\(\<\(schematic_\)\?\(corollary\|lemma\|theorem\)\>\)\@<="
     \ end="\<\(done\|by\|qed\|apply_end\|oops\|sorry\)\>"
+    \ fold keepend transparent
+syn region IsabelleLocaleFold
+    \ start="\(\<\(sub\)\?locale\>\)\@<="
+    \ end="\<end\>"
     \ fold keepend transparent
 
 syn match IsabelleComment "--.*$"

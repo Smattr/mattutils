@@ -29,6 +29,10 @@ syn match RootNumber "\m[0-9]\+"
 syn match RootBool "\(true\|false\)"
 syn keyword RootFormat pdf
 
+" Enable syntax-based folding of sessions.
+syn region RootSessionFold fold keepend transparent
+    \ start="\(\<session\>\)\@<=" end="\ze\(\s*\n\)\+\(\S\|\%$\)"
+
 hi def link RootKeyword Statement
 hi def link RootOption Type
 hi def link RootComment Comment
