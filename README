@@ -23,6 +23,7 @@ fwdmail.py - A script for forwarding your local mail to an external address.
 fuckit-cc - A script for violently suppressing errors in your C code.
     Considered harmful.
 generate-passwd - A script for generating random passwords.
+git-stree - Git subtree helper (WIP).
 github-ls.sh - A script for listing the names of all your github repos. I use
     this to generate a manifest to pass to my backup script.
 giveem.sh - Creates a setuid binary for a given shell command. This is a quick

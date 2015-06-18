@@ -28,6 +28,7 @@ for i in \
          fwdmail.py \
          generate-passwd \
          gg \
+         git-stree \
          github-ls.sh \
          in \
          has-changed.sh \
