@@ -36,6 +36,7 @@ for i in \
          ifind \
          intray \
          repty \
+         rsync \
          timestamp \
          toggle-screensaver \
          term \
