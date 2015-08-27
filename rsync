@@ -14,6 +14,8 @@ quite inefficient, but this is rarely a show stopper.
 
 import atexit, os, subprocess, sys, tempfile
 
+ME = os.path.abspath(__file__)
+
 def is_remote(path):
     '''
     Determine whether a URL represents a remote path.
@@ -26,7 +28,7 @@ def call(argv):
     '''
     for root in os.environ.get('PATH', '').split(':'):
         rsync = os.path.abspath(os.path.join(root, 'rsync'))
-        if os.path.isfile(rsync) and os.access(rsync, os.X_OK):
+        if rsync != ME and os.path.isfile(rsync) and os.access(rsync, os.X_OK):
             break
     else:
         sys.stderr.write('real rsync not found\n')
