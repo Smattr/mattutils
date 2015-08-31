@@ -50,6 +50,7 @@ for i in \
          reset-perms.sh \
          search \
          sendmail.py \
+         ssh-proxy \
          tb \
          validate.py \
          wh \
