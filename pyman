@@ -48,14 +48,20 @@ def main(argv):
             return -1
 
     # Now the function could be either (a) a built-in, (b) a global function,
-    # or (c) a function in a module.
+    # (c) a module itself or (d) a function in a module.
     fn = None
     if module is None:
         try:
             fn = getattr(__builtins__, call) # (a)
         except AttributeError:
-            fn = globals().get(call) # (b)
-    else: # (c)
+            try:
+                fn = globals()[call] # (b)
+            except KeyError:
+                try:
+                    fn = __import__(call) # (c)
+                except ImportError:
+                    pass
+    else: # (d)
         try:
             bits = call.split('.')
             for b in bits:
