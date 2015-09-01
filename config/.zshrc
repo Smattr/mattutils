@@ -15,9 +15,8 @@ autoload -U colors && colors
 
 # Bail out immediately if the system is overloaded, on the assumption that the
 # user just wants a shell to run some recovery commands.
-which mpstat &>/dev/null
 if [ $? -eq 0 ]; then
-  OVERLOAD=$(($(mpstat | tail -1 | tr -s ' ' | cut -d ' ' -f 12) < 10))
+  OVERLOAD=$(($(free -m | grep --color=none '^-/+' | sed 's/^[^0-9]*[0-9]\+[^0-9]\+\([0-9]\+\).*$/\1/g') < 512))
 else
   OVERLOAD=0
 fi
