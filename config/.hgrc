@@ -21,8 +21,7 @@ progress =
 purge =
 record =
 transplant =
-# Remember to `hg clone https://bitbucket.org/astiob/hgshelve /opt/hgshelve`
-shelve = /opt/hgshelve/hgshelve.py
+shelve =
 # Remember to `hg clone https://bitbucket.org/edgimar/crecord /opt/crecord`
 hgext.crecord = /opt/crecord/crecord
 # Remember to `hg clone https://bitbucket.org/parren/hg-pbranch /opt/hg-pbranch`
