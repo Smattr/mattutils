@@ -25,13 +25,13 @@ shelve =
 # Remember to `hg clone https://bitbucket.org/edgimar/crecord /opt/crecord`
 hgext.crecord = /opt/crecord/crecord
 # Remember to `hg clone https://bitbucket.org/parren/hg-pbranch /opt/hg-pbranch`
-pbranch = /opt/hg-pbranch/hgext/pbranch.py
+# pbranch = /opt/hg-pbranch/hgext/pbranch.py
 # `hg clone ssh://hg@bitbucket.org/smattr/hgidentities /opt/hgidentities`
 hgext.identities = /opt/hgidentities/identities.py
 # `hg clone https://bitbucket.org/lantiq/onsub`
-onsub = /opt/onsub/onsub.py
+# onsub = /opt/onsub/onsub.py
 # `hg clone ssh://hg@bitbucket.org/smattr/hgswitch /opt/hgswitch`
-switch = /opt/hgswitch/switch.py
+# switch = /opt/hgswitch/switch.py
 git =
 
 [identities]
