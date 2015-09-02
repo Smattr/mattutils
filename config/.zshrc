@@ -346,7 +346,6 @@ stty stop undef
 stty start undef
 
 if [ -n "${PHD}" ]; then
-    export PYTHONPATH=${PYTHONPATH}:/opt/ruje
     export PROMPT="%{${fg_bold[blue]}%}[phd]%{${fg_no_bold[default]}%} ${PROMPT}"
 fi
 
