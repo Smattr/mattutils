@@ -28,4 +28,5 @@ augroup filetypedetect
     au BufRead,BufNewFile *.lds setfiletype ld
     au BufRead,BufNewFile *.bsh setfiletype java
     au BufRead,BufNewFile *.conf setfiletype dosini
+    au BufRead,BufNewFile SConstruct setfiletype python
 augroup END
