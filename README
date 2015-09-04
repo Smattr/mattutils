@@ -11,8 +11,6 @@ original author, Matthew Fernandez <matthew.fernandez@gmail.com>.
 ABC News 24.py - Script for watching ABC News 24 with mplayer.
 addcert.sh - Tool for adding an SSL certificate to multiple sources on a
     system.
-auto-commit.sh - A script for automatically syncing a git repository across
-    machines.
 bashd.sh - A script for connecting bash to a local port. Handy for probing
     environments where you don't have a PTY.
 bitbucket-ls.sh - The BitBucket equivalent of github-ls.sh.
