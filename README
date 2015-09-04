@@ -102,4 +102,6 @@ sendmail.py - Script for sending mail from the command line. I got tired of
     simple email.
 timestamp - Timestamp console stdout.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
+ubiquity -  A script for automatically syncing a git repository across
+    machines.
 vimall.sh - Quick way of opening everything in a directory in vim.

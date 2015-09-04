@@ -53,6 +53,7 @@ for i in \
          sendmail.py \
          ssh-proxy \
          tb \
+         ubiquity \
          validate.py \
          wh \
          wim ; do
