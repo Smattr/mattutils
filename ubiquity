@@ -7,7 +7,7 @@ Automated synchronisation for git repositories (à la distributed Dropbox).
 This script is designed to be run on a schedule from a crontab or similar, to
 automatically synchronise changes from a local working directory to a git
 remote. It is assumed that this script is the only one touching your working
-directory and that you always want to push to origin's master.
+directory.
 '''
 
 import argparse, getpass, os, signal, socket, subprocess, sys
@@ -32,8 +32,14 @@ def online(info):
 def main(argv, out, err):
     parser = argparse.ArgumentParser(
         description='synchronise a git working directory')
+    parser.add_argument('--branch', '-b', default='master',
+        help='branch to synchronise')
     parser.add_argument('--check', '-c', action='store_true',
         help='check whether a network connection is available first')
+    parser.add_argument('--no-commit', '-n', action='store_false',
+        dest='commit', help='do not commit before pushing')
+    parser.add_argument('--remote', '-r', default='origin',
+        help='remote to synchronise with')
     parser.add_argument('--verbose', '-v', action='store_true',
         help='verbose output')
     parser.add_argument('dir', default=os.getcwd(),
@@ -63,29 +69,39 @@ def main(argv, out, err):
         err.write('failed to chdir to %s: %s\n' % (options.dir, e))
         return -1
 
-    ret, stdout, stderr = run(['git', 'add', '--all', '.'], info)
+    ret, stdout, stderr = run(['git', 'branch', '--no-color'], info)
     if ret != 0:
-        err.write('`git add --all .` failed:\n%s\n%s\n' % (stdout, stderr))
+        err.write('`git branch` failed:\n%s\n%s\n' % (stdout, stderr))
         return ret
+    if ('* %s' % options.branch) not in stdout.split('\n'):
+        err.write('not on specified branch (%s)\n' % options.branch)
+        return -1
 
-    ret, stdout, stderr = run(['git', 'commit', '--message',
-        'Auto-commit from %s@%s.' % (user, host)], info)
-    if ret != 0 and 'nothing to commit' not in stdout:
-        err.write('`git commit ...` failed:\n%s\n%s\n' % (stdout, stderr))
-        return ret
+    if options.commit:
+
+        ret, stdout, stderr = run(['git', 'add', '--all', '.'], info)
+        if ret != 0:
+            err.write('`git add --all .` failed:\n%s\n%s\n' % (stdout, stderr))
+            return ret
+
+        ret, stdout, stderr = run(['git', 'commit', '--message',
+            'Auto-commit from %s@%s.' % (user, host)], info)
+        if ret != 0 and 'nothing to commit' not in stdout:
+            err.write('`git commit ...` failed:\n%s\n%s\n' % (stdout, stderr))
+            return ret
 
     if options.check and not online(info):
         return 0
 
     ret, stdout, stderr = run(['git', 'pull', '--rebase', '--ff-only',
-        '--tags', 'origin', 'master'], info)
+        '--tags', options.remote, options.branch], info)
     if ret != 0:
         err.write('`git pull ...` failed:\n%s\n%s\n' % (stdout, stderr))
         run(['git', 'rebase', '--abort'], info)
         return ret
 
-    ret, stdout, stderr = run(['git', 'push', '--tags', 'origin', 'master'],
-        info)
+    ret, stdout, stderr = run(['git', 'push', '--tags', options.remote,
+        options.branch], info)
     if ret != 0:
         err.write('`git push ...` failed:\n%s\n%s\n' % (stdout, stderr))
         return -1
