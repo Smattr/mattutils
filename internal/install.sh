@@ -113,3 +113,8 @@ if [ ! -e "${HOME}/.gitconfig_mattutils" ]; then
 elif [ ! -L "${HOME}/.gitconfig_mattutils" ]; then
     echo "Warning: Skipping gitconfig_mattutils that already exists." >&2
 fi
+
+# Build some utils.
+if [ ! -e "${HOME}/bin/balloon" ]; then
+    cc -W -Wall -Werror -o balloon "${REPO}/misc/balloon.c" $(pkg-config --libs ncurses)
+fi
