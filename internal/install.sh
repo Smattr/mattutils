@@ -44,6 +44,7 @@ for i in \
          mediawatch.py \
          notate.py \
          now \
+         package.py \
          pdfcrop.sh \
          ppa-install \
          prefix \
