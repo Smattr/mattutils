@@ -45,6 +45,7 @@ def main(argv):
         help='encrypt with OpenSSL')
     parser.add_argument('--no-openssl-encrypt', action='store_false',
         dest='openssl_encrypt', help='do not encrypt with OpenSSL')
+    parser.add_argument('--split', type=int, help='split at SPLIT bytes')
     parser.add_argument('--output', '-o', help='output file')
     options = parser.parse_args(argv[1:])
 
@@ -61,6 +62,8 @@ def main(argv):
         commands.append('openssl')
     if options.progress:
         commands.append('pv')
+    if options.split is not None:
+        commands.append('split')
 
     for c in commands:
         if which(c) is None:
@@ -77,10 +80,25 @@ def main(argv):
             output += '.enc'
     else:
         output = os.path.abspath(options.output)
+    if options.split is not None:
+        output += '.'
 
-    if os.path.exists(output):
-        sys.stderr.write('%s already exists\n' % output)
+    if not os.path.exists(os.path.dirname(output)):
+        sys.stderr.write('containing directory %s for output does not exist\n' %
+            os.path.dirname(output))
         return -1
+
+    if options.split is None:
+        if os.path.exists(output):
+            sys.stderr.write('%s already exists\n' % output)
+            return -1
+    else:
+        prefix = os.path.basename(output)
+        for f in os.listdir(os.path.dirname(output)):
+            if f.startswith(prefix):
+                sys.stderr.write('existing file %s might be overwritten\n' %
+                    os.path.join(os.path.dirname(output), f))
+                return -1
 
     if options.gpg_encrypt or options.openssl_encrypt:
         password = getpass.getpass('password: ')
@@ -107,16 +125,26 @@ def main(argv):
     if options.progress:
         pipeline.append('pv')
 
-    try:
-        with open(output, 'wb') as f:
-            subprocess.check_call('|'.join(pipeline), shell=True, cwd=cwd,
-                stdout=f)
-    except subprocess.CalledProcessError as e:
-        sys.stderr.write('failed: %s\n' % str(e))
-        return -1
+    if options.split is None:
+        try:
+            with open(output, 'wb') as f:
+                subprocess.check_call('|'.join(pipeline), shell=True, cwd=cwd,
+                    stdout=f)
+        except subprocess.CalledProcessError as e:
+            sys.stderr.write('failed: %s\n' % str(e))
+            return -1
+    else:
+        pipeline.append('split --bytes=%d --numeric-suffixes - \'%s\'' %
+            (options.split, output))
+        try:
+            subprocess.check_call('|'.join(pipeline), shell=True, cwd=cwd)
+        except subprocess.CalledProcessError as e:
+            sys.stderr.write('failed: %s\n' % str(e))
+            return -1
 
     sys.stdout.write('done\n'
-                     'to decrypt: cat %s' % os.path.basename(output))
+                     'to decrypt: cat %s%s' % (os.path.basename(output),
+        '' if options.split is None else '*'))
     if options.openssl_encrypt:
         sys.stdout.write(' | openssl enc -aes-256-cbc -d')
     if options.gpg_encrypt:
