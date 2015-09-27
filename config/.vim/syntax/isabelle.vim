@@ -124,8 +124,6 @@ if exists('g:isabelle_tex') && g:isabelle_tex == 1
     let s:current_syntax=b:current_syntax
     unlet b:current_syntax
   endif
-  " FIXME: The TeX syntax meddles with iskeyword and thereby screws up syntax
-  " highlighting for anything involving an underscore after it has been loaded.
   syntax include @TEX syntax/tex.vim
   if exists('s:current_syntax')
     let b:current_syntax=s:current_syntax
@@ -133,6 +131,10 @@ if exists('g:isabelle_tex') && g:isabelle_tex == 1
     unlet b:current_syntax
   endif
   syntax region IsabelleCommand matchgroup=IsabelleComment fold start="\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*" end="\*}" contains=@TEX
+  " The TeX syntax meddles with iskeyword and thereby screws up syntax
+  " highlighting for anything involving an underscore after it has been loaded.
+  " Reset this here.
+  set iskeyword+=_
 else
   " If g:isabelle_tex is not set, just highlight these blocks as normal
   " comments.

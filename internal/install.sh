@@ -44,6 +44,7 @@ for i in \
          mediawatch.py \
          notate.py \
          now \
+         package.py \
          pdfcrop.sh \
          ppa-install \
          prefix \
@@ -112,4 +113,9 @@ if [ ! -e "${HOME}/.gitconfig_mattutils" ]; then
     ln -s "${REPO}/config/.gitconfig" "${HOME}/.gitconfig_mattutils"
 elif [ ! -L "${HOME}/.gitconfig_mattutils" ]; then
     echo "Warning: Skipping gitconfig_mattutils that already exists." >&2
+fi
+
+# Build some utils.
+if [ ! -e "${HOME}/bin/balloon" ]; then
+    cc -W -Wall -Werror -o balloon "${REPO}/misc/balloon.c" $(pkg-config --libs ncurses)
 fi
