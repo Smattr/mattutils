@@ -57,7 +57,12 @@ def main(argv):
 
     # SIGTERM any stragglers.
     for pid in procs:
-        os.kill(pid, signal.SIGTERM)
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            # Ignore exceptions resulting from the process having already
+            # exited.
+            pass
     for pid in procs:
         os.waitpid(pid, 0)
 
