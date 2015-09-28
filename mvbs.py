@@ -56,6 +56,9 @@ class RuleSet(object):
         except KeyError:
             if not os.path.exists(target):
                 raise MVBSError('no rule to build target \'%s\'' % target)
+            if verbose:
+                sys.stdout.write('no rule for %s, but file exists\n' % target)
+            return
 
         rebuild = not os.path.exists(target)
 
