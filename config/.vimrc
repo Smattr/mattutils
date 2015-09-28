@@ -72,6 +72,18 @@ endfunction
 nm <F8> :call ToggleIsabelleTex()<CR>
 imap <F8> <C-o>:call ToggleIsabelleTex()<CR>
 
+function! ToggleIsabelleAbbreviations()
+  if exists('g:isabelle_abbreviations')
+    let g:isabelle_abbreviations=!g:isabelle_abbreviations
+  else
+    let g:isabelle_abbreviations=1
+  endif
+  syntax off
+  syntax on
+endfunction
+nm <F9> :call ToggleIsabelleAbbreviations()<CR>
+imap <F9> <C-o>:call ToggleIsabelleAbbreviations()<CR>
+
 " Enable our friend, the mouse. Though ttymouse supposedly supports pterm (my
 " weapon of choice), xterm2 seems to work where pterm does not. Cheers,
 " kristopolous@HN, for the tip.
