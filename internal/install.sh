@@ -42,6 +42,7 @@ for i in \
          term \
          later \
          mediawatch.py \
+         mvbs.py \
          notate.py \
          now \
          package.py \
