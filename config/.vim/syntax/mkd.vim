@@ -90,6 +90,9 @@ syn region isabelleCode matchgroup=SpecialComment fold start=/^```\s*isabelle\s*
 syn match includeFile /^\s*{{\(camkes\|isabelle\).*}}\s*$/
 HtmlHiLink includeFile SpecialComment
 
+syn match mkdReference /\[@.*\]/
+HtmlHiLink mkdReference SpecialComment
+
 " *** End added stuff
 
 "define Markdown groups
