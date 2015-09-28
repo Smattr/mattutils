@@ -2,6 +2,23 @@
 
 '''
 Minimum viable build system
+
+What...why? Well I wanted to build a small project and all the build systems in
+my arsenal were irritating me in one way or another: built-in recipes that do
+more harm than good (GNU Make), anything outside of C/C++ as second class
+citizens (GNU Make, CMake), timestamps for modification detection (GNU Make,
+Ninja), active build language (SCons), poor scalability (SCons), ...
+
+This "build system" doesn't solve all these issues, but it attempts to pare
+back a set of requirements to the minimum I had at the time. Features:
+
+  * SHA256s for modification detection, instead of timestamps
+  * Environment variable expansion (e.g. "${HOME}/mytarget.o")
+
+That's more or less it. It hasn't been heavily tested, isn't thread safe,
+contains a few egregious hacks and (despite importing six) does not work with
+Python 3. Consider it more an experimental prototype of what a true MVBS might
+look like.
 '''
 
 import argparse, collections, hashlib, json, os, shelve, six, subprocess, sys
