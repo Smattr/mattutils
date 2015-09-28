@@ -349,4 +349,14 @@ if [ -n "${PHD}" ]; then
     export PROMPT="%{${fg_bold[blue]}%}[phd]%{${fg_no_bold[default]}%} ${PROMPT}"
 fi
 
+# Export of environment variables with a visible reminder.
+function exp() {
+  if [ $# -eq 0 ]; then
+    echo "usage: $0 variable=value" >&2
+    return 1
+  fi
+  export "$1"
+  PROMPT="%{${bg_bold[magenta]}%}${1%%=*}%{${bg_no_bold[default]}%} ${PROMPT}"
+}
+
 fi # Close overload detection
