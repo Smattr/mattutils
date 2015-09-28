@@ -153,9 +153,8 @@ def main(argv):
 
         rules.build(options.target, options.verbose, sigs)
 
-    except MVBSError:
+    finally:
         sigs.close()
-        raise
 
     return 0
 
