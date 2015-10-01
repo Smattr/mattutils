@@ -713,192 +713,119 @@ if exists('g:isabelle_abbreviations')
     "             print 'iab %s %s' % (vim_escape(abbreviation),
     "                 vim_escape(symbol.ascii_text))
     "
-    iab % <Bslash><lt>lambda>
-    iab <lt>. <Bslash><lt>leftarrow>
-    iab <lt>. <Bslash><lt>longleftarrow>
-    iab .> <Bslash><lt>rightarrow>
-    iab -> <Bslash><lt>rightarrow>
-    iab .> <Bslash><lt>longrightarrow>
-    iab --> <Bslash><lt>longrightarrow>
-    iab <lt>. <Bslash><lt>Leftarrow>
-    iab <lt>. <Bslash><lt>Longleftarrow>
-    iab .> <Bslash><lt>Rightarrow>
-    iab => <Bslash><lt>Rightarrow>
-    iab .> <Bslash><lt>Longrightarrow>
-    iab ==> <Bslash><lt>Longrightarrow>
-    iab <lt>> <Bslash><lt>leftrightarrow>
-    iab <lt>-> <Bslash><lt>leftrightarrow>
-    iab <lt>> <Bslash><lt>longleftrightarrow>
-    iab <lt>-> <Bslash><lt>longleftrightarrow>
-    iab <lt>--> <Bslash><lt>longleftrightarrow>
-    iab <lt>> <Bslash><lt>Leftrightarrow>
-    iab <lt>> <Bslash><lt>Longleftrightarrow>
-    iab .> <Bslash><lt>mapsto>
-    iab <Bar>-> <Bslash><lt>mapsto>
-    iab .> <Bslash><lt>longmapsto>
-    iab <Bar>--> <Bslash><lt>longmapsto>
-    iab <lt>> <Bslash><lt>midarrow>
-    iab <lt>> <Bslash><lt>Midarrow>
-    iab <lt>. <Bslash><lt>hookleftarrow>
-    iab .> <Bslash><lt>hookrightarrow>
-    iab <lt>. <Bslash><lt>leftharpoondown>
-    iab .> <Bslash><lt>rightharpoondown>
-    iab <lt>. <Bslash><lt>leftharpoonup>
-    iab .> <Bslash><lt>rightharpoonup>
-    iab <lt>> <Bslash><lt>rightleftharpoons>
-    iab == <Bslash><lt>rightleftharpoons>
-    iab .> <Bslash><lt>leadsto>
-    iab ~> <Bslash><lt>leadsto>
-    iab <lt><lt> <Bslash><lt>langle>
-    iab >> <Bslash><lt>rangle>
-    iab [. <Bslash><lt>lceil>
-    iab .] <Bslash><lt>rceil>
-    iab [. <Bslash><lt>lfloor>
-    iab .] <Bslash><lt>rfloor>
-    iab (<Bar> <Bslash><lt>lparr>
-    iab <Bar>) <Bslash><lt>rparr>
-    iab [<Bar> <Bslash><lt>lbrakk>
-    iab <Bar>] <Bslash><lt>rbrakk>
-    iab {<Bar> <Bslash><lt>lbrace>
-    iab <Bar>} <Bslash><lt>rbrace>
-    iab <lt><lt> <Bslash><lt>guillemotleft>
-    iab >> <Bslash><lt>guillemotright>
-    iab /<Bslash> <Bslash><lt>and>
-    iab & <Bslash><lt>and>
-    iab !! <Bslash><lt>And>
-    iab <Bslash>/ <Bslash><lt>or>
-    iab <Bar> <Bslash><lt>or>
-    iab ?? <Bslash><lt>Or>
-    iab ! <Bslash><lt>forall>
-    iab ALL <Bslash><lt>forall>
-    iab ? <Bslash><lt>exists>
-    iab EX <Bslash><lt>exists>
-    iab ~? <Bslash><lt>nexists>
-    iab ~ <Bslash><lt>not>
-    iab <Bar>- <Bslash><lt>turnstile>
-    iab <Bar>= <Bslash><lt>Turnstile>
-    iab <Bar>- <Bslash><lt>tturnstile>
-    iab <Bar>= <Bslash><lt>TTurnstile>
-    iab -<Bar> <Bslash><lt>stileturn>
-    iab <lt>= <Bslash><lt>le>
-    iab >= <Bslash><lt>ge>
-    iab <lt><lt> <Bslash><lt>lless>
-    iab >> <Bslash><lt>ggreater>
-    iab : <Bslash><lt>in>
-    iab ~: <Bslash><lt>notin>
-    iab (= <Bslash><lt>subseteq>
-    iab )= <Bslash><lt>supseteq>
-    iab [= <Bslash><lt>sqsubseteq>
-    iab ]= <Bslash><lt>sqsupseteq>
-    iab Int <Bslash><lt>inter>
-    iab Inter <Bslash><lt>Inter>
-    iab INT <Bslash><lt>Inter>
-    iab Un <Bslash><lt>union>
-    iab Union <Bslash><lt>Union>
-    iab UN <Bslash><lt>Union>
-    iab SUP <Bslash><lt>Squnion>
-    iab INF <Bslash><lt>Sqinter>
-    iab ~= <Bslash><lt>noteq>
-    iab .= <Bslash><lt>doteq>
-    iab == <Bslash><lt>equiv>
-    iab <Bar><Bar> <Bslash><lt>parallel>
-    iab <Bar><Bar> <Bslash><lt>bar>
-    iab <lt>*> <Bslash><lt>times>
-    iab +o <Bslash><lt>oplus>
-    iab +O <Bslash><lt>Oplus>
-    iab *o <Bslash><lt>otimes>
-    iab *O <Bslash><lt>Otimes>
-    iab .o <Bslash><lt>odot>
-    iab .O <Bslash><lt>Odot>
-    iab -o <Bslash><lt>ominus>
-    iab /o <Bslash><lt>oslash>
-    iab ... <Bslash><lt>dots>
-    iab SUM <Bslash><lt>Sum>
-    iab PROD <Bslash><lt>Prod>
-    iab <lt><lt> <Bslash><lt>open>
-    iab >> <Bslash><lt>close>
-    iab =_( <Bslash><lt>^bsub>
-    iab =_) <Bslash><lt>^esub>
-    iab =^( <Bslash><lt>^bsup>
-    iab =^) <Bslash><lt>^esup>
+    iab <buffer> % <Bslash><lt>lambda>
+    iab <buffer> <lt>. <Bslash><lt>leftarrow>
+    iab <buffer> <lt>. <Bslash><lt>longleftarrow>
+    iab <buffer> .> <Bslash><lt>rightarrow>
+    iab <buffer> -> <Bslash><lt>rightarrow>
+    iab <buffer> .> <Bslash><lt>longrightarrow>
+    iab <buffer> --> <Bslash><lt>longrightarrow>
+    iab <buffer> <lt>. <Bslash><lt>Leftarrow>
+    iab <buffer> <lt>. <Bslash><lt>Longleftarrow>
+    iab <buffer> .> <Bslash><lt>Rightarrow>
+    iab <buffer> => <Bslash><lt>Rightarrow>
+    iab <buffer> .> <Bslash><lt>Longrightarrow>
+    iab <buffer> ==> <Bslash><lt>Longrightarrow>
+    iab <buffer> <lt>> <Bslash><lt>leftrightarrow>
+    iab <buffer> <lt>-> <Bslash><lt>leftrightarrow>
+    iab <buffer> <lt>> <Bslash><lt>longleftrightarrow>
+    iab <buffer> <lt>-> <Bslash><lt>longleftrightarrow>
+    iab <buffer> <lt>--> <Bslash><lt>longleftrightarrow>
+    iab <buffer> <lt>> <Bslash><lt>Leftrightarrow>
+    iab <buffer> <lt>> <Bslash><lt>Longleftrightarrow>
+    iab <buffer> .> <Bslash><lt>mapsto>
+    iab <buffer> <Bar>-> <Bslash><lt>mapsto>
+    iab <buffer> .> <Bslash><lt>longmapsto>
+    iab <buffer> <Bar>--> <Bslash><lt>longmapsto>
+    iab <buffer> <lt>> <Bslash><lt>midarrow>
+    iab <buffer> <lt>> <Bslash><lt>Midarrow>
+    iab <buffer> <lt>. <Bslash><lt>hookleftarrow>
+    iab <buffer> .> <Bslash><lt>hookrightarrow>
+    iab <buffer> <lt>. <Bslash><lt>leftharpoondown>
+    iab <buffer> .> <Bslash><lt>rightharpoondown>
+    iab <buffer> <lt>. <Bslash><lt>leftharpoonup>
+    iab <buffer> .> <Bslash><lt>rightharpoonup>
+    iab <buffer> <lt>> <Bslash><lt>rightleftharpoons>
+    iab <buffer> == <Bslash><lt>rightleftharpoons>
+    iab <buffer> .> <Bslash><lt>leadsto>
+    iab <buffer> ~> <Bslash><lt>leadsto>
+    iab <buffer> <lt><lt> <Bslash><lt>langle>
+    iab <buffer> >> <Bslash><lt>rangle>
+    iab <buffer> [. <Bslash><lt>lceil>
+    iab <buffer> .] <Bslash><lt>rceil>
+    iab <buffer> [. <Bslash><lt>lfloor>
+    iab <buffer> .] <Bslash><lt>rfloor>
+    iab <buffer> (<Bar> <Bslash><lt>lparr>
+    iab <buffer> <Bar>) <Bslash><lt>rparr>
+    iab <buffer> [<Bar> <Bslash><lt>lbrakk>
+    iab <buffer> <Bar>] <Bslash><lt>rbrakk>
+    iab <buffer> {<Bar> <Bslash><lt>lbrace>
+    iab <buffer> <Bar>} <Bslash><lt>rbrace>
+    iab <buffer> <lt><lt> <Bslash><lt>guillemotleft>
+    iab <buffer> >> <Bslash><lt>guillemotright>
+    iab <buffer> /<Bslash> <Bslash><lt>and>
+    iab <buffer> & <Bslash><lt>and>
+    iab <buffer> !! <Bslash><lt>And>
+    iab <buffer> <Bslash>/ <Bslash><lt>or>
+    iab <buffer> <Bar> <Bslash><lt>or>
+    iab <buffer> ?? <Bslash><lt>Or>
+    iab <buffer> ! <Bslash><lt>forall>
+    iab <buffer> ALL <Bslash><lt>forall>
+    iab <buffer> ? <Bslash><lt>exists>
+    iab <buffer> EX <Bslash><lt>exists>
+    iab <buffer> ~? <Bslash><lt>nexists>
+    iab <buffer> ~ <Bslash><lt>not>
+    iab <buffer> <Bar>- <Bslash><lt>turnstile>
+    iab <buffer> <Bar>= <Bslash><lt>Turnstile>
+    iab <buffer> <Bar>- <Bslash><lt>tturnstile>
+    iab <buffer> <Bar>= <Bslash><lt>TTurnstile>
+    iab <buffer> -<Bar> <Bslash><lt>stileturn>
+    iab <buffer> <lt>= <Bslash><lt>le>
+    iab <buffer> >= <Bslash><lt>ge>
+    iab <buffer> <lt><lt> <Bslash><lt>lless>
+    iab <buffer> >> <Bslash><lt>ggreater>
+    iab <buffer> : <Bslash><lt>in>
+    iab <buffer> ~: <Bslash><lt>notin>
+    iab <buffer> (= <Bslash><lt>subseteq>
+    iab <buffer> )= <Bslash><lt>supseteq>
+    iab <buffer> [= <Bslash><lt>sqsubseteq>
+    iab <buffer> ]= <Bslash><lt>sqsupseteq>
+    iab <buffer> Int <Bslash><lt>inter>
+    iab <buffer> Inter <Bslash><lt>Inter>
+    iab <buffer> INT <Bslash><lt>Inter>
+    iab <buffer> Un <Bslash><lt>union>
+    iab <buffer> Union <Bslash><lt>Union>
+    iab <buffer> UN <Bslash><lt>Union>
+    iab <buffer> SUP <Bslash><lt>Squnion>
+    iab <buffer> INF <Bslash><lt>Sqinter>
+    iab <buffer> ~= <Bslash><lt>noteq>
+    iab <buffer> .= <Bslash><lt>doteq>
+    iab <buffer> == <Bslash><lt>equiv>
+    iab <buffer> <Bar><Bar> <Bslash><lt>parallel>
+    iab <buffer> <Bar><Bar> <Bslash><lt>bar>
+    iab <buffer> <lt>*> <Bslash><lt>times>
+    iab <buffer> +o <Bslash><lt>oplus>
+    iab <buffer> +O <Bslash><lt>Oplus>
+    iab <buffer> *o <Bslash><lt>otimes>
+    iab <buffer> *O <Bslash><lt>Otimes>
+    iab <buffer> .o <Bslash><lt>odot>
+    iab <buffer> .O <Bslash><lt>Odot>
+    iab <buffer> -o <Bslash><lt>ominus>
+    iab <buffer> /o <Bslash><lt>oslash>
+    iab <buffer> ... <Bslash><lt>dots>
+    iab <buffer> SUM <Bslash><lt>Sum>
+    iab <buffer> PROD <Bslash><lt>Prod>
+    iab <buffer> <lt><lt> <Bslash><lt>open>
+    iab <buffer> >> <Bslash><lt>close>
+    iab <buffer> =_( <Bslash><lt>^bsub>
+    iab <buffer> =_) <Bslash><lt>^esub>
+    iab <buffer> =^( <Bslash><lt>^bsup>
+    iab <buffer> =^) <Bslash><lt>^esup>
   else
     " Reset to default.
     set iskeyword=@,48-57,_,192-255
 
     " Remove all abbreviations.
-    una %
-    una <lt>.
-    una .>
-    una ->
-    una -->
-    una =>
-    una ==>
-    una <lt>>
-    una <lt>->
-    una <lt>-->
-    una <Bar>->
-    una <Bar>-->
-    una ==
-    una ~>
-    una <lt><lt>
-    una >>
-    una [.
-    una .]
-    una (<Bar>
-    una <Bar>)
-    una [<Bar>
-    una <Bar>]
-    una {<Bar>
-    una <Bar>}
-    una /<Bslash>
-    una &
-    una !!
-    una <Bslash>/
-    una <Bar>
-    una ??
-    una !
-    una ALL
-    una ?
-    una EX
-    una ~?
-    una ~
-    una <Bar>-
-    una <Bar>=
-    una -<Bar>
-    una <lt>=
-    una >=
-    una :
-    una ~:
-    una (=
-    una )=
-    una [=
-    una ]=
-    una Int
-    una Inter
-    una INT
-    una Un
-    una Union
-    una UN
-    una SUP
-    una INF
-    una ~=
-    una .=
-    una <Bar><Bar>
-    una <lt>*>
-    una +o
-    una +O
-    una *o
-    una *O
-    una .o
-    una .O
-    una -o
-    una /o
-    una ...
-    una SUM
-    una PROD
-    una =_(
-    una =_)
-    una =^(
-    una =^)
+    iabc <buffer>
   endif
 endif
