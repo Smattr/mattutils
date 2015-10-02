@@ -86,6 +86,18 @@ if exists('s:current_syntax')
 endif
 syn region isabelleCode matchgroup=SpecialComment fold start=/^```\s*isabelle\s*$/ end=/^```\s*$/me=s-3 contains=@isabelle containedin=ALL
 
+" Support for embedded C.
+if exists('b:current_syntax')
+  let s:current_syntax=b:current_syntax
+  unlet b:current_syntax
+endif
+syntax include @c syntax/c.vim
+if exists('s:current_syntax')
+  let b:current_syntax=s:current_syntax
+  unlet s:current_syntax
+endif
+syn region CCode matchgroup=SpecialComment fold start=/^```\s*c\s*$/ end=/^```\s*$/me=s-3 contains=@c containedin=ALL
+
 " Support for pre-processor tags.
 syn match includeFile /^\s*{{\(camkes\|isabelle\).*}}\s*$/
 HtmlHiLink includeFile SpecialComment
