@@ -99,7 +99,7 @@ endif
 syn region CCode matchgroup=SpecialComment fold start=/^```\s*c\s*$/ end=/^```\s*$/me=s-3 contains=@c containedin=ALL
 
 " Support for pre-processor tags.
-syn match includeFile /^\s*{{\(camkes\|isabelle\).*}}\s*$/
+syn match includeFile /^\s*{{\w\+.\{-}}}\s*$/
 HtmlHiLink includeFile SpecialComment
 
 syn match mkdReference /\[@.*\]/
