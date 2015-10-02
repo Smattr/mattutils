@@ -102,7 +102,7 @@ syn region CCode matchgroup=SpecialComment fold start=/^```\s*c\s*$/ end=/^```\s
 syn match includeFile /^\s*{{\w\+.\{-}}}\s*$/
 HtmlHiLink includeFile SpecialComment
 
-syn match mkdReference /\[@.*\]/
+syn match mkdReference /\[@.\{-}\]/
 HtmlHiLink mkdReference SpecialComment
 
 " *** End added stuff
