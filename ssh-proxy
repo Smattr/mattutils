@@ -64,7 +64,12 @@ def main(argv):
             # exited.
             pass
     for pid in procs:
-        os.waitpid(pid, 0)
+        try:
+            os.waitpid(pid, 0)
+        except OSError:
+            # Ignore exceptions resulting from the process having already
+            # exited.
+            pass
 
     # Turn into ssh.
     os.execlp('ssh', 'ssh', gateway, 'nc', '-q0', options.host,
