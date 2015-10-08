@@ -74,7 +74,7 @@ imap <F8> <C-o>:call ToggleIsabelleTex()<CR>
 
 function! ToggleIsabelleAbbreviations()
   if exists('g:isabelle_abbreviations')
-    let g:isabelle_abbreviations=!g:isabelle_abbreviations
+    let g:isabelle_abbreviations = !g:isabelle_abbreviations
   else
     let g:isabelle_abbreviations=1
   endif
