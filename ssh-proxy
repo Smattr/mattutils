@@ -42,7 +42,11 @@ def main(argv):
     # Wait until one responds with success.
     gateway = None
     while len(procs) > 0:
-        pid, status = os.wait()
+        try:
+            pid, status = os.wait()
+        except OSError: # All processes exited.
+            procs = {}
+            break
         assert pid in procs
         if status == 0:
             gateway = procs[pid]
