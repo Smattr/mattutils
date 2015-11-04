@@ -20,6 +20,7 @@ augroup filetypedetect
     au BufRead,BufNewFile CMakeLists setfiletype cmake
     au BufRead,BufNewFile *.ml setfiletype sml
     au BufRead,BufNewFile *.ML setfiletype sml
+    au BufRead,BufNewFile *.nanorc setfiletype nanorc
     au BufRead,BufNewFile *.bf setfiletype bf
     au BufRead,BufNewFile *.pbf setfiletype bf
     au BufRead,BufNewFile *.sal setfiletype sal
