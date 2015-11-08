@@ -132,6 +132,13 @@ def main(argv):
     with open(os.path.join(options.output, 'feed.xml'), 'w') as f:
         et.write(f, encoding='utf-8', xml_declaration=True)
 
+    # Write a Lighttpd conf.
+    with open(os.path.join(options.output, 'lighttpd.conf'), 'w') as f:
+        f.write('server.document-root = "%s"\n'
+                'server.port = 8000\n'
+                'mimetype.assign = (".mp3" => "audio/mpeg")\n' %
+                os.path.abspath(options.output))
+
     return 0
 
 if __name__ == '__main__':
