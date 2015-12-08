@@ -40,19 +40,24 @@ def main(argv):
     # in which this function is contained.
     module = None
     if '.' in call:
-        m, call = call.split('.', 1)
+        m, stem = call.split('.', 1)
         try:
             module = __import__(m)
-        except Exception as e:
-            print >>sys.stderr, 'Failed to import \'%s\'' % m
-            return -1
+            call = stem
+        except ImportError as e:
+            pass
 
     # Now the function could be either (a) a built-in, (b) a global function,
     # (c) a module itself or (d) a function in a module.
     fn = None
     if module is None:
         try:
-            fn = getattr(__builtins__, call) # (a)
+            stem = call.split('.')
+            fn = getattr(__builtins__, stem[0]) # (a)
+            stem = stem[1:]
+            while len(stem) > 0:
+                fn = getattr(fn, stem[0])
+                stem = stem[1:]
         except AttributeError:
             try:
                 fn = globals()[call] # (b)
@@ -60,7 +65,7 @@ def main(argv):
                 try:
                     fn = __import__(call) # (c)
                 except ImportError:
-                    pass
+                    fn = None
     else: # (d)
         try:
             bits = call.split('.')
