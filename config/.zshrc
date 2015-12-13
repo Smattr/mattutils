@@ -199,7 +199,7 @@ function vcs_prompt {
     fi
     svn list &>/dev/null
     if [ $? -eq 0 ]; then
-        echo -n '-S-'
+        echo -n '-‡-'
         if [ -z "`svn status 2>/dev/null`" ]; then
             # Working directory is clean.
             echo -n "%{${fg_bold[green]}%}"
