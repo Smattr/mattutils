@@ -146,6 +146,10 @@ def meta_u(api):
     if len(errored) == 0 and len(unmounted) == 0:
         api[1]['notify']('nothing to unmount')
 
+def meta_v(api):
+    '''screenshot'''
+    return api[1]['run'](['gnome-screenshot', '-a'])
+
 def meta_x(api):
     '''terminal'''
     import os
