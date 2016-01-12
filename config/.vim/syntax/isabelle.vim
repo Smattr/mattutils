@@ -1,11 +1,18 @@
-" Vim syntax highlighting for THY files.
 "
-" Licensing: The original version of this file was released on the Isabelle
-" user's list by Jens-Wolfhard Schicke <drahflow@gmx.de> in 2008 and
-" subsequently extended by Timothy Bourke and Matthew Fernandez. It's unclear
-" to me (Matt) what licence Jens intended and I disclaim any right to it
-" myself, but note that this is not NICTA_CORE. Feel free to use it locally if
-" it helps you.
+" Copyright 2016, NICTA
+"
+" This software may be distributed and modified according to the terms of
+" the BSD 2-Clause license. Note that NO WARRANTY is provided.
+" See "LICENSE_BSD2.txt" for details.
+"
+" @TAG(NICTA_BSD)
+"
+" Parts of this file were originally contributed by
+" Jens-Wolfhard Schicke-Uffmann <drahflow@gmx.de>
+"
+
+"
+" Vim syntax highlighting for THY files.
 "
 " This syntax will show UTF-8 Isabelle symbols if you have concealling enabled.
 " If you use this, you will probably want it automatically enabled whenever you
@@ -44,7 +51,6 @@ syn keyword IsabelleCommand primrec
 syn keyword IsabelleCommand datatype
 syn keyword IsabelleCommand declare declaration syntax_declaration
 syn keyword IsabelleCommand definition
-syn keyword IsabelleCommand method_setup
 syn keyword IsabelleCommand fun
 syn keyword IsabelleCommand function termination
 syn keyword IsabelleCommand typedecl
@@ -93,7 +99,8 @@ if exists('s:current_syntax')
 else
   unlet b:current_syntax
 endif
-syntax region IsabelleCommand matchgroup=SpecialComment fold start="ML[ ]*{\*" end="\*}" contains=@SML
+syntax region IsabelleCommand matchgroup=SpecialComment fold start="ML\_s*\({\*\|\\<open>\)" end="\(\*}\|\\<close>\)" contains=@SML
+syntax region IsabelleCommand matchgroup=SpecialComment fold start="method_setup\_s*\a\w*\_s*=\_s*\({\*\|\\<open>\)" end="\(\*}\|\\<close>\)\_s*\(\"[^\"]*\"\)\?" contains=@SML
 
 " Excessively complicated way of matching (* ... *) comments to support nested
 " blocks.
@@ -633,13 +640,15 @@ syn match IsabelleSpecial /\\<s>/ conceal cchar=𝗌
 syn match IsabelleSpecial /\\<Leftrightarrow>/ conceal cchar=⇔
 syn match IsabelleSpecial /\\<heartsuit>/ conceal cchar=♡
 syn match IsabelleSpecial /\\<four>/ conceal cchar=𝟰
+syn match IsabelleSpecial /\\<open>/ conceal cchar=‹
+syn match IsabelleSpecial /\\<close>/ conceal cchar=›
 
 syn cluster IsabelleInnerStuff contains=IsabelleSpecial
 
 " Enable folding of proofs and locales. Note that the starting regex needs to
 " match with zero width to preserve syntax highlighting of the opening command.
 syn region IsabelleLemmaFold
-    \ start="\(\<\(schematic_\)\?\(corollary\|lemma\|theorem\)\>\)\@<="
+    \ start="\(\<\(schematic_\)\?\(corollary\|lemma\|theorem\)\>\|have\|show\)\@<="
     \ end="\<\(done\|by\|qed\|apply_end\|oops\|sorry\)\>"
     \ fold keepend transparent
 syn region IsabelleLocaleFold
