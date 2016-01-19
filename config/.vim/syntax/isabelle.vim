@@ -99,7 +99,7 @@ if exists('s:current_syntax')
 else
   unlet b:current_syntax
 endif
-syntax region IsabelleCommand matchgroup=SpecialComment fold start="ML\_s*\({\*\|\\<open>\)" end="\(\*}\|\\<close>\)" contains=@SML
+syntax region IsabelleCommand matchgroup=SpecialComment fold start="\(ML\|local_setup\)\_s*\({\*\|\\<open>\)" end="\(\*}\|\\<close>\)" contains=@SML
 syntax region IsabelleCommand matchgroup=SpecialComment fold start="method_setup\_s*\a\w*\_s*=\_s*\({\*\|\\<open>\)" end="\(\*}\|\\<close>\)\_s*\(\"[^\"]*\"\)\?" contains=@SML
 
 " Excessively complicated way of matching (* ... *) comments to support nested
