@@ -8,7 +8,7 @@
 import inspect, re, sys
 
 STATEMENTS = frozenset(['assert', 'break', 'continue', 'del', 'exec', 'global',
-    'import', 'pass', 'print', 'raise', 'return', 'yield'])
+    'import', 'nonlocal', 'pass', 'print', 'raise', 'return', 'yield'])
 
 def signature(name, argspec):
     args = []
