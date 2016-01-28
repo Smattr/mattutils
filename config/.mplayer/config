@@ -15,3 +15,7 @@ noautosub=yes
 # Override volume hardware management.
 softvol=yes
 softvol-max=400
+
+# Suppress cover art for MP3s.
+[extension.mp3]
+vo=null
