@@ -187,7 +187,7 @@ syn keyword IsabelleCommandMethod coinduct
 syn keyword IsabelleCommandMethod induct_scheme lexicographic_order relation
 syn keyword IsabelleCommandMethod case_tac cases split
 syn keyword IsabelleCommandMethod subgoal_tac
-syn keyword IsabelleCommandMethod eval evaluation
+syn keyword IsabelleCommandMethod eval evaluation code_simp smt
 syn keyword IsabelleCommandMethod fail succeed
 syn keyword IsabelleCommandMethod atomize atomize_elim
 syn keyword IsabelleCommandMethod neg_clausify finish_clausify
