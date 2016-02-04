@@ -1,4 +1,12 @@
-" @LICENSE(NICTA_CORE)
+"
+" Copyright 2014, NICTA
+"
+" This software may be distributed and modified according to the terms of
+" the BSD 2-Clause license. Note that NO WARRANTY is provided.
+" See "LICENSE_BSD2.txt" for details.
+"
+" @TAG(NICTA_BSD)
+"
 " CapDL syntax highlighting for vim.
 "
 " To use this, copy to ~/.vim/syntax/ and put the following in
@@ -15,10 +23,11 @@ syn keyword CapDLKeyword arch caps objects arm11 ia32
 syn match CapDLIRQMap "\<irq maps\>"
 syn match CapDLIRQ "\<irq\>\( maps\)\@!"
 syn keyword CapDLObject aep asid_pool cnode ep frame io_device io_ports io_pt pd pt tcb ut
-syn keyword CapDLAttribute addr badge elf G guard guard_size init ip prio sp R RG RX RW RWG RWX W WG WX paddr cached uncached
+syn keyword CapDLAttribute addr badge elf fault_ep_slot G guard guard_size init ip prio sp R RG RX RW RWG RWX W WG WX paddr cached uncached
 syn match CapDLCPP "[ \t]*#.*$"
 syn match CapDLLiteral "\<\(0x\)\?[0-9]\+\(k\|M\)\?\( bits\)\?\>"
 syn match CapDLLiteral "\<0x[0-f]\+\>"
+syn keyword CapDLSymbolicSlot cspace vspace reply_slot caller_slot ipc_buffer_slot
 
 syn region Foldable start="{" end="}" fold transparent
 
@@ -34,3 +43,4 @@ hi def link CapDLIRQ Type
 hi def link CapDLAttribute Type
 hi def link CapDLCPP PreProc
 hi def link CapDLLiteral Constant
+hi def link CapDLSymbolicSlot Constant
