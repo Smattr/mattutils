@@ -25,7 +25,7 @@ syn keyword RootOption browser_info document document_output document_variants
 syn region RootComment start="(\*" end="\*)"
 syn region RootDescription start="{\*" end="\*}"
 syn region RootString start='"' end='"'
-syn match RootNumber "\m[0-9]\+"
+syn match RootNumber "\<\d\+\>"
 syn match RootBool "\(true\|false\)"
 syn keyword RootFormat pdf
 
