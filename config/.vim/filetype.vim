@@ -23,6 +23,7 @@ augroup filetypedetect
     au BufRead,BufNewFile *.nanorc setfiletype nanorc
     au BufRead,BufNewFile *.bf setfiletype bf
     au BufRead,BufNewFile *.pbf setfiletype bf
+    au BufRead,BufNewFile *.rs setfiletype rust
     au BufRead,BufNewFile *.sal setfiletype sal
     au BufRead,BufNewFile *.m setfiletype murphi
     au BufRead,BufNewFile .hgignore setfiletype hgignore
