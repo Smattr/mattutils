@@ -25,6 +25,7 @@ augroup filetypedetect
     au BufRead,BufNewFile *.pbf setfiletype bf
     au BufRead,BufNewFile *.rs setfiletype rust
     au BufRead,BufNewFile *.sal setfiletype sal
+    au BufRead,BufNewFile *.toml setfiletype toml
     au BufRead,BufNewFile *.m setfiletype murphi
     au BufRead,BufNewFile .hgignore setfiletype hgignore
     au BufRead,BufNewFile *.lds setfiletype ld
