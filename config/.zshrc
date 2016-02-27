@@ -116,8 +116,8 @@ setopt LONG_LIST_JOBS
 setopt NO_HUP
 setopt RC_QUOTES
 export HISTFILE="${HOME}/.zsh_history"
-export HISTSIZE=1000000
-export SAVEHIST=1000000
+export HISTSIZE=100000000
+export SAVEHIST=100000000
 
 autoload history-search-end
 zle -N history-beginning-search-backward-end history-search-end
