@@ -99,8 +99,17 @@ def main(argv, out, err):
             err.write('`git commit ...` failed:\n%s\n%s\n' % (stdout, stderr))
             return ret
 
-    if options.check and not online(info):
-        return 0
+    if options.check:
+        if not online(info):
+            return 0
+
+        ret, stdout, stderr = run(['git', 'ls-remote', options.remote], info)
+        if ret != 0:
+            # Remote is unavailable.
+            if options.verbose:
+                err.write('`git ls-remote ...` failed:\n%s\n%s\n' % (stdout,
+                    stderr))
+            return 0
 
     if options.commit:
         ret, stdout, stderr = run(['git', 'pull', '--rebase', '--ff-only',
