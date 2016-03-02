@@ -13,13 +13,21 @@ def meta_c(api):
 def meta_g(api):
     '''news'''
     import feedparser
+    RETRIES = 3
     if not api[1]['which']('mplayer'):
         api[1]['error']('mplayer not available')
         return -1
     if not api[1]['which']('wget'):
         api[1]['error']('wget not available')
         return -1
-    entry = feedparser.parse('http://downloads.bbc.co.uk/podcasts/worldservice/globalnews/rss.xml').entries[0]
+    for _ in range(RETRIES):
+        entries = feedparser.parse('http://downloads.bbc.co.uk/podcasts/worldservice/globalnews/rss.xml').entries
+        if len(entries) > 0:
+            entry = entries[0]
+            break
+    else:
+        api[1]['error']('no entries in feed')
+        return -1
     url = entry['media_content'][0]['url']
     api[1]['notify']('streaming BBC Global News')
     return api[2]['run']('wget %s -O - | mplayer -' % url)[0]
