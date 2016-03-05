@@ -50,7 +50,7 @@ def _notify(tty, message):
 def ps(proc):
     procs = []
     for p in psutil.process_iter():
-        if p.name() == proc:
+        if p.name == proc:
             procs.append(p)
     return procs
 
