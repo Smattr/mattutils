@@ -51,7 +51,7 @@ LOCAL_PROMPT="[%n@%m %{${fg_bold[red]}%}%(?..%? )%{${fg_no_bold[default]}%}%~] "
 REMOTE_PROMPT="[%n@%m %{${fg_bold[red]}%}%(?..%?)%{${fg_no_bold[default]}%}%~ %{${fg_bold[green]}%}#%{${fg_no_bold[default]}%}] "
 export PATH="$HOME/bin:$PATH"
 export EDITOR="vim"
-export LESS="-i -R -n -S -FRX"
+export LESS="-M -i -R -n -S -FRX"
 if [ -e "${HOME}/.python" ]; then
   export PYTHONSTARTUP="$HOME/.python"
 fi
