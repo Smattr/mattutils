@@ -39,7 +39,7 @@ syn clear
 syn sync fromstart
 syn case match
 
-syn keyword IsabelleCommand term typ prop prf full_prf pr value
+syn keyword IsabelleCommand term typ prop prf full_prf pr value notation
 syn keyword IsabelleCommand abbreviation
 syn keyword IsabelleCommand theory
 syn keyword IsabelleCommand theorem schematic_theorem corollary
@@ -148,7 +148,7 @@ else
   syn match IsabelleComment "\(chapter\|text\|txt\|header\|\(sub\)*section\)[ ]*{\*\_.\{-}\*}"
 endif
 
-syn keyword IsabelleCommandPart and is
+syn keyword IsabelleCommandPart and is input output
 syn keyword IsabelleCommandPart assumes constrains defines shows fixes notes
     \ obtains
 syn keyword IsabelleCommandPart where for
