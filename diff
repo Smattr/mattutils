@@ -4,7 +4,7 @@
 Wrapper around `diff` that calls `colordiff` when available.
 '''
 
-import os, subprocess, sys
+import os, sys
 
 ME = os.path.abspath(__file__)
 
@@ -40,11 +40,11 @@ def main(argv):
             # Mark the environment, indicating that we are recursing.
             env = dict(os.environ.items() +
                 [(RECURSE_MARKER, RECURSE_INDICATOR)])
-            return subprocess.call([colordiff] + argv[1:], env=env)
+            return os.execve(colordiff, [colordiff] + argv[1:], env)
 
     diff = which('diff')
     if diff is not None:
-        return subprocess.call([diff] + sys.argv[1:])
+        return os.execv(diff, [diff] + sys.argv[1:])
 
     print >>sys.stderr, 'diff not found'
     return -1
