@@ -73,7 +73,6 @@ for i in .dircolors \
          .emacs \
          .fonts.conf \
          .gdbinit \
-         .gnomerc \
          .hgrc \
          .mplayer \
          .reroute-config.py \
