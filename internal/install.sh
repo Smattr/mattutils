@@ -31,7 +31,6 @@ for i in \
          git-stree \
          github-ls.sh \
          in \
-         has-changed.sh \
          have-lib.sh \
          ifind \
          intray \
