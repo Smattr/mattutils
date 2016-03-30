@@ -36,8 +36,6 @@ set laststatus=2
 set incsearch
 
 " Bodhi's options for spell checking
-"set spell spelllang=en_au
-"setlocal spell spelllang=en_au
 nm <F7> :setlocal spell! spelllang=en_au<CR>
 imap <F7> <C-o>:setlocal spell! spelllang=en_au<CR>
 highlight clear SpellBad
