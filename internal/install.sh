@@ -24,7 +24,6 @@ for i in \
          compresspdf.sh \
          fifi.sh \
          find-broken.sh \
-         fuckit-cc \
          fwdmail.py \
          generate-passwd \
          gg \
@@ -41,7 +40,6 @@ for i in \
          term \
          later \
          mediawatch.py \
-         mvbs.py \
          notate.py \
          now \
          package.py \
@@ -52,7 +50,6 @@ for i in \
          search \
          sendmail.py \
          ssh-proxy \
-         tb \
          ubiquity \
          validate.py \
          wh \
