@@ -19,8 +19,6 @@ cub.py - Messy and inaccurate C linter.
 dd.sh - Wrapper around dd to provide progress output.
 find-broken.sh - A script for finding broken symlinks.
 fwdmail.py - A script for forwarding your local mail to an external address.
-fuckit-cc - A script for violently suppressing errors in your C code.
-    Considered harmful.
 generate-passwd - A script for generating random passwords.
 git-stree - Git subtree helper (WIP).
 github-ls.sh - A script for listing the names of all your github repos. I use
@@ -48,6 +46,8 @@ misc/balloon.c - A memory balloon application.
 misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
 misc/error-handling.c - An example (experiment?) of out-of-line error handling
     in C.
+misc/fuckit-cc - A script for violently suppressing errors in your C code.
+    Considered harmful.
 misc/is-bound.c - Program for checking whether a socket is currently bound.
 misc/linked_list.[ch] - An implementation of a linked list in C. This was some
     code from when I was learning C. If you want a linked list, you are
