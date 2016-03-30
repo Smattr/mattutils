@@ -1,2 +1,4 @@
 *.swp
+*.pyc
 config/.vim/.netrwhist
+balloon
