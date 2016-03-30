@@ -100,4 +100,3 @@ timestamp - Timestamp console stdout.
 toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
 ubiquity -  A script for automatically syncing a git repository across
     machines.
-vimall.sh - Quick way of opening everything in a directory in vim.
