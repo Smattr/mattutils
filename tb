@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Bind this script to a keyboard shortcut to restart Thunderbird easily in
-# order to cope with its shitty inability to roam across networks.
-
-killall --quiet --wait thunderbird
-thunderbird
