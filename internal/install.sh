@@ -29,7 +29,6 @@ for i in \
          gg \
          git-stree \
          github-ls.sh \
-         in \
          ifind \
          intray \
          repty \
