@@ -4,7 +4,7 @@
 # things like probing the environment in my crontab. Run it with a chosen port
 # and then run "nc localhost port" in another terminal to connect.
 #
-#Don't run this if you don't understand what it's doing, as it effectively
+# Don't run this if you don't understand what it's doing, as it effectively
 # creates a backdoor into your machine.
 
 if [ $# -ne 1 ]; then
