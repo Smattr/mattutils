@@ -83,7 +83,6 @@ for i in .dircolors \
          .vim \
          .wgetrc \
          .Xdefaults \
-         .xmonad \
          .zsh \
          .zshrc; do
     if [ ! -e "${REPO}/config/$i" ]; then
