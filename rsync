@@ -22,7 +22,7 @@ def is_remote(path):
     '''
     return ':' in path
 
-def call(argv):
+def call(argv, need_return=False):
     '''
     Call the real rsync with the given arguments.
     '''
@@ -34,7 +34,10 @@ def call(argv):
         sys.stderr.write('real rsync not found\n')
         return -1
 
-    return subprocess.call([rsync] + argv)
+    if need_return:
+        return subprocess.call([rsync] + argv)
+
+    os.execv(rsync, [rsync] + argv)
 
 def main(argv):
     source_index = None
@@ -73,7 +76,7 @@ def main(argv):
     atexit.register(subprocess.call, ['fusermount', '-u', tmp])
 
     # Rsync should now be able to cope.
-    return call(argv[1:target_index] + [tmp] + argv[target_index + 1:])
+    return call(argv[1:target_index] + [tmp] + argv[target_index + 1:], True)
 
 if __name__ == '__main__':
     try:
