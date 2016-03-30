@@ -93,9 +93,6 @@ npq.sh - Check a print queue and send a notification to the desktop.
 ppa-install - Wrapper for installing PPA-hosted packages in Ubuntu.
 prefix - Preface each output line from a command with some given text.
 reroute.py - Shortcut gateway.
-reset-perms.sh - Script for reseting the permissions on a folder recursively.
-    This is awkward to do with chmod when you want to set different permissions
-    for the directories and files.
 rsync - Wrapper to allow rsync to handle remote-to-remote transfers.
 search - Bash script for doing a souped up `which`.
 sendmail.py - Script for sending mail from the command line. I got tired of

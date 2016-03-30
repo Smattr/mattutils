@@ -50,7 +50,6 @@ for i in \
          ppa-install \
          prefix \
          pyman \
-         reset-perms.sh \
          search \
          sendmail.py \
          ssh-proxy \
