@@ -30,7 +30,6 @@ for i in \
          git-stree \
          github-ls.sh \
          in \
-         have-lib.sh \
          ifind \
          intray \
          repty \

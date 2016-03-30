@@ -28,8 +28,6 @@ giveem.sh - Creates a setuid binary for a given shell command. This is a quick
     system where you're collaborating with someone and neither of you have
     sudo. Obviously it's pretty easy to shoot yourself in the foot with this
     one, so tread carefully.
-have-lib.sh - A bash script to check for the existence of a library (handy for
-    Makefiles).
 internal/ - A directory for scripts for managing operations specific to this
     repository.
 internal/install.sh - A script to symlink all the relevant bits I use into my
