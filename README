@@ -86,7 +86,6 @@ mplayerfs - Wrapper for starting mplayer in full screen mode and accounting for
     network playback.
 notify-send-wrapper.sh - A way to call notify-send from a crontab or other
     restricted environment.
-npq.sh - Check a print queue and send a notification to the desktop.
 ppa-install - Wrapper for installing PPA-hosted packages in Ubuntu.
 prefix - Preface each output line from a command with some given text.
 reroute.py - Shortcut gateway.
