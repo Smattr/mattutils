@@ -92,8 +92,17 @@ def main(argv):
         print signature(fn.__name__, inspect.getargspec(fn))
         print ''
     elif inspect.isclass(fn):
-        print signature('%s.__init__' % fn.__name__, inspect.getargspec(fn.__init__))
-        print ''
+        argspec = None
+        try:
+            argspec = inspect.getargspec(fn.__init__)
+        except TypeError:
+            # We end up here if the function we were inspecting is implemented
+            # in C.
+            pass
+
+        if argspec is not None:
+            print signature('%s.__init__' % fn.__name__, argspec)
+            print ''
     print re.sub(r'^    ', '', doc, flags=re.MULTILINE)
 
     return 0
