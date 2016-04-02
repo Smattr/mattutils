@@ -71,6 +71,7 @@ for i in .dircolors \
          .emacs \
          .fonts.conf \
          .gdbinit \
+         .gitconfig \
          .hgrc \
          .mplayer \
          .reroute-config.py \
@@ -98,13 +99,6 @@ if [ ! -e "${HOME}/.ssh/config_mattutils" ]; then
     ln -s "${REPO}/config/.ssh/config" "${HOME}/.ssh/config_mattutils"
 elif [ ! -L "${HOME}/.ssh/config_mattutils" ]; then
     echo "Warning: Skipping SSH config_mattutils that already exists." >&2
-fi
-
-# Link Git config.
-if [ ! -e "${HOME}/.gitconfig_mattutils" ]; then
-    ln -s "${REPO}/config/.gitconfig" "${HOME}/.gitconfig_mattutils"
-elif [ ! -L "${HOME}/.gitconfig_mattutils" ]; then
-    echo "Warning: Skipping gitconfig_mattutils that already exists." >&2
 fi
 
 # Build some utils.
