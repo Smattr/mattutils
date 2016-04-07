@@ -33,6 +33,7 @@ internal/ - A directory for scripts for managing operations specific to this
 internal/install.sh - A script to symlink all the relevant bits I use into my
     ~/bin directory.
 lottery.py - Hastily written script for choosing random system users.
+manage-kernels - Script for uninstalling Linux kernels.
 mediad.py - Quick daemon for remotely controlling mplayer.
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.

@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+'''
+Utility for uninstalling Linux kernels. I can never remember which exact
+packages to remove.
+'''
+
+import os, re, subprocess, sys
+
+def main():
+
+    sys.stdout.write('Finding installed kernels...\n')
+    kernels = []
+    regex = re.compile(r'vmlinuz-(.*)-generic$')
+    for k in os.listdir('/boot'):
+        m = regex.match(k)
+        if m is not None:
+            kernels.append(m.group(1))
+
+    # Check the found kernels are actually installed.
+    remove = []
+    for k in kernels:
+        try:
+            with open(os.devnull, 'wt') as f:
+                subprocess.check_call(['dpkg', '-l', 'linux-image-%s-generic'
+                    % k], stdout=f, stderr=f)
+        except subprocess.CalledProcessError:
+            sys.stderr.write('Removing false positive Linux %s\n' % k)
+            remove.append(k)
+    kernels = sorted(k for k in kernels if k not in remove)
+
+    sys.stdout.write('Checking free space...')
+    stdout = subprocess.check_output(['df', '-h', '/boot'])
+    free = stdout.split('\n')[1].split()[3]
+    sys.stdout.write('%s\n' % free)
+
+    for index, k in enumerate(kernels):
+        sys.stdout.write(' [%d] Remove %s\n' % (index, k))
+
+    inp = raw_input('What would you like to do? ')
+    try:
+        index = int(inp)
+        if index < 0 or index >= len(kernels):
+            raise ValueError
+    except ValueError:
+        sys.stderr.write('%s is not a valid option\n' % inp)
+        return -1
+
+    os.execlp('sudo', 'sudo', 'apt-get', 'purge',
+        'linux-headers-%s-generic' % kernels[index], 'linux-image-%s-generic' % kernels[index],
+        'linux-headers-%s' % kernels[index], 'linux-image-extra-%s-generic' % kernels[index])
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)
