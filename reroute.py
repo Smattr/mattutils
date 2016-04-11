@@ -68,16 +68,11 @@ def which(cmd):
         return ''
 
 api = {
-    1:{
-        'error':functools.partial(_error, None),
-        'notify':functools.partial(_notify, None),
-        'ps':ps,
-        'run':subprocess.call,
-        'which':which,
-    },
-    2:{
-        'run':run,
-    }
+    'error':functools.partial(_error, None),
+    'notify':functools.partial(_notify, None),
+    'ps':ps,
+    'run':run,
+    'which':which,
 }
 
 def main(argv):
@@ -92,10 +87,10 @@ def main(argv):
     opts = parser.parse_args(argv[1:])
 
     error = functools.partial(_error, opts.tty)
-    api[1]['error'] = error
+    api['error'] = error
 
     notify = functools.partial(_notify, opts.tty)
-    api[1]['notify'] = notify
+    api['notify'] = notify
 
     try:
         shortcuts = imp.load_source('', os.path.expanduser('~/.reroute-config.py'))
