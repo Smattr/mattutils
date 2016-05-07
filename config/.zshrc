@@ -361,4 +361,7 @@ function exp() {
   PROMPT="%{${bg_bold[magenta]}%}${1%%=*}%{${bg_no_bold[default]}%} ${PROMPT}"
 }
 
+# Enable colour diagnostics in GCC >=4.9
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
 fi # Close overload detection
