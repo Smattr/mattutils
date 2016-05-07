@@ -51,7 +51,7 @@ meta_l = ['gnome-screensaver-command', '--lock']
 def meta_p(api):
     '''type password'''
     import os
-    return api['run']([os.path.expanduser('~/bin/pw'), 'gui-type'])[0]
+    return api['run']([os.path.expanduser('~/bin/pw-gui')])[0]
 
 def meta_s(api):
     '''toggle screensaver'''
