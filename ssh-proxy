@@ -31,12 +31,13 @@ def main(argv):
     options = parser.parse_args(argv[1:])
 
     procs = {}
-    devnull = open(os.devnull, 'w')
+    devnullout = open(os.devnull, 'w')
+    devnullin = open(os.devnull, 'r')
 
-    # Fire off pings to all the gateways to see which are reachable.
+    # SSH to all the gateways to see which are reachable.
     for g in options.gateway:
-        p = subprocess.Popen(['ping', '-c', '1', g], stdout=devnull,
-            stderr=devnull)
+        p = subprocess.Popen(['ssh', g, 'exit 0'], stdin=devnullin,
+            stdout=devnullout, stderr=devnullout)
         procs[p.pid] = g
 
     # Wait until one responds with success.
