@@ -74,6 +74,7 @@ for i in .dircolors \
          .gitconfig \
          .hgrc \
          .mplayer \
+         .notme.json \
          .reroute-config.py \
          .screenrc \
          .tmux.conf \
@@ -104,4 +105,9 @@ fi
 # Build some utils.
 if [ ! -e "${HOME}/bin/balloon" ]; then
     cc -W -Wall -Werror -o balloon "${REPO}/misc/balloon.c" $(pkg-config --libs ncurses)
+fi
+
+# Notme links.
+if [ ! -e "${HOME}/bin/cmake" ]; then
+    ln -s "${REPO}/notme.py" "${HOME}/bin/cmake"
 fi
