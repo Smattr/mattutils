@@ -9,6 +9,9 @@ import os, re, subprocess, sys
 
 def main():
 
+    sys.stdout.write('You are currently running %s' %
+        subprocess.check_output(['uname', '-r']))
+
     sys.stdout.write('Finding installed kernels...\n')
     kernels = []
     regex = re.compile(r'vmlinuz-(.*)-generic$')
