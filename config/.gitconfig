@@ -17,6 +17,7 @@
     outgoing = "!git getch origin master && git log origin/master.."
     in = incoming
     out = outgoing
+    root = rev-parse --show-toplevel
 
 [merge]
     conflictstyle = diff3
