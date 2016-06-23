@@ -153,7 +153,7 @@ def meta_x(api):
 def meta_z(api):
     '''browser'''
     import os, socket
-    FIREWALLED_MACHINES = frozenset(['polysemy', 'synecdoche'])
+    FIREWALLED_MACHINES = frozenset(['synecdoche'])
     cmd = ['chromium-browser', '--incognito']
     if socket.gethostname() in FIREWALLED_MACHINES:
         cmd.append('--proxy-pac-url=file://%s' % \
