@@ -159,7 +159,7 @@ function vcs_prompt {
         echo "-%{${fg_bold[magenta]}%}DISABLED%{${fg_no_bold[default]}%}"
         exit 0
     fi
-    for i in git hg svn; do
+    for i in git hg; do
         which $i &>/dev/null
         if [ $? -ne 0 ]; then
             echo "zshrc: $i not found; vcs_prompt bailing out." 1>&2
@@ -196,22 +196,6 @@ function vcs_prompt {
             echo -n "%{${fg_bold[red]}%}"
         fi
         echo -n `hg branch 2>/dev/null`
-        echo -n "%{${fg_no_bold[default]}%}"
-    fi
-    svn list &>/dev/null
-    if [ $? -eq 0 ]; then
-        echo -n '-‡-'
-        if [ -z "`svn status 2>/dev/null`" ]; then
-            # Working directory is clean.
-            echo -n "%{${fg_bold[green]}%}"
-        elif [ -z "`svn status 2>/dev/null | grep -v '^?'`" ]; then
-            # Working directory only contains changes to untracked files.
-            echo -n "%{${fg_bold[yellow]}%}"
-        else
-            # Working directory contains changes to tracked files.
-            echo -n "%{${fg_bold[red]}%}"
-        fi
-        echo -n `svn info 2>/dev/null | grep URL | sed 's/.*\/\(.*\)/\1/g'`
         echo -n "%{${fg_no_bold[default]}%}"
     fi
 }
