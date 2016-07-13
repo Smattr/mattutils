@@ -1,3 +1,4 @@
 {
-    "cmake":["-G", "Ninja"]
+    "cmake":["-G", "Ninja"],
+    "ag":["--group", "--color", "--pager", "less"]
 }
