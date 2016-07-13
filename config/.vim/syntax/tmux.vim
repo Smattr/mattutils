@@ -48,8 +48,8 @@ syn keyword tmuxOptsSet prefix prefix2 status status-fg status-bg bell-action
 syn keyword tmuxOptsSet default-command history-limit status-left status-right
 syn keyword tmuxOptsSet status-interval set-titles display-time buffer-limit
 syn keyword tmuxOptsSet status-left-length status-right-length status-position
-syn keyword tmuxOptsSet message-[command-]bg lock-after-time default-path
-syn keyword tmuxOptsSet message-[command-]attr status-attr set-remain-on-exit
+syn keyword tmuxOptsSet message-bg message-command-bg lock-after-time default-path
+syn keyword tmuxOptsSet message-attr message-command-attr status-attr set-remain-on-exit
 syn keyword tmuxOptsSet status-utf8 default-terminal visual-activity repeat-time
 syn keyword tmuxOptsSet visual-bell visual-content status-justify status-keys
 syn keyword tmuxOptsSet terminal-overrides status-left-attr status-left-bg
@@ -59,7 +59,7 @@ syn keyword tmuxOptsSet display-panes-colour display-panes-time default-shell
 syn keyword tmuxOptsSet set-titles-string lock-command lock-server
 syn keyword tmuxOptsSet mouse-select-pane message-limit quiet escape-time
 syn keyword tmuxOptsSet pane-active-border-bg pane-active-border-fg
-syn keyword tmuxOptsSet pane-border-bg pane-border-fg message-[command-]fg
+syn keyword tmuxOptsSet pane-border-bg pane-border-fg message-fg message-command-fg
 syn keyword tmuxOptsSet display-panes-active-colour alternate-screen
 syn keyword tmuxOptsSet detach-on-destroy word-separators
 syn keyword tmuxOptsSet destroy-unattached exit-unattached set-clipboard
