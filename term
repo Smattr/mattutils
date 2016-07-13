@@ -18,7 +18,9 @@ fi
 
 cd ~/
 
-if [ $(which tmux) ]; then
+if [ $# -ge 1 ]; then
+    RUN="-e $@"
+elif [ $(which tmux) ]; then
     RUN="-e tmux"
 elif [ $(which screen) ]; then
     RUN="-e screen zsh"
