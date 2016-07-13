@@ -6,6 +6,8 @@
     ui = True
 [pager]
     status = True
+    diff = "less -FRSX +Gg"
+
 [github]
 	user = Smattr
 
