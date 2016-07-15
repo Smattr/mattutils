@@ -17,6 +17,7 @@ for i in \
          after \
          bashd.sh \
          bitbucket-ls.sh \
+         check_tmux_version.sh \
          colour-dump \
          defn.sh \
          diff \
@@ -79,6 +80,7 @@ for i in .agignore \
          .reroute-config.py \
          .screenrc \
          .tmux.conf \
+         .tmux-1.9-workaround.conf \
          .vimrc \
          .vim \
          .wgetrc \
