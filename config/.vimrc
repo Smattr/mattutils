@@ -7,10 +7,19 @@ set hlsearch
 set number
 set ignorecase
 
+" Fix typos. Ugh, there must be a better way.
 cnoreabbrev W w
 cnoreabbrev Q q
 cnoreabbrev Wq wq
 cnoreabbrev WQ wq
+cnoreabbrev WQA wqa
+cnoreabbrev WQa wqa
+cnoreabbrev WqA wqa
+cnoreabbrev Wqa wqa
+cnoreabbrev wQA wqa
+cnoreabbrev wQa wqa
+cnoreabbrev wqA wqa
+
 set display+=lastline
 set bg=dark
 
