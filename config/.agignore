@@ -1,0 +1,6 @@
+# Cscope databases
+cscope.out
+
+# Patch artefacts
+*.rej
+*.orig

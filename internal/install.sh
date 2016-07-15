@@ -67,7 +67,8 @@ if [ ":${PATH}:" != *":${HOME}/bin:"* ]; then
 fi
 
 # Link configurations.
-for i in .dircolors \
+for i in .agignore \
+         .dircolors \
          .emacs \
          .fonts.conf \
          .gdbinit \
