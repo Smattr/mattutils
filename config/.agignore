@@ -2,5 +2,5 @@
 cscope.out
 
 # Patch artefacts
-*.rej
-*.orig
+**.rej
+**.orig
