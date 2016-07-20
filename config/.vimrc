@@ -128,3 +128,9 @@ let g:ycm_filetype_blacklist = {}
 
 set foldmethod=syntax
 set foldlevelstart=20
+
+" XXX: I don't know why, but the combination of Tmux setting
+" TERM=screen-256color, Vim autodetecting t_Co=256 and Pterm displaying things
+" incorrectly means we need to set the following or visual highlighting is
+" invisible.
+hi Visual cterm=reverse
