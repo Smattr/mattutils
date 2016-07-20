@@ -301,7 +301,7 @@ fi
 # Terminal highlighting.
 highlight() { perl -pe "s/$1/\e[1;35;44m$&\e[0m/g"; }
 
-if [[ "${TERM}" != "screen" ]]; then
+if [[ "${TERM}" != "screen" && "${TERM}" != "screen-256color" ]]; then
     echo "You are not in screen/tmux..."
 fi
 
