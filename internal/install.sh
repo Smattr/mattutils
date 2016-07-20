@@ -114,3 +114,7 @@ fi
 if [ ! -e "${HOME}/bin/cmake" ]; then
     ln -s "${REPO}/notme.py" "${HOME}/bin/cmake"
 fi
+
+if [ ! -e "${HOME}/.tmux/plugins/tpm" ]; then
+    echo "Warning: Tmux Plugin Manager not found (~/.tmux/plugins/tpm)" >&2
+fi
