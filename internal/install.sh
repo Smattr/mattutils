@@ -43,7 +43,6 @@ for i in \
          now \
          package.py \
          pdfcrop.sh \
-         ppa-install \
          prefix \
          pyman \
          search \
