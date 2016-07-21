@@ -63,7 +63,8 @@ for i in \
         echo "Warning: Skipping $i that already exists." >&2
     fi
 done
-if [ ":${PATH}:" != *":${HOME}/bin:"* ]; then
+SHELL_PATH=$(${SHELL} -c 'echo ${PATH}')
+if [[ ":${SHELL_PATH}:" != *":${HOME}/bin:"* ]]; then
     echo "Warning: ${HOME}/bin, where symlinks are created, is not in your bash \$PATH." >&2
 fi
 
