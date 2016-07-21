@@ -186,7 +186,7 @@ function vcs_prompt {
         git bi visualize &>/dev/null
         if [ $? -eq 0 ]; then
             REMAINING=$(git bi visualize | grep '^commit' | wc -l)
-            if [ ${REMAINING} -eq 1 ]; then
+            if [ ${REMAINING} -le 1 ]; then
                 echo -n "-%{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
             else
                 echo -n "-%{${fg_bold[magenta]}%}⥷ ${REMAINING}%{${fg_no_bold[default]}%}"
