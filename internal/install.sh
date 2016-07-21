@@ -80,7 +80,8 @@ for i in .agignore \
          .reroute-config.py \
          .screenrc \
          .tmux.conf \
-         .tmux-1.9-workaround.conf \
+         .tmux-legacy.conf \
+         .tmux-modern.conf \
          .vimrc \
          .vim \
          .wgetrc \
