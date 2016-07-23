@@ -27,5 +27,8 @@
 [log]
     decorate = True
 
+[rebase]
+    autoStash = True
+
 [include]
     path = .gitconfig_mattbin
