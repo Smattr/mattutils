@@ -12,7 +12,7 @@
 [alias]
     co = clone
     st = status
-    glog = log --graph
+    glog = log --graph --stat
     incoming = "!git fetch origin master && git log ..origin/master"
     outgoing = "!git getch origin master && git log origin/master.."
     in = incoming
