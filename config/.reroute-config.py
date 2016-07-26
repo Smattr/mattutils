@@ -159,3 +159,6 @@ def meta_z(api, argv):
         cmd.append('--proxy-pac-url=file://%s' % \
             os.path.expanduser('~/bin/nictabin/nicta-proxy.pac'))
     return api['run'](cmd + argv[1:])[0]
+
+cmake = ['cmake', '-G', 'Ninja']
+ag = ['ag', '--group', '--color', '--pager', 'less']

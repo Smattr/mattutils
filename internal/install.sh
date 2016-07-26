@@ -76,7 +76,6 @@ for i in .agignore \
          .gitconfig \
          .hgrc \
          .mplayer \
-         .notme.json \
          .reroute-config.py \
          .screenrc \
          .tmux.conf \
@@ -111,17 +110,18 @@ if [ ! -e "${HOME}/bin/balloon" ]; then
     cc -W -Wall -Werror -o balloon "${REPO}/misc/balloon.c" $(pkg-config --libs ncurses)
 fi
 
-# Notme links.
-if [ ! -e "${HOME}/bin/cmake" ]; then
-    ln -s "${REPO}/notme.py" "${HOME}/bin/cmake"
-fi
-
 # Re-route links.
 for i in c g h l o s u v x z; do
     if [ ! -e "${HOME}/bin/meta_$i" ]; then
         ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
     fi
 done
+if [ ! -e "${HOME}/bin/ag" ]; then
+    ln -s "${REPO}/reroute.py" "${HOME}/bin/ag"
+fi
+if [ ! -e "${HOME}/bin/cmake" ]; then
+    ln -s "${REPO}/reroute.py" "${HOME}/bin/cmake"
+fi
 
 if [ ! -e "${HOME}/.tmux/plugins/tpm" ]; then
     echo "Warning: Tmux Plugin Manager not found (~/.tmux/plugins/tpm)" >&2
