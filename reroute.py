@@ -67,8 +67,25 @@ def which(cmd):
     except subprocess.CalledProcessError:
         return ''
 
+def find_shadow(target):
+    '''
+    Find the first command in our PATH that is not us.
+    '''
+    me = os.path.abspath(__file__)
+    cmd = os.path.basename(me)
+    path = os.environ.get('PATH', '').strip()
+    if path == '':
+        return None
+    for root in path.split(':'):
+        candidate = os.path.abspath(os.path.join(root, target))
+        if os.path.exists(candidate) and os.access(candidate, os.R_OK|os.X_OK) and \
+                not os.path.samefile(me, candidate):
+            return candidate
+    return None
+
 api = {
     'error':functools.partial(_error, None),
+    'find_shadow':find_shadow,
     'notify':functools.partial(_notify, None),
     'ps':ps,
     'run':run,
@@ -76,21 +93,14 @@ api = {
 }
 
 def main(argv):
-    parser = argparse.ArgumentParser(description='shortcut gateway')
-    parser.add_argument('--list', '-l', action='store_true',
-        help='show available shortcuts')
-    parser.add_argument('--tty', action='store_true', default=None,
-        help='force output to be recognised as a TTY')
-    parser.add_argument('--no-tty', dest='tty', action='store_false',
-        help='force output to not be recognised as a TTY')
-    parser.add_argument('shortcut', nargs='?', help='shortcut to invoke')
-    opts = parser.parse_args(argv[1:])
-
-    error = functools.partial(_error, opts.tty)
+    error = functools.partial(_error, sys.stdout.isatty())
     api['error'] = error
 
-    notify = functools.partial(_notify, opts.tty)
+    notify = functools.partial(_notify, sys.stdout.isatty())
     api['notify'] = notify
+
+    # Figure out what command the user is trying to run.
+    shortcut = os.path.basename(__file__)
 
     try:
         shortcuts = imp.load_source('', os.path.expanduser('~/.reroute-config.py'))
@@ -104,48 +114,36 @@ def main(argv):
         error('no shortcuts defined')
         return -1
 
-    if opts.list:
-        available = []
-        for k, v in shortcuts.__dict__.items():
-            if k.startswith('__'):
-                continue
-            if isinstance(v, str):
-                available.append('%s - exec "%s"' % (k, v))
-            elif isinstance(v, list):
-                available.append('%s - exec "%s"' % (k, ' '.join(v)))
-            elif hasattr(v, '__call__'):
-                available.append('%s - %s' % (k, v.__doc__))
-            else:
-                available.append('%s - unknown' % k)
-        notify('\n'.join(available))
-        return 0
-
-    if opts.shortcut is None:
-        error('no shortcut specified')
-        return -1
-
-    if opts.shortcut.startswith('__'):
+    if shortcut.startswith('__'):
         # Avoid letting users accidentally invoke Python built ins.
         error('illegal shortcut name')
         return -1
 
-    cmd = shortcuts.__dict__.get(opts.shortcut)
+    cmd = shortcuts.__dict__.get(shortcut)
     if cmd is None:
-        error('shortcut %s not found' % opts.shortcut)
+        error('shortcut %s not found' % shortcut)
         return -1
 
     try:
         if isinstance(cmd, str):
-            return subprocess.call(cmd, shell=True)
-        elif isinstance(cmd, list):
-            return subprocess.call(cmd)
+            target = find_shadow(cmd)
+            if target is None:
+                error('\'%s\' not found' % cmd)
+                return -1
+            os.execv(target, [target] + argv[1:])
+        elif isinstance(cmd, list) and len(cmd) > 0:
+            target = find_shadow(cmd[0])
+            if target is None:
+                error('\'%s\' not found' % cmd[0])
+                return -1
+            os.execv(target, [target] + cmd[1:] + argv[1:])
         elif hasattr(cmd, '__call__'):
-            return cmd(api)
+            return cmd(api, argv)
         else:
-            error('unrecognised type of shortcut %s' % opts.shortcut)
+            error('unrecognised type of shortcut %s' % shortcut)
             return -1
     except Exception as e:
-        error('failed to run %s: %s' % (opts.shortcut, e))
+        error('failed to run %s: %s' % (shortcut, e))
         return -1
 
 if __name__ == '__main__':

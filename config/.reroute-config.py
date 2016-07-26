@@ -1,4 +1,4 @@
-def meta_c(api):
+def meta_c(api, argv):
     '''email'''
     if not api['which']('thunderbird'):
         api['error']('thunderbird not available')
@@ -6,9 +6,9 @@ def meta_c(api):
     # Restart Thunderbird if it's already running to cope with its shitty
     # inability to roam across networks.
     api['run'](['killall', '--quiet', '--wait', 'thunderbird'])
-    return api['run'](['thunderbird'])[0]
+    return api['run'](['thunderbird'] + argv[1:])[0]
 
-def meta_g(api):
+def meta_g(api, argv):
     '''news'''
     import feedparser
     RETRIES = 3
@@ -30,7 +30,7 @@ def meta_g(api):
     api['notify']('streaming BBC Global News')
     return api['run']('wget %s -O - | mplayer -' % url)[0]
 
-def meta_h(api):
+def meta_h(api, argv):
     '''Toggle unclutter'''
     import os, signal
     if not api['which']('unclutter'):
@@ -48,12 +48,12 @@ def meta_h(api):
 
 meta_l = ['gnome-screensaver-command', '--lock']
 
-def meta_o(api):
+def meta_o(api, argv):
     '''type password'''
     import os
-    return api['run']([os.path.expanduser('~/bin/pw-gui')])[0]
+    return api['run']([os.path.expanduser('~/bin/pw-gui')] + argv[1:])[0]
 
-def meta_s(api):
+def meta_s(api, argv):
     '''toggle screensaver'''
     import re
 
@@ -120,7 +120,7 @@ def meta_s(api):
 
     return ret
 
-def meta_u(api):
+def meta_u(api, argv):
     '''unmount all user drives we currently have mounted'''
     import os
     USER_MOUNT_ROOT = '/media/%s/' % os.environ['USER']
@@ -141,16 +141,16 @@ def meta_u(api):
     if len(errored) == 0 and len(unmounted) == 0:
         api['notify']('nothing to unmount')
 
-def meta_v(api):
+def meta_v(api, argv):
     '''screenshot'''
-    return api['run'](['gnome-screenshot', '-a'])[0]
+    return api['run'](['gnome-screenshot', '-a'] + argv[1:])[0]
 
-def meta_x(api):
+def meta_x(api, argv):
     '''terminal'''
     import os
     return api['run'](os.path.expanduser('~/bin/term'))[0]
 
-def meta_z(api):
+def meta_z(api, argv):
     '''browser'''
     import os, socket
     FIREWALLED_MACHINES = frozenset(['synecdoche'])
@@ -158,4 +158,4 @@ def meta_z(api):
     if socket.gethostname() in FIREWALLED_MACHINES:
         cmd.append('--proxy-pac-url=file://%s' % \
             os.path.expanduser('~/bin/nictabin/nicta-proxy.pac'))
-    return api['run'](cmd)[0]
+    return api['run'](cmd + argv[1:])[0]

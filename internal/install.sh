@@ -116,6 +116,13 @@ if [ ! -e "${HOME}/bin/cmake" ]; then
     ln -s "${REPO}/notme.py" "${HOME}/bin/cmake"
 fi
 
+# Re-route links.
+for i in c g h l o s u v x z; do
+    if [ ! -e "${HOME}/bin/meta_$i" ]; then
+        ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
+    fi
+done
+
 if [ ! -e "${HOME}/.tmux/plugins/tpm" ]; then
     echo "Warning: Tmux Plugin Manager not found (~/.tmux/plugins/tpm)" >&2
 fi
