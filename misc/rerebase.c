@@ -84,6 +84,8 @@ static int move(const char *oldpath, const char *newpath) {
             int r = sendfile(dst, src, NULL, st.st_size);
             close(dst);
             close(src);
+            if (r == 0)
+                unlink(oldpath);
             return r;
         }
         return -1;
