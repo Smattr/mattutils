@@ -19,7 +19,8 @@
     out = outgoing
     root = rev-parse --show-toplevel
     # Fix Git's shitty inability to bisect when not at the top level
-    bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect $@; }; f"
+    bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect \"$@\"; }; f"
+    re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
 
 [merge]
     conflictstyle = diff3
