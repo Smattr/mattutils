@@ -107,7 +107,7 @@ fi
 
 # Build some utils.
 if [ ! -e "${HOME}/bin/balloon" ]; then
-    cc -W -Wall -Werror -o balloon "${REPO}/misc/balloon.c" $(pkg-config --libs ncurses)
+    cc -O3 -std=c11 -W -Wall -Wextra -Werror -o "${HOME}/bin/balloon" "${REPO}/misc/balloon.c" $(pkg-config --libs ncurses)
 fi
 if [ ! -e "${HOME}/bin/rerebase" ]; then
     cc -O3 -std=c11 -W -Wall -Wextra -Werror -o "${HOME}/bin/rerebase" "${REPO}/misc/rerebase.c"

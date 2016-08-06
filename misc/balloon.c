@@ -25,6 +25,7 @@
  *  Matthew Fernandez <matthew.fernandez@gmail.com>
  */
 
+#define _BSD_SOURCE
 #include <assert.h>
 #include <ncurses.h>
 #include <stdio.h>
