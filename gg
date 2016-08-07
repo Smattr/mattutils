@@ -1,4 +1,4 @@
 #!/bin/sh
 
-find . 2>/dev/null -type f -exec grep --color=auto -HI "$@" "{}" \; | less -iRnSFX
+find . 2>/dev/null -type f -exec grep --color=always -HI "$@" "{}" \; | less -iRnSFX
 
