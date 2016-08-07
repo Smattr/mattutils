@@ -5,6 +5,7 @@
 [pager]
     status = True
     diff = "less -FRSX +Gg"
+    branch = True
 
 [github]
 	user = Smattr
