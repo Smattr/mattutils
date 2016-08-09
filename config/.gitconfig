@@ -22,6 +22,8 @@
     # Fix Git's shitty inability to bisect when not at the top level
     bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect \"$@\"; }; f"
     re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
+    dsf = "!f() { { which diff-so-fancy >/dev/null 2>/dev/null || { echo \"diff-so-fancy not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff --color \"$@\" | diff-so-fancy  | less --tabs=4 -RFX; }; f"
+    ssf = "!f() { { which diff-so-fancy >/dev/null 2>/dev/null || { echo \"diff-so-fancy not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | diff-so-fancy  | less --tabs=4 -RFX; }; f"
 
 [merge]
     conflictstyle = diff3
