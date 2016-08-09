@@ -15,6 +15,8 @@ import argparse, os, re, sys
 UNDEF_SHIFT = re.compile(r'[^\d]1\s*<<\s*(\d+)')
 NEGATE_SELF = re.compile(r'([a-zA-Z_]\w*)\s*=\s*-\s*([a-zA-Z_]\w*)')
 MODIFY_TWICE = re.compile(r'\[\s*(?P<pre1>(?:\+\+)|(?:--))?\s*(?P<id1>[a-zA-Z_]\w*)\s*(?P<post1>(?:\+\+)|(?:--))?\s*\]\s*=\s*(?P<pre2>(?:\+\+)|(?:--))?\s*(?P<id2>[a-zA-Z_]\w*)\s*(?P<post2>(?:\+\+)|(?:--))?')
+GUARD_IFNDEF = re.compile(r'\s*#\s*ifndef\s+(?P<guard>\w+)\s*$')
+GUARD_DEF = re.compile(r'\s*#\s*define\s+(?P<guard>\w+)\s*$')
 
 def scan_file(filepath):
 
@@ -22,6 +24,8 @@ def scan_file(filepath):
         sys.stderr.write('%s:%d: %s' % (filepath, lineno, line))
 
     with open(filepath) as f:
+        ifndef_guard = None
+
         for lineno, line in enumerate(f, 1):
 
             # Undefined left shifts into the sign bit.
@@ -46,6 +50,18 @@ def scan_file(filepath):
             if m is not None and m.group('id1') == m.group('id2') and (m.group('pre1') is not None or m.group('pre2') is not None or m.group('post1') is not None or m.group('post2') is not None):
                 write_line(lineno, line)
                 sys.stderr.write(' potential duplicate modification of %s within a sequence point\n' % m.group('id1'))
+
+            # Find mismatched header guards.
+            if ifndef_guard is not None:
+                m = GUARD_DEF.match(line)
+                if m is not None:
+                    if ifndef_guard != m.group('guard'):
+                        write_line(lineno, line)
+                        sys.stderr.write(' guard define does not match preceding #ifndef\n')
+                ifndef_guard = None
+            m = GUARD_IFNDEF.match(line)
+            if m is not None:
+                ifndef_guard = m.group('guard')
 
 def main(argv):
     parser = argparse.ArgumentParser(
