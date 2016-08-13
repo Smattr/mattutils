@@ -20,7 +20,6 @@ for i in \
          check_tmux_version.sh \
          colour-dump \
          defn.sh \
-         diff \
          download \
          compresspdf.sh \
          fifi.sh \
