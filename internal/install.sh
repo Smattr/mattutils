@@ -112,6 +112,9 @@ fi
 if [ ! -e "${HOME}/bin/rerebase" ]; then
     cc -O3 -std=c11 -W -Wall -Wextra -Werror -o "${HOME}/bin/rerebase" "${REPO}/misc/rerebase.c"
 fi
+if [ ! -e "${HOME}/bin/dif" ]; then
+    c++ -O3 -std=c++11 -W -Wall -Wextra -Werror -o "${HOME}/bin/dif" "${REPO}/misc/dif.cpp"
+fi
 
 # Re-route links.
 for i in c g h l o s u v x z; do
