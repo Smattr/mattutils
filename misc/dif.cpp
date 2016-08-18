@@ -131,7 +131,7 @@ child_fail:;
 
   int status;
   if (read(signal_pipe[0], &status, sizeof status) > 0) // child failed
-    goto fail4;
+    goto fail5;
 
   close(signal_pipe[0]);
 
@@ -153,9 +153,10 @@ child_fail:;
 
   return;
 
-fail4:;
+fail5:;
   int ignored;
   waitpid(p, &ignored, 0);
+fail4:
   close(signal_pipe[0]);
   if (signal_pipe[1] >= 0)
     close(signal_pipe[1]);
