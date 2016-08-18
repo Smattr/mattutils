@@ -18,7 +18,12 @@ A shortcut in ~/.reroute-config.py can be:
  3. A Python function to run.
 '''
 
-import argparse, functools, imp, os, psutil, pynotify, re, subprocess, sys
+import argparse, functools, imp, os, pynotify, re, subprocess, sys
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 _pynotify_inited = False
 
@@ -48,6 +53,8 @@ def _notify(tty, message):
         n.show()
 
 def ps(proc):
+    if psutil is None:
+        raise Exception('psutil not available')
     procs = []
     for p in psutil.process_iter():
         if p.name == proc:
