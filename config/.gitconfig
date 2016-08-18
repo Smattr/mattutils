@@ -25,6 +25,7 @@
     dsf = "!f() { { which diff-so-fancy >/dev/null 2>/dev/null || { echo \"diff-so-fancy not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff --color \"$@\" | diff-so-fancy  | less --tabs=4 -RFX; }; f"
     ssf = "!f() { { which diff-so-fancy >/dev/null 2>/dev/null || { echo \"diff-so-fancy not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | diff-so-fancy  | less --tabs=4 -RFX; }; f"
     dif = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
+    sif = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
 
 [merge]
     conflictstyle = diff3
