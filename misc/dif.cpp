@@ -229,19 +229,19 @@ Child::~Child() {
 }
 
 static Child *run_diff(int argc, char **argv) {
-  const char **args = new (nothrow) const char*[argc + 6];
+  static const char *argv_prefix[] = {
+    "diff", "--show-c-function", "--unified", "--recursive", "--new-file" };
+  static const size_t argv_prefix_len = sizeof argv_prefix / sizeof argv_prefix[0];
+
+  const char **args = new (nothrow) const char*[argc + argv_prefix_len + 1];
   if (args == NULL)
     return NULL;
 
-  args[0] = "diff";
-  args[1] = "--show-c-function";
-  args[2] = "--unified";
-  args[3] = "--recursive";
-  args[4] = "--new-file";
+  for (unsigned i = 0; i < argv_prefix_len; i++)
+    args[i] = argv_prefix[i];
   for (int i = 0; i < argc; i++)
-    args[i + 5] = argv[i];
-  args[argc + 5] = NULL;
-
+    args[i + argv_prefix_len] = argv[i];
+  args[argc + argv_prefix_len] = NULL;
 
   Child *c = new (nothrow) Child(args, STDIN_FILENO);
 
