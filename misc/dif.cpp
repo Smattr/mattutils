@@ -65,11 +65,9 @@ class Child {
   void hup();
   ~Child();
 
- public:
+ private:
   int m_cin;
   int m_cout;
-
- private:
   pid_t m_pid;
 
 };
@@ -281,7 +279,7 @@ Prettify::Prettify() : m_dsf(NULL), m_less(NULL), state(IDLE) {
     m_dsf = new (nothrow) Child(argv);
     if (m_dsf == NULL)
       return;
-    less_cin = m_dsf->m_cout;
+    less_cin = m_dsf->cout();
   }
 
   const char *argv[] = { "less", "--RAW-CONTROL-CHARS", "--quit-if-one-screen", "--no-init", NULL };
