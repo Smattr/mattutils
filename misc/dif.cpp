@@ -24,7 +24,7 @@
  *  ╚═════════════════╝                  │                   └─────────────┘
  *                                       │ no                       │
  *                                       │    ┌─────────────────────┘
- *                                       ↓    ↓                      
+ *                                       ↓    ↓
  *                                 ╔════════════╗
  *                                 ║pipe to less║
  *                                 ╚════════════╝
@@ -327,34 +327,64 @@ static ssize_t write_string(int fd, const char *str) {
   return write(fd, str, strlen(str));
 }
 
+#define strprefix(s, s_lit) (strncmp((s), s_lit, sizeof s_lit - 1) == 0)
+
 int Prettify::process(const char *line) {
+
+  if (strprefix(line, "\033[33mcommit ")) {
+    if (write_string(m_cout, line) < 0)
+      return -1;
+    return 0;
+  }
+
   for (const char *p = line; *p; p++) {
     switch (state) {
 
       case IDLE:
-        switch (*p) {
 
-          case '+':
-            if (write_string(m_cout, "\033[32m+") < 0)
-              return -1;
-            state = COLOURISING;
-            break;
+        if (strprefix(p, "diff ") ||
+            strprefix(p, "new file ") ||
+            strprefix(p, "deleted file ") ||
+            strprefix(p, "index ") ||
+            strprefix(p, "--- ") ||
+            strprefix(p, "+++ ")) {
+          if (write_string(m_cout, "\033[1m") < 0)
+            return -1;
+          if (write(m_cout, p, 1) < 0)
+            return -1;
+          state = COLOURISING;
+        } else if (strprefix(p, "@@ ")) {
+          if (write_string(m_cout, "\033[36m") < 0)
+            return -1;
+          if (write(m_cout, p, 1) < 0)
+            return -1;
+          state = COLOURISING;
+        } else {
 
-          case '-':
-            if (write_string(m_cout, "\033[31m-") < 0)
-              return -1;
-            state = COLOURISING;
-            break;
+          switch (*p) {
 
-          case '\033':
-            state = LOOKAHEAD_ANSI_EXPR;
-            break;
+            case '+':
+              if (write_string(m_cout, "\033[32m+") < 0)
+                return -1;
+              state = COLOURISING;
+              break;
 
-          default:
-            if (write_string(m_cout, p) < 0)
-              return -1;
-            return 0;
+            case '-':
+              if (write_string(m_cout, "\033[31m-") < 0)
+                return -1;
+              state = COLOURISING;
+              break;
 
+            case '\033':
+              state = LOOKAHEAD_ANSI_EXPR;
+              break;
+
+            default:
+              if (write_string(m_cout, p) < 0)
+                return -1;
+              return 0;
+
+          }
         }
         break;
 
