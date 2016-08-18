@@ -72,7 +72,7 @@ class Child {
 
 };
 
-Child::Child(const char **argv, int cin, int cout) {
+Child::Child(const char **argv, int cin, int cout) : m_cin(-1), m_cout(-1) {
   int cin_pipe[2], cout_pipe[2], signal_pipe[2];
   pid_t p;
 
@@ -138,15 +138,11 @@ child_fail:;
   if (cin == -1) {
     close(cin_pipe[0]);
     m_cin = cin_pipe[1];
-  } else {
-    m_cin = cin;
   }
 
   if (cout == -1) {
     close(cout_pipe[1]);
     m_cout = cout_pipe[0];
-  } else {
-    m_cout = cout;
   }
 
   m_pid = p;
@@ -207,7 +203,8 @@ Child::~Child() {
   }
   if (m_cin >= 0)
     close(m_cin);
-  close(m_cout);
+  if (m_cout >= 0)
+    close(m_cout);
 }
 
 static Child *run_diff(int argc, char **argv) {
@@ -381,13 +378,11 @@ void Prettify::kill() {
 int Prettify::wait() {
   int ret = 0;
   assert(good());
+  hup();
   if (m_dsf != NULL) {
-    close(m_dsf->cin());
     ret |= m_dsf->wait();
     delete m_dsf;
     m_dsf = NULL;
-  } else {
-    close(m_less->cin());
   }
 
   ret |= m_less->wait();
