@@ -275,8 +275,11 @@ Prettify::Prettify() : m_dsf(NULL), m_less(NULL), state(IDLE) {
   if (which("diff-so-fancy")) {
     const char *argv[] = { "diff-so-fancy", NULL };
     m_dsf = new (nothrow) Child(argv);
-    if (m_dsf == NULL)
+    if (m_dsf == NULL || !m_dsf->good()) {
+      delete m_dsf;
+      m_dsf = NULL;
       return;
+    }
     less_cin = m_dsf->cout();
   }
 
