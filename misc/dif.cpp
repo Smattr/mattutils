@@ -419,11 +419,10 @@ int Prettify::wait() {
 }
 
 void Prettify::hup() {
-  if (m_dsf != NULL) {
+  if (m_dsf != NULL)
     m_dsf->hup();
-  } else {
+  else
     m_less->hup();
-  }
 }
 
 Prettify::~Prettify() {
