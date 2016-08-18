@@ -62,6 +62,8 @@ class Child {
   bool good() const { return m_pid >= 0; }
   int cin() const { return m_cin; }
   int cout() const { return m_cout; }
+  int cin_cloexec();
+  int cout_cloexec();
   void hup();
   ~Child();
 
@@ -168,6 +170,25 @@ fail2:
   }
 fail1:
   m_pid = -1;
+}
+
+static int set_cloexec(int fd) {
+  int flags = fcntl(fd, F_GETFD, 0);
+  if (flags < 0)
+    return flags;
+  return fcntl(fd, F_SETFD, flags|FD_CLOEXEC);
+}
+
+int Child::cin_cloexec() {
+  if (m_cin >= 0)
+    return set_cloexec(m_cin);
+  return 0;
+}
+
+int Child::cout_cloexec() {
+  if (m_cout >= 0)
+    return set_cloexec(m_cout);
+  return 0;
 }
 
 int Child::kill() const {
@@ -280,7 +301,10 @@ Prettify::Prettify() : m_dsf(NULL), m_less(NULL), state(IDLE) {
       m_dsf = NULL;
       return;
     }
+    int r __attribute__((unused)) = m_dsf->cin_cloexec();
+    assert(r == 0);
     less_cin = m_dsf->cout();
+    assert(less_cin != -1);
   }
 
   const char *argv[] = { "less", "--RAW-CONTROL-CHARS", "--quit-if-one-screen", "--no-init", NULL };
