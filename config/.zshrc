@@ -59,22 +59,11 @@ fi
 #
 # Determine if we are a remote login
 #
-LOGIN_IP=`echo ${SSH_CLIENT} | cut -d ' ' -f 1`
-echo $LOGIN_IP | egrep -q '^(10|192.168)\.'
-if [[ $? == 0 ]]; then
-	# Local IP address
-	LOGIN_IP=""
-fi
-
-#
-# Setup prompt
-#
-if [ $LOGIN_IP ] ; then
-	export PROMPT=$REMOTE_PROMPT
-else
+if [ -z "${SSH_CLIENT}" ]; then
 	export PROMPT=$LOCAL_PROMPT
+else
+    export PROMPT=$REMOTE_PROMPT
 fi
-export LOGIN_IP
 
 #
 # Aliases
