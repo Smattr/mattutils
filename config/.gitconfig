@@ -35,6 +35,8 @@
 
 [rebase]
     autoStash = True
+    autoSquash = True
+    stat = True
 
 [include]
     path = .gitconfig_mattbin
