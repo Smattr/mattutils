@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 
     // we'll use this to look for lines representing commits in the input
     regex_t pick;
-    if (regcomp(&pick, "^pick ([[:xdigit:]]+) ", REG_EXTENDED) < 0) {
+    if (regcomp(&pick, "^(pick|fixup|squash) ([[:xdigit:]]+) ", REG_EXTENDED) < 0) {
         fprintf(stderr, "failed to compile regular expression\n");
         goto fail3;
     }
@@ -147,11 +147,11 @@ int main(int argc, char **argv) {
             goto fail4;
         }
 
-        regmatch_t match[2];
+        regmatch_t match[3];
         if (regexec(&pick, line, sizeof match / sizeof match[0], match, 0) == 0) {
             // this line is a commit
 
-            assert(match[1].rm_so != -1);
+            assert(match[2].rm_so != -1);
 
             // Lop off the newline if there is one
             if (line[r - 1] == '\n')
@@ -165,8 +165,8 @@ int main(int argc, char **argv) {
 
             // Create a Git command to get a diff of this commit
             char *command;
-            if (asprintf(&command, "git show %.*s", match[1].rm_eo - match[1].rm_so,
-                    &line[match[1].rm_so]) < 0) {
+            if (asprintf(&command, "git show %.*s", match[2].rm_eo - match[2].rm_so,
+                    &line[match[2].rm_so]) < 0) {
                 fprintf(stderr, "asprintf failed\n");
                 goto fail4;
             }
