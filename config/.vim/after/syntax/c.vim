@@ -26,6 +26,7 @@ syn keyword cOperator __builtin_cpu_init __builtin_cpu_is __builtin_cpu_supports
 " GCC extensions
 syn keyword cType __label__ __auto_type __int128 __thread
 syn keyword cOperator __alignof__ typeof
+syn keyword cConstant __FUNCTION__ __PRETTY_FUNCTION__
 
 " Clang builtins
 syn keyword cOperator __builtin_assume __builtin_bitreverse __builtin_convertvector
@@ -36,7 +37,26 @@ syn keyword cOperator __builtin_arm_clrex __builtin_arm_ldaex __builtin_arm_ldre
     \ __builtin_arm_stlex __builtin_arm_strex __dmb __dsb __isb 
 
 " Linux extras
-syn keyword cType __force __iomem __kernel __nocast __percpu __pmem __private __rcu __safe __user
-    \ notrace 
-syn keyword cType dev_t irqreturn_t loff_t u8 u16 u32 u64
-syn keyword cConstant __ATTR_NULL GFP_KERNEL IRQ_NONE IRQ_HANDLED IRQ_WAKE_THREAD THIS_MODULE
+syn keyword cType __force __iomem __kernel __kernel_size_t __nocast __percpu __pmem __private __rcu
+    \ __safe __user notrace 
+syn keyword cType __compat_gid_t __compat_gid16_t __compat_gid32_t __compat_uid_t __compat_uid16_t
+    \ __compat_uid32_t compat_caddr_t compat_clock_t compat_daddr_t compat_dev_t compat_fsid_t
+    \ compat_ino_t compat_int_t compat_ipc_pid_t compat_key_t compat_loff_t compat_long_t
+    \ compat_mode_t compat_nlink_t compat_off_t compat_old_sigset_t compat_pid_t compat_s64
+    \ compat_short_t compat_sigset_word compat_size_t compat_ssize_t compat_time_t compat_timer_t
+    \ compat_u64 compat_uint_t compat_ulong_t compat_uptr_t compat_ushort_t dev_t gfp_t irqreturn_t
+    \ loff_t s8 s16 s32 s64 u8 u16 u32 u64
+syn keyword cConstant __ATTR_NULL __GFP_HIGHMEM __GFP_HIGH COMPAT_LOFF_T_MAX COMPAT_OFF_T_MAX
+    \ EADDRINUSE EADDRNOTAVAIL EADV EAFNOSUPPORT EALREADY EBADE EBADFD EBADR EBADRQC EBADSLT EBFRONT
+    \ ECHRNG ECOMM ECONNABORTED ECONNREFUSED ECONNRESET EDEADLOCK EDESTADDRREQ EDOTDOT EDQUOT
+    \ EHOSTDOWN EHOSTUNREACH EHWPOISON EIDRM EISCONN EISNAM EKEYEXPIRED EKEYREJECTED EKEYREVOKED
+    \ EL2HLT EL2NSYNC EL3HLT EL3RST ELNRNG ELOOP EMULTIHOP ENETDOWN ENETRESET ENETUNREACH ENOANO
+    \ ENODATA ENOTCONN ELIBACC ELIBBAD ELIBEXEC ELIBMAX ELIBSCN EMEDIUMTYPE ENAVAIL ENOBUFS ENOKEY
+    \ ENOLINK ENOMEDIUM ENOMSG ENONET ENOPKG ENOPROTOOPT ENOSCI ENOSR ENOSTR ENOTNAM ENOTRECOVERABLE
+    \ ENOTSOCK ENOTUNIQ EOPNOTSUPP EOVERFLOW EOWNERDEAD EPFNOSUPPORT EPROTO EPROTONOSUPPORT
+    \ EPROTOTYPE EREMCHG EREMOTE EREMOTEIO ERESTART ERFKILL ESHUTDOWN ESOCKTNOSUPPORT ESRMNT ESTALE
+    \ ESTRPIPE ETIME ETOOMANYREFS EUCLEAN EUNATCH EUSERS EWOULDBLOCK EXFULL GFP_ATOMIC GFP_KERNEL
+    \ IRQ_NONE IRQ_HANDLED IRQ_WAKE_THREAD PAGE_SIZE POLLERR POLLHUP POLLIN POLLNVAL POLLOUT POLLPRI
+    \ THIS_MODULE UIO_FASTIOV UIO_MAXIOV
+syn keyword cOperator EXPORT_SYMBOL EXPORT_SYMBOL_GPL MODULE_AUTHOR MODULE_DESCRIPTION
+    \ MODULE_DEVICE_TABLE MODULE_LICENSE
