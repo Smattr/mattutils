@@ -63,6 +63,12 @@ def scan_file(filepath):
             if m is not None:
                 ifndef_guard = m.group('guard')
 
+            # Find bad memset calls
+            m = re.search('memset\s*\(.*,\s*0\s*\)', line);
+            if m is not None:
+                write_line(lineno, line)
+                sys.stderr.write(' incorrect argument order to memset?\n')
+
 def main(argv):
     parser = argparse.ArgumentParser(
         description='C undefined behaviour linter')
