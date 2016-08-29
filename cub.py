@@ -25,6 +25,7 @@ def scan_file(filepath):
 
     with open(filepath) as f:
         ifndef_guard = None
+        mmap_var = None
 
         for lineno, line in enumerate(f, 1):
 
@@ -64,10 +65,22 @@ def scan_file(filepath):
                 ifndef_guard = m.group('guard')
 
             # Find bad memset calls
-            m = re.search('memset\s*\(.*,\s*0\s*\)', line);
+            m = re.search(r'memset\s*\(.*,\s*0\s*\)', line);
             if m is not None:
                 write_line(lineno, line)
                 sys.stderr.write(' incorrect argument order to memset?\n')
+
+            # Catch mmaps that don't compare to MAP_FAILED
+            if mmap_var is None:
+                m = re.search(r'([a-zA-Z_]\w*)\s*=\s*mmap\s*\(', line)
+                if m is not None:
+                    mmap_var = m.group(1)
+            else:
+                m = re.search(r'([a-zA-Z_]\w*)\s*==\s*(NULL|0)', line)
+                if m is not None and m.group(1) == mmap_var:
+                    write_line(lineno, line)
+                    sys.stderr.write(' result of mmap incorrectly compared to NULL\n')
+                mmap_var = None
 
 def main(argv):
     parser = argparse.ArgumentParser(
