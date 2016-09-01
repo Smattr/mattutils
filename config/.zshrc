@@ -348,4 +348,16 @@ function exp() {
 # Enable colour diagnostics in GCC >=4.9
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
+# Thanks, https://gist.github.com/boredzo/06271944983864da495d303638351ca8
+function man() {
+    env \
+        LESS_TERMCAP_md=$'\e[1;36m' \
+        LESS_TERMCAP_me=$'\e[0m' \
+        LESS_TERMCAP_se=$'\e[0m' \
+        LESS_TERMCAP_so=$'\e[1;40;92m' \
+        LESS_TERMCAP_ue=$'\e[0m' \
+        LESS_TERMCAP_us=$'\e[1;32m' \
+        man "$@"
+}
+
 fi # Close overload detection
