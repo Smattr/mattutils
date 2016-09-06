@@ -1,6 +1,10 @@
 " Extension to C syntax for systems code
 " Language: C
 " Maintainer: Matthew Fernandez <matthew.fernandez@gmail.com>
+" License: Public domain
+
+" Assert has always been morally an operator to me, though I know it usually expands to a function
+syn keyword cOperator assert
 
 " GCC builtins
 syn keyword cOperator __builtin_alloca __builtin_alloca_with_align __builtin_apply
@@ -37,15 +41,15 @@ syn keyword cOperator __builtin_arm_clrex __builtin_arm_ldaex __builtin_arm_ldre
     \ __builtin_arm_stlex __builtin_arm_strex __dmb __dsb __isb 
 
 " Linux extras
-syn keyword cType __force __iomem __kernel __kernel_size_t __nocast __percpu __pmem __private __rcu
-    \ __safe __user notrace 
+syn keyword cType __force __iomem __kernel __kernel_size_t __must_check __nocast __percpu __pmem
+    \ __private __rcu __safe __user notrace 
 syn keyword cType __compat_gid_t __compat_gid16_t __compat_gid32_t __compat_uid_t __compat_uid16_t
-    \ __compat_uid32_t compat_caddr_t compat_clock_t compat_daddr_t compat_dev_t compat_fsid_t
-    \ compat_ino_t compat_int_t compat_ipc_pid_t compat_key_t compat_loff_t compat_long_t
-    \ compat_mode_t compat_nlink_t compat_off_t compat_old_sigset_t compat_pid_t compat_s64
-    \ compat_short_t compat_sigset_word compat_size_t compat_ssize_t compat_time_t compat_timer_t
-    \ compat_u64 compat_uint_t compat_ulong_t compat_uptr_t compat_ushort_t dev_t gfp_t irqreturn_t
-    \ loff_t s8 s16 s32 s64 u8 u16 u32 u64
+    \ __compat_uid32_t __s8 __s16 __s32 __s64 __u8 __u16 __u32 __u64 compat_caddr_t compat_clock_t
+    \ compat_daddr_t compat_dev_t compat_fsid_t compat_ino_t compat_int_t compat_ipc_pid_t
+    \ compat_key_t compat_loff_t compat_long_t compat_mode_t compat_nlink_t compat_off_t
+    \ compat_old_sigset_t compat_pid_t compat_s64 compat_short_t compat_sigset_word compat_size_t
+    \ compat_ssize_t compat_time_t compat_timer_t compat_u64 compat_uint_t compat_ulong_t
+    \ compat_uptr_t compat_ushort_t dev_t gfp_t irqreturn_t loff_t s8 s16 s32 s64 u8 u16 u32 u64
 syn keyword cConstant __ATTR_NULL __GFP_HIGHMEM __GFP_HIGH COMPAT_LOFF_T_MAX COMPAT_OFF_T_MAX
     \ EADDRINUSE EADDRNOTAVAIL EADV EAFNOSUPPORT EALREADY EBADE EBADFD EBADR EBADRQC EBADSLT EBFRONT
     \ ECHRNG ECOMM ECONNABORTED ECONNREFUSED ECONNRESET EDEADLOCK EDESTADDRREQ EDOTDOT EDQUOT
@@ -57,6 +61,25 @@ syn keyword cConstant __ATTR_NULL __GFP_HIGHMEM __GFP_HIGH COMPAT_LOFF_T_MAX COM
     \ EPROTOTYPE EREMCHG EREMOTE EREMOTEIO ERESTART ERFKILL ESHUTDOWN ESOCKTNOSUPPORT ESRMNT ESTALE
     \ ESTRPIPE ETIME ETOOMANYREFS EUCLEAN EUNATCH EUSERS EWOULDBLOCK EXFULL GFP_ATOMIC GFP_KERNEL
     \ IRQ_NONE IRQ_HANDLED IRQ_WAKE_THREAD PAGE_SIZE POLLERR POLLHUP POLLIN POLLNVAL POLLOUT POLLPRI
-    \ THIS_MODULE UIO_FASTIOV UIO_MAXIOV
-syn keyword cOperator EXPORT_SYMBOL EXPORT_SYMBOL_GPL MODULE_AUTHOR MODULE_DESCRIPTION
-    \ MODULE_DEVICE_TABLE MODULE_LICENSE
+    \ POLLRDNORM POLLWRNORM THIS_MODULE UIO_FASTIOV UIO_MAXIOV
+syn keyword cOperator BUILD_BUG_ON BUG_ON EXPORT_SYMBOL EXPORT_SYMBOL_GPL MODULE_AUTHOR
+    \ MODULE_DESCRIPTION MODULE_DEVICE_TABLE MODULE_LICENSE WARN_ON
+
+" Linux atomics. These are not scalars, but the way we treat them more or less is.
+syn keyword cType atomic_t atomic64_t
+
+" C11 atomics
+syn keyword cType atomic_bool atomic_char atomic_schar atomic_uchar atomic_short atomic_ushort
+    \ atomic_int atomic_uint atomic_long atomic_ulong atomic_llong atomic_ullong atomic_char16_t
+    \ atomic_char32_t atomic_wchar_t atomic_int_least8_t atomic_uint_least8_t atomic_int_least16_t
+    \ atomic_uint_least16_t atomic_int_least32_t atomic_uint_least32_t atomic_int_least64_t
+    \ atomic_uint_least64_t atomic_int_fast8_t atomic_uint_fast8_t atomic_int_fast16_t
+    \ atomic_uint_fast16_t atomic_int_fast32_t atomic_uint_fast32_t atomic_int_fast64_t
+    \ atomic_uint_fast64_t atomic_intptr_t atomic_uintptr_t atomic_size_t atomic_ptrdiff_t
+    \ atomic_intmax_t atomic_uintmax_t
+
+" GCC hacking
+syn keyword cOperator gcc_assert
+
+" LLVM hacking
+syn keyword cOperator llvm_unreachable
