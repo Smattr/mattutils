@@ -1,6 +1,7 @@
 " Syntax highlighting for inline diffs inserted into Git's rebase picker by rerebase.
 " Language: GIT_EDITOR=rerebase git rebase --interactive
 " Maintainer: Matthew Fernandez <matthew.fernandez@gmail.com>
+" License: Public domain
 
 syn match gitrebaseDiffCommit "\(^\s*# \)\@<=commit .*" containedin=gitrebaseComment
 syn match gitrebaseDiffAuthor "\(^\s*# \)\@<=Author: .*" containedin=gitrebaseComment
