@@ -28,6 +28,8 @@
  *                                 ╔════════════╗
  *                                 ║pipe to less║
  *                                 ╚════════════╝
+ *
+ * This code is in the public domain. Use it in any way you see fit.
  */
 
 #include <cassert>
