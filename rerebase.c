@@ -221,10 +221,8 @@ static int strip_comments(FILE *in, FILE *out) {
             goto end;
         }
 
-        // Is this a comment?
-        const char *c = line;
-        for (; *c == ' ' || *c == '\t'; c++);
-        if (*c == '\0' || *c == '\n' || *c == '#')
+        // Is this a comment we inserted?
+        if (!strncmp(line, " #", sizeof " #" - 1))
             continue;
 
         size_t w = fwrite(line, 1, r, out);
