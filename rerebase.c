@@ -71,7 +71,7 @@ static int move(const char *oldpath, const char *newpath) {
             int src = open(oldpath, O_RDONLY);
             if (src < 0)
                 return -1;
-            int dst = open(newpath, O_WRONLY);
+            int dst = open(newpath, O_WRONLY|O_TRUNC|O_CREAT, 0644);
             if (dst < 0) {
                 close(src);
                 return -1;
