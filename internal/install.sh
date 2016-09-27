@@ -26,7 +26,7 @@ for i in \
          find-broken.sh \
          fwdmail.py \
          generate-passwd \
-         gg \
+         g \
          git-stree \
          github-ls.sh \
          ifind \
