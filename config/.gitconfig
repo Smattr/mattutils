@@ -36,5 +36,8 @@
     autoSquash = True
     stat = True
 
+[diff]
+    noprefix = True
+
 [include]
     path = .gitconfig_mattbin
