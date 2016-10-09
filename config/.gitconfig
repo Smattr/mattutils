@@ -39,5 +39,8 @@
 [diff]
     noprefix = True
 
+[interactive]
+    singlekey = True
+
 [include]
     path = .gitconfig_mattbin
