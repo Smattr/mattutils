@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
      * can't conclude anything from a single byte.
      */
     for (size_t i = 0; i < size - 1; i++) {
+loop:;
 
         /* Try to identify the byte stream at the current offset. Note that we
          * filter out the unhelpful "data" result.
@@ -87,6 +88,16 @@ int main(int argc, char **argv) {
             fflush(stdout);
         }
 
+        /* If something was identified as ASCII text, avoid re-identifying every
+         * substring of it.
+         */
+        static const char ASCII[] = "ASCII text";
+        if (type != NULL && strstr(type, ASCII) != NULL) {
+            for (; i < size - 1 && *(unsigned char*)(base + i) < 128; i++);
+            if (i == size - 1)
+                break;
+            goto loop;
+        }
     }
 
 end:
