@@ -309,7 +309,8 @@ Prettify::Prettify() : m_dsf(NULL), m_less(NULL), state(IDLE) {
     assert(less_cin != -1);
   }
 
-  const char *argv[] = { "less", "--RAW-CONTROL-CHARS", "--quit-if-one-screen", "--no-init", NULL };
+  const char *argv[] = { "less", "--RAW-CONTROL-CHARS", "--quit-if-one-screen", "--no-init", "+Gg",
+    NULL };
   m_less = new (nothrow) Child(argv, less_cin, STDOUT_FILENO);
   if (m_less == NULL) {
     delete m_dsf;
