@@ -134,3 +134,7 @@ set foldlevelstart=20
 " incorrectly means we need to set the following or visual highlighting is
 " invisible.
 hi Visual cterm=reverse
+
+" Some less sane environments have syntax highlighting off by default, so force
+" it on.
+syntax on
