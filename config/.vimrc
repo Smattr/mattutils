@@ -138,3 +138,6 @@ hi Visual cterm=reverse
 " Some less sane environments have syntax highlighting off by default, so force
 " it on.
 syntax on
+
+" Force ruler on for some environments where it defaults to off.
+set ruler
