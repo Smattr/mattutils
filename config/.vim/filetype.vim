@@ -34,3 +34,6 @@ augroup filetypedetect
     au BufRead,BufNewFile SConstruct setfiletype python
     au BufRead,BufNewFile *.lnt setfiletype lnt
 augroup END
+if getline(2) == '== Anything below this line will be ignored'
+    set ft=be
+endif
