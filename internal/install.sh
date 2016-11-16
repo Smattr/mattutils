@@ -18,7 +18,6 @@ for i in \
          bashd.sh \
          bitbucket-ls.sh \
          check_tmux_version.sh \
-         colour-dump \
          defn.sh \
          download \
          compresspdf.sh \
