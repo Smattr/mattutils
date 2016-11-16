@@ -16,7 +16,6 @@ for i in \
          addcert.sh \
          after \
          bashd.sh \
-         bitbucket-ls.sh \
          check_tmux_version.sh \
          defn.sh \
          download \
@@ -27,7 +26,6 @@ for i in \
          generate-passwd \
          g \
          git-stree \
-         github-ls.sh \
          ifind \
          repty \
          rsync \

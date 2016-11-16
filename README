@@ -13,7 +13,6 @@ addcert.sh - Tool for adding an SSL certificate to multiple sources on a
     system.
 bashd.sh - A script for connecting bash to a local port. Handy for probing
     environments where you don't have a PTY.
-bitbucket-ls.sh - The BitBucket equivalent of github-ls.sh.
 config/ - Directory for containing my shared configuration settings.
 cub.py - Messy and inaccurate C linter.
 dd.sh - Wrapper around dd to provide progress output.
@@ -21,8 +20,6 @@ find-broken.sh - A script for finding broken symlinks.
 fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
 git-stree - Git subtree helper (WIP).
-github-ls.sh - A script for listing the names of all your github repos. I use
-    this to generate a manifest to pass to my backup script.
 giveem.sh - Creates a setuid binary for a given shell command. This is a quick
     hack to give someone else the ability to run commands as you. Handy on a
     system where you're collaborating with someone and neither of you have
