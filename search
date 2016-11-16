@@ -13,6 +13,8 @@ for i in \
         "gem search" \
         "gem search -r" \
         "cabal list --simple-output" \
+        "pip search" \
+        "pip3 search" \
         ; do
     # Get the first word of the command to check for existence.
     cmd=${i%% *}
