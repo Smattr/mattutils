@@ -30,16 +30,13 @@ for i in \
          git-stree \
          github-ls.sh \
          ifind \
-         intray \
          repty \
          rsync \
          timestamp \
          toggle-screensaver \
          term \
-         later \
          mediawatch.py \
          notate.py \
-         now \
          package.py \
          pdfcrop.sh \
          prefix \
