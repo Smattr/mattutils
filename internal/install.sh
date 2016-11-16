@@ -23,7 +23,6 @@ for i in \
          fwdmail.py \
          generate-passwd \
          g \
-         git-stree \
          ifind \
          repty \
          rsync \
