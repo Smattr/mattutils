@@ -15,12 +15,13 @@ for i in \
         "cabal list --simple-output" \
         "pip search" \
         "pip3 search" \
+        "/usr/lib/command-not-found --no-failure-msg" \
         ; do
     # Get the first word of the command to check for existence.
     cmd=${i%% *}
     which ${cmd} &>/dev/null
     if [ $? -eq 0 ]; then
-        $i "$1" 2>/dev/null | \
+        $i "$1" 2>&1 | \
             while read line; do
                 echo "[$i]: ${line}"
             done
