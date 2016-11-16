@@ -43,7 +43,6 @@ for i in \
          ssh-proxy \
          ubiquity \
          validate.py \
-         wh \
          wim ; do
     if [ ! -e "${REPO}/$i" ]; then
         echo "Error: $i not found in working directory." >&2
