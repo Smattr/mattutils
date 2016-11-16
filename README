@@ -77,8 +77,6 @@ mediawatch.py - A python script I use for monitoring directories on various
     servers that I administer. It's designed to be run as a cron job that scans
     a set of directories and notifies you of any changes observed since its
     last scan.
-mplayerfs - Wrapper for starting mplayer in full screen mode and accounting for
-    network playback.
 notify-send-wrapper.sh - A way to call notify-send from a crontab or other
     restricted environment.
 ppa-install - Wrapper for installing PPA-hosted packages in Ubuntu.
