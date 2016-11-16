@@ -17,7 +17,6 @@ for i in \
          after \
          bashd.sh \
          check_tmux_version.sh \
-         download \
          compresspdf.sh \
          fifi.sh \
          find-broken.sh \
