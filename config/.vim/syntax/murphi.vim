@@ -95,7 +95,7 @@ syn match murphiError "==[^>]"he=e-1
 syn match murphiError "&&\|||"
 
 " Strings. This is defined so late so that it overrides previous matches.
-syn region murphiString start=+"+ skip=+\\"+ end=+"+
+syn region murphiString start=+"+ end=+"+
 
 " Comments. This is defined so late so that it overrides previous matches.
 syn region murphiComment start="--" end="$" contains=murphiTodo
