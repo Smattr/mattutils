@@ -1,0 +1,7 @@
+An occasional need has come up to do an rsync when only the source or
+destination can be mounted at once; not both. This is a pretty obscure
+scenario and I'm not aware of any built in support in rsync for this
+(though this should be investigated). This could probably be supported
+with relatively little pain by repeated partial syncing through a
+temporary location. I haven't clearly thought this through, but I think
+it could easily be scripted.
