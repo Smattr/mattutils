@@ -87,6 +87,7 @@ alias ..='cd ..'
 alias evince="dbus-launch /usr/bin/evince" # Mask evince problems in newer Ubuntu.
 alias ffs='sudo $(fc -ln -1)'
 alias vcat='pygmentize -g -O bg=dark'
+alias cs="cscope -R"
 
 # ZSH Options
 
