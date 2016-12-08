@@ -42,8 +42,5 @@
 [interactive]
     singlekey = True
 
-[rerere]
-    enabled = True
-
 [include]
     path = .gitconfig_mattbin
