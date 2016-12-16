@@ -70,3 +70,6 @@ out-offline = log --rev 'sort(draft(),-rev)'
 [switch]
 path = ~/bin/hg
 default = /usr/bin/hg
+
+[defaults]
+glog = --stat
