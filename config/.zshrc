@@ -13,17 +13,6 @@
 # Enable zsh colour function.
 autoload -U colors && colors
 
-# Bail out immediately if the system is overloaded, on the assumption that the
-# user just wants a shell to run some recovery commands.
-if [ $? -eq 0 ]; then
-  OVERLOAD=$(($(grep --color=none '^MemFree' /proc/meminfo | sed 's/^MemFree:\s*\([0-9]\+\)\s*kB$/\1/g') < 512))
-else
-  OVERLOAD=0
-fi
-if [ ${OVERLOAD} -ne 0 ]; then
-  export PROMPT="%{${fg_bold[red]}%}[overloaded]%{${fg_no_bold[default]}%} "
-else
-
 #
 # General Options
 #
@@ -360,5 +349,3 @@ function man() {
         LESS_TERMCAP_us=$'\e[1;32m' \
         man "$@"
 }
-
-fi # Close overload detection
