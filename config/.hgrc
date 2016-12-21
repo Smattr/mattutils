@@ -1,6 +1,5 @@
 # Include local hg settings.
 %include ${HOME}/.hgrc_local
-%include ${HOME}/.hgrc_nictabin
 
 [ui]
 ignore = ${HOME}/.hgignore
