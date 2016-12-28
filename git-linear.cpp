@@ -444,8 +444,8 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
 
-    if (argc >= 2 && (!strcmp(argv[1], "good") || !strcmp(argv[1], "bad") ||
-        !strcmp(argv[1], "skip"))) {
+    if (!strcmp(argv[1], "good") || !strcmp(argv[1], "bad") ||
+        !strcmp(argv[1], "skip")) {
       ret = action_mark(repo, state, argc - 1, argv + 1);
     }
 
