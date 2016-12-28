@@ -175,12 +175,13 @@ namespace { class State {
   }
 
   sha first, last;
+
+  vector<Result> commits;
+  
  private:
   string path;
   sha home;
 
-  vector<Result> commits;
-  
 }; };
 
 
@@ -389,6 +390,18 @@ static int action_mark(git_repository *repo, State &state, int argc,
   return checkout_next(repo, state);
 }
 
+static int action_status(State &state) {
+  unsigned untested = 0;
+  for (const Result &r : state.commits) {
+    //TODO: some nice spacing and commit message
+    cout << to_string(r.quality) << " " << r.commit << "\n";
+    if (r.quality == UNTESTED)
+      untested++;
+  }
+  cout << untested << " commits remaining to test\n";
+  return EXIT_SUCCESS;
+}
+
 int main(int argc, char **argv) {
 
   if (argc < 2 || !strcmp(argv[1], "help")) {
@@ -398,10 +411,10 @@ int main(int argc, char **argv) {
       " " << argv[0] << " good [<rev>]         - mark current commit as good\n"
       " " << argv[0] << " bad [<rev>]          - mark current commit as bad\n"
       " " << argv[0] << " skip [<rev>]         - skip current commit\n"
+      " " << argv[0] << " status               - show current progress\n"
 #if 0
       " " << argv[0] << " run <cmd>...         - automate the remaining testing using the given command\n"
       " " << argv[0] << " add <rev>            - append some more commits to an in-progress scan\n"
-      " " << argv[0] << " status               - show current progress\n"
       " " << argv[0] << " reset                - abort testing and clean up metadata\n"
       " " << argv[0] << " log                  - generate a log of actions\n"
       " " << argv[0] << " replay <file>        - replay a previously generated log\n"
@@ -447,6 +460,8 @@ int main(int argc, char **argv) {
     if (!strcmp(argv[1], "good") || !strcmp(argv[1], "bad") ||
         !strcmp(argv[1], "skip")) {
       ret = action_mark(repo, state, argc - 1, argv + 1);
+    } else if (argc == 2 && !strcmp(argv[1], "status")) {
+      ret = action_status(state);
     }
 
     else {
