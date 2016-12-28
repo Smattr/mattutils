@@ -407,11 +407,11 @@ int main(int argc, char **argv) {
   if (argc < 2 || !strcmp(argv[1], "help")) {
     cout << "Test a range of commits in the manner of git-bisect, but exhaustively.\n\n"
       "usage:\n"
-      " " << argv[0] << " start <rev>          - start testing the range rev1..rev2\n"
-      " " << argv[0] << " good [<rev>]         - mark current commit as good\n"
-      " " << argv[0] << " bad [<rev>]          - mark current commit as bad\n"
-      " " << argv[0] << " skip [<rev>]         - skip current commit\n"
-      " " << argv[0] << " status               - show current progress\n"
+      " " << argv[0] << " start (<revspec>|<rev> <rev>) - start testing the range rev1..rev2\n"
+      " " << argv[0] << " good [<rev>]                  - mark current commit as good\n"
+      " " << argv[0] << " bad [<rev>]                   - mark current commit as bad\n"
+      " " << argv[0] << " skip [<rev>]                  - skip current commit\n"
+      " " << argv[0] << " status                        - show current progress\n"
 #if 0
       " " << argv[0] << " run <cmd>...         - automate the remaining testing using the given command\n"
       " " << argv[0] << " add <rev>            - append some more commits to an in-progress scan\n"
