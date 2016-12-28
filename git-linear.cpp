@@ -96,6 +96,8 @@ namespace { class State {
     nlohmann::json j;
     in >> j;
 
+    home = j["home"];
+
     for (auto item : j["progress"]) {
       Result r { item["commit"], from_string(item["quality"]) };
       commits.push_back(r);
@@ -115,6 +117,7 @@ namespace { class State {
 
     nlohmann::json j {
       {"comment", "hello world"},
+      {"home", home},
       {"progress", progress},
     };
 
@@ -131,6 +134,10 @@ namespace { class State {
 
   void set_path(const string &path) {
     this->path = path;
+  }
+
+  void set_home(const sha &commit) {
+    this->home = commit;
   }
 
   void mark(const sha &commit, quality_t quality) {
@@ -316,6 +323,15 @@ static int action_start(git_repository *repo, const string &config, int argc, ch
   git_oid oid;
   while (git_revwalk_next(&oid, walk) == 0)
     state.enqueue(to_sha(&oid));
+
+  git_object *obj;
+  if (git_revparse_single(&obj, repo, "HEAD") < 0) {
+    const git_error *e = giterr_last();
+    cerr << "failed to check current revision: " << e->message << "\n";
+    return EXIT_FAILURE;
+  }
+  MANAGE(obj);
+  state.set_home(to_sha(git_object_id(obj)));
 
   state.set_path(config);
 
