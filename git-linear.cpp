@@ -341,7 +341,7 @@ static int action_start(git_repository *repo, const string &config, int argc, ch
 static int action_mark(git_repository *repo, State &state, int argc,
     char **argv) {
 
-  assert(argc == 1 || argc == 2);
+  assert(argc >= 1);
   quality_t quality;
   if (!strcmp(argv[0], "good")) {
     quality = GOOD;
@@ -352,20 +352,36 @@ static int action_mark(git_repository *repo, State &state, int argc,
     quality = SKIPPED;
   }
 
-  // Figure out what current commit we're looking at.
-  git_object *obj;
-  if (git_revparse_single(&obj, repo, "HEAD") < 0) {
-    const git_error *e = giterr_last();
-    cerr << "Failed to retrieve current HEAD: " << e->message << "\n";
+  if (argc > 2) {
+    cerr << "Unrecognized arguments. Run `git-linear help` for usage.\n";
     return EXIT_FAILURE;
   }
-  MANAGE(obj);
 
-  const git_oid *oid = git_object_id(obj);
-  sha commit = to_sha(oid);
-  if (!state.contains(commit)) {
-    cerr << "The current commit is not in the search space.\n";
-    return EXIT_FAILURE;
+  sha commit;
+  if (argc == 2) {
+
+    commit = argv[1];
+    if (!state.contains(commit)) {
+      cerr << "Commit " << commit << " does not lie in search range.\n";
+      return EXIT_FAILURE;
+    }
+
+  } else {
+    // Figure out what current commit we're looking at.
+    git_object *obj;
+    if (git_revparse_single(&obj, repo, "HEAD") < 0) {
+      const git_error *e = giterr_last();
+      cerr << "Failed to retrieve current HEAD: " << e->message << "\n";
+      return EXIT_FAILURE;
+    }
+    MANAGE(obj);
+
+    const git_oid *oid = git_object_id(obj);
+    commit = to_sha(oid);
+    if (!state.contains(commit)) {
+      cerr << "The current commit is not in the search space.\n";
+      return EXIT_FAILURE;
+    }
   }
 
   state.mark(commit, quality);
@@ -428,7 +444,7 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
 
-    if (argc == 2 && (!strcmp(argv[1], "good") || !strcmp(argv[1], "bad") ||
+    if (argc >= 2 && (!strcmp(argv[1], "good") || !strcmp(argv[1], "bad") ||
         !strcmp(argv[1], "skip"))) {
       ret = action_mark(repo, state, argc - 1, argv + 1);
     }
