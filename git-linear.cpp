@@ -390,7 +390,12 @@ static int action_mark(git_repository *repo, State &state, int argc,
   return checkout_next(repo, state);
 }
 
-static int action_status(State &state) {
+static string first_line(const string &text) {
+  auto it = find(text.begin(), text.end(), '\n');
+  return string(text.begin(), it);
+}
+
+static int action_status(git_repository *repo, State &state) {
 
   bool tty = isatty(STDOUT_FILENO);
   const char *green = tty ? "\033[32m" : "";
@@ -413,12 +418,22 @@ static int action_status(State &state) {
         break;
       case UNTESTED:
         cout << "untested";
+        untested++;
         break;
     }
 
-    cout << " " << r.commit << "\n";
-    if (r.quality == UNTESTED)
-      untested++;
+    cout << " " << r.commit;
+
+    git_object *obj;
+    string message;
+    if (git_revparse_single(&obj, repo, r.commit.c_str()) < 0) {
+      message = "<failed to retrieve commit message>";
+    } else {
+      message = first_line(git_commit_message((git_commit*)obj));
+      MANAGE(obj);
+    }
+
+    cout << " " << message << "\n";
   }
   cout << untested << " commits remaining to test\n";
   return EXIT_SUCCESS;
@@ -483,7 +498,7 @@ int main(int argc, char **argv) {
         !strcmp(argv[1], "skip")) {
       ret = action_mark(repo, state, argc - 1, argv + 1);
     } else if (argc == 2 && !strcmp(argv[1], "status")) {
-      ret = action_status(state);
+      ret = action_status(repo, state);
     }
 
     else {
