@@ -136,10 +136,6 @@ namespace { class State {
     this->path = path;
   }
 
-  void set_home(const sha &commit) {
-    this->home = commit;
-  }
-
   void mark(const sha &commit, quality_t quality) {
     for (Result &res : commits) {
       if (res.commit == commit) {
@@ -178,12 +174,11 @@ namespace { class State {
 
   vector<Result> commits;
   
+  sha home;
  private:
   string path;
-  sha home;
 
 }; };
-
 
 static int checkout_next(git_repository *repo, State &state) {
 
@@ -238,17 +233,10 @@ static int checkout_next(git_repository *repo, State &state) {
   return EXIT_SUCCESS;
 }
 
-static int action_start(git_repository *repo, const string &config, int argc, char **argv) {
+static int action_add(git_repository *repo, State &state, int argc, char **argv) {
   if (argc < 2 || argc > 3) {
     cerr << "expected rev-spec\n"
             "run `git-linear help` for usage\n";
-    return EXIT_FAILURE;
-  }
-
-  if (access(config.c_str(), R_OK) == 0) {
-    cerr << config << " exists; git-linear in progress?\n"
-      "run `git-linear reset` or remove " << config << " to abort an "
-        "in-progress git-linear\n";
     return EXIT_FAILURE;
   }
 
@@ -298,9 +286,6 @@ static int action_start(git_repository *repo, const string &config, int argc, ch
     }
   }
 
-  // We're starting from scratch. Create a new state.
-  State state;
-
   git_revwalk *walk;
   if (git_revwalk_new(&walk, repo) < 0) {
     const git_error *e = giterr_last();
@@ -332,11 +317,32 @@ static int action_start(git_repository *repo, const string &config, int argc, ch
     return EXIT_FAILURE;
   }
   MANAGE(obj);
-  state.set_home(to_sha(git_object_id(obj)));
-
-  state.set_path(config);
+  if (state.home == "")
+    state.home = to_sha(git_object_id(obj));
 
   return checkout_next(repo, state);
+}
+
+static int action_start(git_repository *repo, const string &config, int argc, char **argv) {
+  if (argc < 2 || argc > 3) {
+    cerr << "expected rev-spec\n"
+            "run `git-linear help` for usage\n";
+    return EXIT_FAILURE;
+  }
+
+  if (access(config.c_str(), R_OK) == 0) {
+    cerr << config << " exists; git-linear in progress?\n"
+      "run `git-linear reset` or remove " << config << " to abort an "
+        "in-progress git-linear\n";
+    return EXIT_FAILURE;
+  }
+
+  // We're starting from scratch. Create a new state.
+  State state;
+  state.set_path(config);
+
+  // XXX: We know the callee won't look at argv[0]
+  return action_add(repo, state, argc, argv);
 }
 
 static int action_mark(git_repository *repo, State &state, int argc,
@@ -449,9 +455,9 @@ int main(int argc, char **argv) {
       " " << argv[0] << " bad [<rev>]                   - mark current commit as bad\n"
       " " << argv[0] << " skip [<rev>]                  - skip current commit\n"
       " " << argv[0] << " status                        - show current progress\n"
+      " " << argv[0] << " add <rev>            - append some more commits to an in-progress scan\n"
 #if 0
       " " << argv[0] << " run <cmd>...         - automate the remaining testing using the given command\n"
-      " " << argv[0] << " add <rev>            - append some more commits to an in-progress scan\n"
       " " << argv[0] << " reset                - abort testing and clean up metadata\n"
       " " << argv[0] << " log                  - generate a log of actions\n"
       " " << argv[0] << " replay <file>        - replay a previously generated log\n"
@@ -499,6 +505,8 @@ int main(int argc, char **argv) {
       ret = action_mark(repo, state, argc - 1, argv + 1);
     } else if (argc == 2 && !strcmp(argv[1], "status")) {
       ret = action_status(repo, state);
+    } else if (argc >= 2 && !strcmp(argv[1], "add")) {
+      ret = action_add(repo, state, argc - 1, argv + 1);
     }
 
     else {
