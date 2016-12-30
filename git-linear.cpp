@@ -391,10 +391,32 @@ static int action_mark(git_repository *repo, State &state, int argc,
 }
 
 static int action_status(State &state) {
+
+  bool tty = isatty(STDOUT_FILENO);
+  const char *green = tty ? "\033[32m" : "";
+  const char *yellow = tty ? "\033[33m" : "";
+  const char *red = tty ? "\033[31m" : "";
+  const char *reset = tty ? "\033[0m" : "";
+
   unsigned untested = 0;
   for (const Result &r : state.commits) {
-    //TODO: some nice spacing and commit message
-    cout << to_string(r.quality) << " " << r.commit << "\n";
+
+    switch (r.quality) {
+      case GOOD:
+        cout << green << "good    " << reset;
+        break;
+      case BAD:
+        cout << red << "bad     " << reset;
+        break;
+      case SKIPPED:
+        cout << yellow << "skipped " << reset;
+        break;
+      case UNTESTED:
+        cout << "untested";
+        break;
+    }
+
+    cout << " " << r.commit << "\n";
     if (r.quality == UNTESTED)
       untested++;
   }
