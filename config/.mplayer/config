@@ -19,3 +19,7 @@ softvol-max=400
 # Suppress cover art for MP3s.
 [extension.mp3]
 vo=null
+
+# Also for M4As.
+[extension.m4a]
+vo=null
