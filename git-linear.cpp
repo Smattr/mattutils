@@ -248,25 +248,42 @@ static int action_add(git_repository *repo, State &state, int argc, char **argv)
   MANAGE(to);
   if (argc == 2) {
 
-    /* It's possible the user gave us an open range (e.g. "..master") in which
-     * case we need to substitute HEAD for the missing limit.
-     */
     string spec(argv[1]);
-    if (spec.size() > 2 && spec.substr(0, 2) == "..") {
-      spec = "HEAD" + spec;
-    } else if (spec.size() > 2 && spec.substr(spec.size() - 2, 2) == "..") {
-      spec += "HEAD";
-    }
 
-    git_revspec revspec;
-    if (git_revparse(&revspec, repo, spec.c_str()) < 0) {
-      const git_error *e = giterr_last();
-      cerr << "failed to parse revspec \"" << argv[1] << "\": " << e->message <<
-        "\n";
-      return EXIT_FAILURE;
+    if (spec.find("..") == string::npos) {
+
+      // This is not a range; this is a single commit.
+      git_object *obj;
+      if (git_revparse_single(&obj, repo, spec.c_str()) < 0) {
+        const git_error *e = giterr_last();
+        cerr << "failed to parse revspec \"" << argv[1] << "\": " <<
+          e->message << "\n";
+        return EXIT_FAILURE;
+      }
+      to = obj;
+
+    } else {
+
+      /* It's possible the user gave us an open range (e.g. "..master") in which
+       * case we need to substitute HEAD for the missing limit.
+       */
+      if (spec.size() > 2 && spec.substr(0, 2) == "..") {
+        spec = "HEAD" + spec;
+      } else if (spec.size() > 2 && spec.substr(spec.size() - 2, 2) == "..") {
+        spec += "HEAD";
+      }
+
+      git_revspec revspec;
+      if (git_revparse(&revspec, repo, spec.c_str()) < 0) {
+        const git_error *e = giterr_last();
+        cerr << "failed to parse revspec \"" << argv[1] << "\": " <<
+          e->message << "\n";
+        return EXIT_FAILURE;
+      }
+      from = revspec.from;
+      to = revspec.to;
+
     }
-    from = revspec.from;
-    to = revspec.to;
 
   } else {
     assert(argc == 3);
@@ -294,21 +311,25 @@ static int action_add(git_repository *repo, State &state, int argc, char **argv)
   }
   MANAGE(walk);
 
-  if (git_revwalk_push(walk, git_object_id(to)) < 0) {
-    const git_error *e = giterr_last();
-    cerr << "failed to push revwalk end: " << e->message << "\n";
-    return EXIT_FAILURE;
-  }
-  if (git_revwalk_hide(walk, git_object_id(from)) < 0) {
-    const git_error *e = giterr_last();
-    cerr << "failed to push revwalk start: " << e->message << "\n";
-    return EXIT_FAILURE;
-  }
+  if (from != nullptr) {
+    if (git_revwalk_push(walk, git_object_id(to)) < 0) {
+      const git_error *e = giterr_last();
+      cerr << "failed to push revwalk end: " << e->message << "\n";
+      return EXIT_FAILURE;
+    }
+    if (git_revwalk_hide(walk, git_object_id(from)) < 0) {
+      const git_error *e = giterr_last();
+      cerr << "failed to push revwalk start: " << e->message << "\n";
+      return EXIT_FAILURE;
+    }
 
-  // Do the walk itself and note each commit we see.
-  git_oid oid;
-  while (git_revwalk_next(&oid, walk) == 0)
-    state.enqueue(to_sha(&oid));
+    // Do the walk itself and note each commit we see.
+    git_oid oid;
+    while (git_revwalk_next(&oid, walk) == 0)
+      state.enqueue(to_sha(&oid));
+  } else {
+    state.enqueue(to_sha(git_object_id(to)));
+  }
 
   git_object *obj;
   if (git_revparse_single(&obj, repo, "HEAD") < 0) {
