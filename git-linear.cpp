@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 #include <git2.h>
 #include <iostream>
@@ -170,6 +171,11 @@ namespace { class State {
     assert(!"unreachable");
   }
 
+  int remove() const {
+    assert(path != "");
+    return std::remove(path.c_str());
+  }
+
   sha first, last;
 
   vector<Result> commits;
@@ -180,21 +186,7 @@ namespace { class State {
 
 }; };
 
-static int checkout_next(git_repository *repo, State &state) {
-
-  // Sync our current state to disk before we continue.
-  if (state.save() < 0) {
-    cerr << "Failed to save current state.\n";
-    return EXIT_FAILURE;
-  }
-
-  // Abort if there's nothing left to check.
-  if (state.done()) {
-    cout << "git-linear complete. Run `git-linear status` to see results.\n";
-    return EXIT_SUCCESS;
-  }
-
-  sha commit = state.next();
+static int checkout(git_repository *repo, const sha &commit) {
 
   git_object *obj;
   if (git_revparse_single(&obj, repo, commit.c_str()) < 0) {
@@ -231,6 +223,25 @@ static int checkout_next(git_repository *repo, State &state) {
   }
 
   return EXIT_SUCCESS;
+}
+
+static int checkout_next(git_repository *repo, State &state) {
+
+  // Sync our current state to disk before we continue.
+  if (state.save() < 0) {
+    cerr << "Failed to save current state.\n";
+    return EXIT_FAILURE;
+  }
+
+  // Abort if there's nothing left to check.
+  if (state.done()) {
+    cout << "git-linear complete. Run `git-linear status` to see results.\n";
+    return EXIT_SUCCESS;
+  }
+
+  sha commit = state.next();
+
+  return checkout(repo, commit);
 }
 
 static int action_add(git_repository *repo, State &state, int argc, char **argv) {
@@ -472,6 +483,24 @@ static int action_status(git_repository *repo, State &state, int argc,
   return EXIT_SUCCESS;
 }
 
+static int action_reset(git_repository *repo, State &state, int argc,
+    [[gnu::unused]] char **argv) {
+
+  if (argc > 1) {
+    cerr << "Unrecognised arguments. Run `git-linear help` for usage.\n";
+    return EXIT_FAILURE;
+  }
+
+  // Delete on-disk state.
+  if (state.remove() < 0) {
+    cerr << "Failed to remove state: " << strerror(errno) << "\n";
+    return EXIT_FAILURE;
+  }
+
+  // Return to where we started this git-linear.
+  return checkout(repo, state.home);
+}
+
 int main(int argc, char **argv) {
 
   if (argc < 2 || !strcmp(argv[1], "help")) {
@@ -482,10 +511,10 @@ int main(int argc, char **argv) {
       " " << argv[0] << " bad [<rev>]                   - mark current commit as bad\n"
       " " << argv[0] << " skip [<rev>]                  - skip current commit\n"
       " " << argv[0] << " status                        - show current progress\n"
-      " " << argv[0] << " add <rev>            - append some more commits to an in-progress scan\n"
+      " " << argv[0] << " add <rev>                     - append some more commits to an in-progress scan\n"
+      " " << argv[0] << " reset                         - abort testing and clean up metadata\n"
 #if 0
       " " << argv[0] << " run <cmd>...         - automate the remaining testing using the given command\n"
-      " " << argv[0] << " reset                - abort testing and clean up metadata\n"
       " " << argv[0] << " log                  - generate a log of actions\n"
       " " << argv[0] << " replay <file>        - replay a previously generated log\n"
 #endif
@@ -534,6 +563,8 @@ int main(int argc, char **argv) {
       ret = action_status(repo, state, argc - 1, argv + 1);
     } else if (argc >= 2 && !strcmp(argv[1], "add")) {
       ret = action_add(repo, state, argc - 1, argv + 1);
+    } else if (!strcmp(argv[1], "reset")) {
+      ret = action_reset(repo, state, argc - 1, argv + 1);
     }
 
     else {
