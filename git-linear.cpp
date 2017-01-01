@@ -17,16 +17,18 @@ using namespace std;
 
 // C++ RAII bullshit. Pay no attention to that human behind the curtain.
 class _manage {
-  enum tag { OBJECT, REVWALK };
+  enum tag { OBJECT, REVWALK, REFERENCE };
   tag tag;
-  union { git_object *object_p; git_revwalk *revwalk_p; };
+  union { git_object *object_p; git_revwalk *revwalk_p; git_reference *reference_p; };
  public:
   _manage(git_object *p): tag(OBJECT), object_p(p) {}
   _manage(git_revwalk *p): tag(REVWALK), revwalk_p(p) {}
+  _manage(git_reference *p): tag(REFERENCE), reference_p(p) {}
   ~_manage() {
     switch (tag) {
       case OBJECT: if (object_p) git_object_free(object_p); break;
       case REVWALK: git_revwalk_free(revwalk_p); break;
+      case REFERENCE: git_reference_free(reference_p); break;
     }
   }
 };
@@ -216,10 +218,14 @@ static int checkout(git_repository *repo, const sha &commit) {
     return EXIT_FAILURE;
   }
 
-  if (git_repository_set_head_detached(repo, git_object_id(obj)) < 0) {
-    const git_error *e = giterr_last();
-    cerr << "Failed to set HEAD: " << e->message << "\n";
-    return EXIT_FAILURE;
+  // First try to set an attached HEAD.
+  if (git_repository_set_head(repo, commit.c_str()) < 0) {
+    // We failed; set a detached one.
+    if (git_repository_set_head_detached(repo, git_object_id(obj)) < 0) {
+      const git_error *e = giterr_last();
+      cerr << "Failed to set HEAD: " << e->message << "\n";
+      return EXIT_FAILURE;
+    }
   }
 
   return EXIT_SUCCESS;
@@ -342,15 +348,59 @@ static int action_add(git_repository *repo, State &state, int argc, char **argv)
     state.enqueue(to_sha(git_object_id(to)));
   }
 
-  git_object *obj;
-  if (git_revparse_single(&obj, repo, "HEAD") < 0) {
-    const git_error *e = giterr_last();
-    cerr << "failed to check current revision: " << e->message << "\n";
-    return EXIT_FAILURE;
+  if (state.home == "") {
+    /* We are just starting a git-linear and need to set a home to later return
+     * to.
+     */
+
+    /* Get a reference to HEAD, so we can figure out what it is. Despite
+     * git_repository_head looking promising and numerous sources online point
+     * to it, it is not the droid we are looking for. It fully resolves the
+     * symbolic link chain, meaning we can never observe whether HEAD first
+     * points to a branch.
+     */
+    git_reference *ref;
+    if (git_reference_lookup(&ref, repo, "HEAD") < 0) {
+      const git_error *e = giterr_last();
+      cerr << "Failed to retrieve a reference for HEAD: " << e->message << "\n";
+      return EXIT_FAILURE;
+    }
+    MANAGE(ref);
+
+    // See if HEAD points at a branch or a random commit.
+    git_ref_t type = git_reference_type(ref);
+    assert(type == GIT_REF_OID || type == GIT_REF_SYMBOLIC);
+
+    if (type == GIT_REF_SYMBOLIC) {
+      /* HEAD points at a branch. We want to store the branch name, not its
+       * commit SHA as the home. If we store its SHA, when we `git-linear reset`
+       * we end up detached.
+       */
+      const char *branch = git_reference_symbolic_target(ref);
+      if (branch == nullptr) {
+        // unreachable?
+        cerr << "HEAD is a symbolic reference, but its target has no name\n";
+        return EXIT_FAILURE;
+      }
+
+      state.home = branch;
+
+    } else {
+      // HEAD points at a random commit. Store its SHA.
+      assert(type == GIT_REF_OID);
+
+      git_oid oid;
+      if (git_reference_name_to_id(&oid, repo, "HEAD") < 0) {
+        // unreachable?
+        const git_error *e = giterr_last();
+        cerr << "Failed to get ID of HEAD: " << e->message << "\n";
+        return EXIT_FAILURE;
+      }
+
+      state.home = to_sha(&oid);
+    }
+
   }
-  MANAGE(obj);
-  if (state.home == "")
-    state.home = to_sha(git_object_id(obj));
 
   return checkout_next(repo, state);
 }
