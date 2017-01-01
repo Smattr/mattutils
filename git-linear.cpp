@@ -381,7 +381,7 @@ static int action_mark(git_repository *repo, State &state, int argc,
   }
 
   if (argc > 2) {
-    cerr << "Unrecognized arguments. Run `git-linear help` for usage.\n";
+    cerr << "Unrecognised arguments. Run `git-linear help` for usage.\n";
     return EXIT_FAILURE;
   }
 
@@ -422,7 +422,13 @@ static string first_line(const string &text) {
   return string(text.begin(), it);
 }
 
-static int action_status(git_repository *repo, State &state) {
+static int action_status(git_repository *repo, State &state, int argc,
+    [[gnu::unused]] char **argv) {
+
+  if (argc > 1) {
+    cerr << "Unrecognised arguments. Run `git-linear help` for usage.\n";
+    return EXIT_FAILURE;
+  }
 
   bool tty = isatty(STDOUT_FILENO);
   const char *green = tty ? "\033[32m" : "";
@@ -524,8 +530,8 @@ int main(int argc, char **argv) {
     if (!strcmp(argv[1], "good") || !strcmp(argv[1], "bad") ||
         !strcmp(argv[1], "skip")) {
       ret = action_mark(repo, state, argc - 1, argv + 1);
-    } else if (argc == 2 && !strcmp(argv[1], "status")) {
-      ret = action_status(repo, state);
+    } else if (!strcmp(argv[1], "status")) {
+      ret = action_status(repo, state, argc - 1, argv + 1);
     } else if (argc >= 2 && !strcmp(argv[1], "add")) {
       ret = action_add(repo, state, argc - 1, argv + 1);
     }
