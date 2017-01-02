@@ -4,12 +4,15 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 #include <git2.h>
 #include <iostream>
 #include <json.hpp> // https://github.com/nlohmann/json
 #include <fstream>
 #include <map>
 #include <string>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
 
@@ -556,6 +559,113 @@ static int action_reset(git_repository *repo, State &state, int argc,
   return checkout(repo, state.home);
 }
 
+static int action_run(git_repository *repo, State &state, int argc,
+    char **argv) {
+
+  if (argc < 2) {
+    cerr << "Unrecognised arguments. Run `git-linear help` for usage.\n";
+    return EXIT_FAILURE;
+  }
+
+  /* Assume we are already within the git-linear range (i.e. do not checkout the
+   * first pending commit here). Essentially we assume that if we're not on the
+   * first commit, there's a reason the user wanted to start here.
+   */
+
+  while (!state.done()) {
+
+    sha commit = state.next();
+
+    /* Setup a file descriptor by which the child can indicate a failed exec to
+     * us. If we ever get anything back on this file descriptor, we know the
+     * exec failed.
+     */
+    int sig[2];
+    if (pipe2(sig, O_CLOEXEC) < 0) {
+      cerr << "Failed to create signal pipe: " << strerror(errno) << "\n";
+      return EXIT_FAILURE;
+    }
+
+    pid_t pid = fork();
+    if (pid < 0) {
+      cerr << "Fork failed: " << strerror(errno) << "\n";
+      return EXIT_FAILURE;
+    }
+
+    if (pid == 0) { // child
+
+      // Set an environment variable for the script to see the current commit.
+      if (setenv("GIT_COMMIT", commit.c_str(), 1) < 0) {
+        cerr << "Failed to set GIT_COMMIT environment variable: " <<
+          strerror(errno) << "\n";
+        goto fail;
+      }
+
+      execvp(argv[1], argv + 1);
+
+fail:
+      char c = 1;
+      write(sig[1], &c, sizeof(c));
+      exit(EXIT_FAILURE);
+
+    }
+
+    /* Close the end of the pipe we (the parent) don't need. We need to do this
+     * to ensure our attempted read is interrupted when our child execs.
+     */
+    close(sig[1]);
+
+    /* Try to read from the pipe. If the child correctly execs, this should
+     * fail.
+     */
+    char dummy;
+    if (read(sig[0], &dummy, sizeof(dummy)) > 0) {
+      cerr << "Failed to exec command\n";
+      return EXIT_FAILURE;
+    }
+
+    int status;
+    if (waitpid(pid, &status, 0) < 0) {
+      cerr << "Failed to wait on child\n";
+      return EXIT_FAILURE;
+    }
+
+    /* Determine how to mark this commit, using the same methodology as
+     * git-bisect.
+     */
+    const char *quality;
+    switch (WEXITSTATUS(status)) {
+
+      case 0:
+        quality = "good";
+        break;
+
+      case 1 ... 124:
+      case 126 ... 127:
+        quality = "bad";
+        break;
+
+      case 125:
+        quality = "skip";
+        break;
+
+      default:
+        cerr << "Command returned status outside [0, 127]; aborting\n";
+        return EXIT_FAILURE;
+
+    }
+
+    const char *mark_argv[] = { quality, nullptr };
+    int r = action_mark(repo, state, 1, const_cast<char**>(mark_argv));
+    if (r != EXIT_SUCCESS)
+      return r;
+
+  }
+
+  const char *status_argv[] = { "status", nullptr };
+  return action_status(repo, state, 1, const_cast<char**>(status_argv));
+}
+
 int main(int argc, char **argv) {
 
   if (argc < 2 || !strcmp(argv[1], "help")) {
@@ -568,8 +678,8 @@ int main(int argc, char **argv) {
       " " << argv[0] << " status                        - show current progress\n"
       " " << argv[0] << " add <rev>                     - append some more commits to an in-progress scan\n"
       " " << argv[0] << " reset                         - abort testing and clean up metadata\n"
+      " " << argv[0] << " run <cmd>...                  - automate the remaining testing using the given command\n"
 #if 0
-      " " << argv[0] << " run <cmd>...         - automate the remaining testing using the given command\n"
       " " << argv[0] << " log                  - generate a log of actions\n"
       " " << argv[0] << " replay <file>        - replay a previously generated log\n"
 #endif
@@ -618,6 +728,8 @@ int main(int argc, char **argv) {
       ret = action_add(repo, state, argc - 1, argv + 1);
     } else if (!strcmp(argv[1], "reset")) {
       ret = action_reset(repo, state, argc - 1, argv + 1);
+    } else if (!strcmp(argv[1], "run")) {
+      ret = action_run(repo, state, argc - 1, argv + 1);
     }
 
     else {
