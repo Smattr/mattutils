@@ -92,18 +92,23 @@ namespace { class State {
 
     ifstream in(path);
     if (!in.is_open()) {
-      cerr << "Failed to open " << path << ".\n";
+      cerr << "Failed to open " << path << ". No git-linear in progress?\n";
       return -1;
     }
 
-    nlohmann::json j;
-    in >> j;
+    try {
+      nlohmann::json j;
+      in >> j;
 
-    home = j["home"];
+      home = j["home"];
 
-    for (auto item : j["progress"]) {
-      Result r { item["commit"], from_string(item["quality"]) };
-      commits.push_back(r);
+      for (auto item : j["progress"]) {
+        Result r { item["commit"], from_string(item["quality"]) };
+        commits.push_back(r);
+      }
+    } catch (exception &e) {
+      cerr << "Failed to parse " << path << ": " << e.what() << "\n";
+      return -1;
     }
 
     return 0;
@@ -600,8 +605,6 @@ int main(int argc, char **argv) {
     // Load the previous state.
     State state;
     if (state.load(state_json) < 0) {
-      cerr << "Failed to read " << state_json << ". No git-linear in "
-        "progress?\n";
       git_libgit2_shutdown();
       return EXIT_FAILURE;
     }
