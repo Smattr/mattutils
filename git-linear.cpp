@@ -683,7 +683,7 @@ int main(int argc, char **argv) {
       " " << argv[0] << " log                  - generate a log of actions\n"
       " " << argv[0] << " replay <file>        - replay a previously generated log\n"
 #endif
-      " " << argv[0] << " help                 - show this information\n";
+      " " << argv[0] << " help                          - show this information\n";
     return EXIT_FAILURE;
   }
 
