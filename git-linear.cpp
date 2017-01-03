@@ -109,6 +109,9 @@ namespace { class State {
         Result r { item["commit"], from_string(item["quality"]) };
         commits.push_back(r);
       }
+
+      log_text = j["log"];
+
     } catch (exception &e) {
       cerr << "Failed to parse " << path << ": " << e.what() << "\n";
       return -1;
@@ -130,6 +133,7 @@ namespace { class State {
       {"comment", "hello world"},
       {"home", home},
       {"progress", progress},
+      {"log", log_text},
     };
 
     ofstream out(path);
@@ -191,6 +195,23 @@ namespace { class State {
   vector<Result> commits;
   
   sha home;
+  string log_text;
+
+  void log(int argc, char **argv) {
+    string cmd("git-linear");
+    for (int i = 0; i < argc; i++) {
+      cmd += " '";
+      for (const char *p = argv[i]; *p != '\0'; p++) {
+        if (*p == '\'')
+          cmd += "''";
+        else
+          cmd += *p;
+      }
+      cmd += "'";
+    }
+    log_text += cmd + "\n";
+  }
+
  private:
   string path;
 
@@ -258,7 +279,9 @@ static int checkout_next(git_repository *repo, State &state) {
   return checkout(repo, commit);
 }
 
-static int action_add(git_repository *repo, State &state, int argc, char **argv) {
+static int action_add(git_repository *repo, State &state, int argc,
+    char **argv, bool no_log = false) {
+
   if (argc < 2 || argc > 3) {
     cerr << "expected rev-spec\n"
             "run `git-linear help` for usage\n";
@@ -410,10 +433,15 @@ static int action_add(git_repository *repo, State &state, int argc, char **argv)
 
   }
 
+  if (!no_log)
+    state.log(argc, argv);
+
   return checkout_next(repo, state);
 }
 
-static int action_start(git_repository *repo, const string &config, int argc, char **argv) {
+static int action_start(git_repository *repo, const string &config, int argc,
+    char **argv) {
+
   if (argc < 2 || argc > 3) {
     cerr << "expected rev-spec\n"
             "run `git-linear help` for usage\n";
@@ -431,8 +459,10 @@ static int action_start(git_repository *repo, const string &config, int argc, ch
   State state;
   state.set_path(config);
 
+  state.log(argc, argv);
+
   // XXX: We know the callee won't look at argv[0]
-  return action_add(repo, state, argc, argv);
+  return action_add(repo, state, argc, argv, true);
 }
 
 static int action_mark(git_repository *repo, State &state, int argc,
@@ -482,6 +512,8 @@ static int action_mark(git_repository *repo, State &state, int argc,
   }
 
   state.mark(commit, quality);
+
+  state.log(argc, argv);
 
   return checkout_next(repo, state);
 }
@@ -666,6 +698,53 @@ fail:
   return action_status(repo, state, 1, const_cast<char**>(status_argv));
 }
 
+static int action_log(State &state, int argc, [[gnu::unused]] char **argv) {
+
+  if (argc > 1) {
+    cerr << "Unrecognised arguments. Run `git-linear help` for usage.\n";
+    return EXIT_FAILURE;
+  }
+
+  cout << state.log_text;
+
+  return EXIT_SUCCESS;
+}
+
+static int action_replay(int argc, char **argv) {
+
+  if (argc != 2) {
+    cerr << "Unrecognised arguments. Run `git-linear help` for usage.\n";
+    return EXIT_FAILURE;
+  }
+
+  ifstream in(argv[1]);
+  if (!in.is_open()) {
+    cerr << "Failed to open " << argv[1] << "\n";
+    return EXIT_FAILURE;
+  }
+
+  /* This (intentionally) allows replay of arbitrary commands. */
+  for (;;) {
+
+    string line;
+    getline(in, line);
+    if (in.eof() || in.bad() || in.fail())
+      break;
+
+    while (line.size() > 0 && isspace(line[0]))
+      line = line.substr(1, line.size() - 1);
+
+    if (line == "" || line[0] == '#')
+      continue;
+
+    int r = system(line.c_str());
+    if (r != 0)
+      return r;
+  }
+
+  return EXIT_SUCCESS;
+}
+
 int main(int argc, char **argv) {
 
   if (argc < 2 || !strcmp(argv[1], "help")) {
@@ -679,16 +758,17 @@ int main(int argc, char **argv) {
       " " << argv[0] << " add <rev>                     - append some more commits to an in-progress scan\n"
       " " << argv[0] << " reset                         - abort testing and clean up metadata\n"
       " " << argv[0] << " run <cmd>...                  - automate the remaining testing using the given command\n"
-#if 0
-      " " << argv[0] << " log                  - generate a log of actions\n"
-      " " << argv[0] << " replay <file>        - replay a previously generated log\n"
-#endif
+      " " << argv[0] << " log                           - generate a log of actions\n"
+      " " << argv[0] << " replay <file>                 - replay a previously generated log\n"
       " " << argv[0] << " help                          - show this information\n";
     return EXIT_FAILURE;
   }
 
   // Guard against careless refactoring.
   assert(argc > 1);
+
+  if (!strcmp(argv[1], "replay"))
+    return action_replay(argc - 1, argv + 1);
 
   git_libgit2_init();
 
@@ -730,6 +810,8 @@ int main(int argc, char **argv) {
       ret = action_reset(repo, state, argc - 1, argv + 1);
     } else if (!strcmp(argv[1], "run")) {
       ret = action_run(repo, state, argc - 1, argv + 1);
+    } else if (!strcmp(argv[1], "log")) {
+      ret = action_log(state, argc - 1, argv + 1);
     }
 
     else {
