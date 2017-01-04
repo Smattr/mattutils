@@ -24,6 +24,8 @@
     re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
     di = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
     sh = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
+    li = linear
+    linear = "!f() { git-linear \"$@\"; }; f"
 
 [merge]
     conflictstyle = diff3
