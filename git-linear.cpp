@@ -1,4 +1,4 @@
-/* WIP of a tool to do exhaustive testing of git revisions. */
+/* A tool to do exhaustive testing of git revisions. See git-linear.1. */
 
 #include <algorithm>
 #include <cassert>
@@ -748,6 +748,19 @@ static int action_replay(int argc, char **argv) {
 int main(int argc, char **argv) {
 
   if (argc < 2 || !strcmp(argv[1], "help")) {
+    // Find the directory we're in, where we assume our manpage is.
+    const string argv0(argv[0]);
+    auto pos = argv0.rfind('/');
+    string manpage;
+    if (pos != string::npos)
+      manpage += argv0.substr(0, pos + 1);
+    manpage += "git-linear.1";
+
+    // Show the manpage for this command.
+    const char *cmd[] = { "man", "--local-file", manpage.c_str(), NULL };
+    execvp(cmd[0], const_cast<char**>(cmd));
+
+    // If we reached here, man failed. Just show simple help.
     cout << "Test a range of commits in the manner of git-bisect, but exhaustively.\n\n"
       "usage:\n"
       " " << argv[0] << " start (<revspec>|<rev> <rev>) - start testing the range rev1..rev2\n"

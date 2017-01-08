@@ -1,0 +1,133 @@
+.TH GIT-LINEAR 1
+.SH NAME
+git linear \- Scan a range of commits in the manner of git-bisect, but one-by-one exhaustively
+.SH SYNOPSIS
+.B \fBgit linear\fR \fIsubcommand options\fR
+.SH DESCRIPTION
+Possible subcommands are:
+.PP
+.nf
+.RS
+\fBgit linear start\fR (<revspec>|<rev> <rev>)
+.RE
+.fi
+.nf
+.RS
+\fBgit linear good\fR [<rev>]
+.RE
+.fi
+.nf
+.RS
+\fBgit linear bad\fR [<rev>]
+.RE
+.fi
+.nf
+.RS
+\fBgit linear skip\fR [<rev>]
+.RE
+.fi
+.nf
+.RS
+\fBgit linear status\fR
+.RE
+.fi
+.nf
+.RS
+\fBgit linear add\fR <rev>
+.RE
+.fi
+.nf
+.RS
+\fBgit linear reset\fR
+.RE
+.fi
+.nf
+.RS
+\fBgit linear run\fR <cmd>...
+.RE
+.fi
+.nf
+.RS
+\fBgit linear log\fR
+.RE
+.fi
+.nf
+.RS
+\fBgit linear replay\fR <file>
+.RE
+.fi
+.nf
+.RS
+\fBgit linear help\fR
+.RE
+.fi
+.PP
+This command was born out of desire to do exhaustive testing of a patch set in the style of git-bisect.
+The basic flow is to \fBstart\fR and either manually or automatically (via \fBrun\fR) indicate whether each commit is good or bad, in the same manner you would during a bisection.
+At each step, where a bisection would bisect the remaining range, instead the next adjacent commit is selected.
+Further usage is essentially the same as git-bisect.
+.TP
+.BR git " " linear " " start " (<revspec>|<rev> <rev>)"
+Start testing a range.
+You can specify a range with either Git's range syntax ("foo..bar", "foo..", ...) or by giving the bounding commits ("foo bar").
+Following this, the first commit in the range will be checked out.
+From here you can either manually mark this commit using \fBgit linear \fR(\fBgood\fR|\fBbad\fR|\fBskip\fR), or start automated testing using \fBgit linear run \fRcmd....
+.PP
+.BR git " " linear " " good " [<rev>]"
+.br
+.BR git " " linear " " bad " [<rev>]"
+.br
+.BR git " " linear " " skip " [<rev>]"
+.RS
+Mark the quality of a commit.
+Each commit in the range is considered either "untested", "good", "bad" or "skipped".
+Immediately after starting, each commit is considered untested.
+These three commands can be used to manually mark a command as good, bad or skipped, respectively.
+The optional revision argument allows you to mark any commit in the range, including commits that have previously been marked.
+When used without a revision, these commands apply to the currently checked out commit.
+.RE
+.TP
+.BR git " " linear " " status
+Show the progress of the current git-linear.
+This command shows all commits in the current range and their quality.
+It gives you some idea of how close you are to the end of testing.
+.TP
+.BR git " " linear " " add " <rev>"
+Extend the range currently being tested.
+If you are midway through testing and decide you want to append some further commits that were not in the original range, this command lets you modify the range.
+The revision supplied can be a single commit or a range.
+The range is \fIonly\fR extended by adding what you have described; any commits in-between the existing range and the range you are adding are not included.
+.TP
+.BR git " " linear " " reset
+Finish a git-linear and return to the commit that was previously checked out.
+This command can be used to either abort an in-progress git-linear, or to remove the state associated with a completed git-linear.
+Note that the git-linear state is not backed up prior to running this command.
+This deletes the results of your testing, so save the output of \fBgit linear status\fR beforehand if you need them to persist.
+.TP
+.BR git " " linear " " run " <cmd>..."
+Execute a given command to evaluate the quality of the remaining commits.
+Much like git-bisect, this is the work horse of git-linear.
+This will test the untested remainder of the range of commits by executing the given command.
+When the command is executed, the environment variable \fBGIT_COMMIT\fR will contain the current commit's hash.
+If the command returns 0, the commit will be considered good.
+If the command returns 1-124, 126 or 127, the commit will be considered bad.
+If the command returns 125, the commit will be skipped.
+See git-bisect documentation for the reasoning behind these values.
+.PP
+.BR git " " linear " " log
+.br
+.BR git " " linear " " replay " <file>"
+.RS
+Output or re-run, respectively, a set of git-linear commands.
+This pair of commands can be used to stash and then later resume testing.
+These correspond closely enough to the equivalent git-bisect commands that, with some tweaking, it is possible to replay a git-bisect as a git-linear or vice-versa.
+This can be extremely valuable.
+For example, if you are midway through a bisection and you realise there are multiple bugs in play, you can transition to a linear scan in an attempt to isolate them.
+.RE
+.TP
+.BR git " " help
+Show this documentation.
+.PP
+The state of an in-progress git-linear is stored in .git-linear.json in the root of your repository's working directory.
+The format is not necessarily stable across git-linear versions, but it is reasonably straightforward.
+With a little common sense, you should be able to edit the state by hand when you need to perform more complex operations.
