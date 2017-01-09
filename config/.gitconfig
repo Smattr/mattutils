@@ -26,6 +26,7 @@
     sh = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
     li = linear
     linear = "!f() { git-linear \"$@\"; }; f"
+    cp = cherry-pick
 
 [merge]
     conflictstyle = diff3
