@@ -19,14 +19,21 @@
     in = incoming
     out = outgoing
     root = rev-parse --show-toplevel
+    cp = cherry-pick
+
     # Fix Git's shitty inability to bisect when not at the top level
     bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect \"$@\"; }; f"
+
+    # More advanced rebasing tool. See rerebase.c.
     re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
+
+    # Smart diffs. See dif.cpp.
     di = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
     sh = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
+
+    # Bisect-like tool. See git-linear.cpp.
     li = linear
     linear = "!f() { git-linear \"$@\"; }; f"
-    cp = cherry-pick
 
 [merge]
     conflictstyle = diff3
