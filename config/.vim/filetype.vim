@@ -33,6 +33,7 @@ augroup filetypedetect
     au BufRead,BufNewFile *.conf setfiletype dosini
     au BufRead,BufNewFile SConstruct setfiletype python
     au BufRead,BufNewFile *.lnt setfiletype lnt
+    au BufRead,BufNewFile *.grako setfiletype grako
 augroup END
 if getline(2) == '== Anything below this line will be ignored'
     set ft=be
