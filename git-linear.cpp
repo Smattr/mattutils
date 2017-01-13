@@ -695,7 +695,11 @@ fail:
   }
 
   const char *status_argv[] = { "status", nullptr };
-  return action_status(repo, state, 1, const_cast<char**>(status_argv));
+  int ret = action_status(repo, state, 1, const_cast<char**>(status_argv));
+  if (ret != EXIT_SUCCESS)
+    return ret;
+
+  return checkout(repo, state.home);
 }
 
 static int action_log(State &state, int argc, [[gnu::unused]] char **argv) {

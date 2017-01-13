@@ -1,0 +1,3 @@
+It turns out we were never checking out the home commit at all at the completion
+of `run`. It merely looked this way because the last tested commit was
+frequently the home commit. The present commit fixes this issue.
