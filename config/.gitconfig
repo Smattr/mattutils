@@ -35,6 +35,10 @@
     li = linear
     linear = "!f() { git-linear \"$@\"; }; f"
 
+    # Access to current bug tracker. Primarily here so we can swap out Bugs
+    # Everywhere for something else if desired.
+    issue = "!f() { be \"$@\"; }; f"
+
 [merge]
     conflictstyle = diff3
 
