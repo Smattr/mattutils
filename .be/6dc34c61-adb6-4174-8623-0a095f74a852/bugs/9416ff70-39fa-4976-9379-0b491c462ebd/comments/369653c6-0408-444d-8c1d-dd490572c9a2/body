@@ -1,0 +1,8 @@
+Synecdoche now has a production toolchain derived from Clang/LLVM r292090. This
+aligns with Clang 5.0.0 which has yet to be released. Though this isn't from a
+stable channel, I've so far found this toolchain to be very stable and produces
+high quality code. Looks like the current distro lives to fight another day.
+
+Note, the old toolchain is currently retained if there's any need to do
+development on it, but it is expected that any development on Clang/LLVM itself
+would involve patches against the latest, rather than 3.7.0.
