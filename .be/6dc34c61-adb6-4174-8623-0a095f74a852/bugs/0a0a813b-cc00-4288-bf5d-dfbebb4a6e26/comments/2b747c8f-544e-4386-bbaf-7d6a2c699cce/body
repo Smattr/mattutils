@@ -1,0 +1,3 @@
+When running `git linear start ...` with the results of a previous git-linear
+hanging around, a git-checkout is done before git-linear notices there's a
+previous state. Fix should be straightforward.
