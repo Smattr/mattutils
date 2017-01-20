@@ -1,0 +1,4 @@
+Ah, the problem here was misdiagnosed. The scenario is that when you
+`git linear reset` while on the way to do a `git linear start ...` you
+inadvertently git-checkout (to the "home" of your previous git-linear). This is
+actually sort of by-design, so closing as WONTFIX.
