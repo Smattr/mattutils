@@ -130,7 +130,7 @@ namespace { class State {
     }
 
     nlohmann::json j {
-      {"comment", "hello world"},
+      {"comment", "this file contains state for git-linear"},
       {"home", home},
       {"progress", progress},
       {"log", log_text},
