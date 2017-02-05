@@ -47,6 +47,8 @@ set incsearch
 " Bodhi's options for spell checking
 nm <F7> :setlocal spell! spelllang=en_au<CR>
 imap <F7> <C-o>:setlocal spell! spelllang=en_au<CR>
+nm <F8> :setlocal spell! spelllang=en_us<CR>
+imap <F8> <C-o>:setlocal spell! spelllang=en_us<CR>
 highlight clear SpellBad
 highlight SpellBad term=standout ctermfg=1 term=underline cterm=underline
 highlight clear SpellCap
