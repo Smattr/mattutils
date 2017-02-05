@@ -68,30 +68,6 @@ endfunction
 nm <F6> :call ToggleConceal()<CR>
 imap <F6> <C-o>:call ToggleConceal()<CR>
 
-function! ToggleIsabelleTex()
-  if exists('g:isabelle_tex')
-    let g:isabelle_tex = !g:isabelle_tex
-  else
-    let g:isabelle_tex=1
-  endif
-  syntax off
-  syntax on
-endfunction
-nm <F8> :call ToggleIsabelleTex()<CR>
-imap <F8> <C-o>:call ToggleIsabelleTex()<CR>
-
-function! ToggleIsabelleAbbreviations()
-  if exists('g:isabelle_abbreviations')
-    let g:isabelle_abbreviations = !g:isabelle_abbreviations
-  else
-    let g:isabelle_abbreviations=1
-  endif
-  syntax off
-  syntax on
-endfunction
-nm <F9> :call ToggleIsabelleAbbreviations()<CR>
-imap <F9> <C-o>:call ToggleIsabelleAbbreviations()<CR>
-
 function! ToggleSyntax()
   if exists('b:syntax_off')
     set syntax=on
