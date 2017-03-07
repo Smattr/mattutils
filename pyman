@@ -26,14 +26,14 @@ def signature(name, argspec):
 
 def main(argv):
     if len(argv) < 2 or argv[1] == '--help':
-        print >>sys.stderr, 'Usage: %s function' % argv[0]
+        sys.stderr.write('Usage: %s function\n' % argv[0])
         return -1
 
     call = argv[1]
 
     if call in STATEMENTS:
-        print >>sys.stdout, '\'%s\' is a statement; refer to online ' \
-            'documentation' % call
+        sys.stdout.write('\'%s\' is a statement; refer to online '
+            'documentation\n' % call)
         return 0
 
     # If there's a period in the path, the first component indicates the module
@@ -77,7 +77,7 @@ def main(argv):
         except AttributeError:
             pass
     if fn is None:
-        print >>sys.stderr, 'Failed to find \'%s\'' % argv[1]
+        sys.stderr.write('Failed to find \'%s\'\n' % argv[1])
         return -1
 
     try:
@@ -85,12 +85,12 @@ def main(argv):
         if doc is None:
             raise AttributeError
     except AttributeError:
-        print >>sys.stderr, 'No documentation associated with \'%s\'' % argv[1]
+        sys.stderr.write('No documentation associated with \'%s\'\n' % argv[1])
         return -1
 
     if inspect.isfunction(fn):
-        print signature(fn.__name__, inspect.getargspec(fn))
-        print ''
+        sys.stdout.write('%s\n\n' %
+            signature(fn.__name__, inspect.getargspec(fn)))
     elif inspect.isclass(fn):
         argspec = None
         try:
@@ -101,9 +101,9 @@ def main(argv):
             pass
 
         if argspec is not None:
-            print signature('%s.__init__' % fn.__name__, argspec)
-            print ''
-    print re.sub(r'^    ', '', doc, flags=re.MULTILINE)
+            sys.stdout.write('%s\n\n' %
+                signature('%s.__init__' % fn.__name__, argspec))
+    sys.stdout.write('%s\n' % re.sub(r'^    ', '', doc, flags=re.MULTILINE))
 
     return 0
 
