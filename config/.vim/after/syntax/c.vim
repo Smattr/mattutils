@@ -79,6 +79,16 @@ syn keyword cType atomic_bool atomic_char atomic_schar atomic_uchar atomic_short
     \ atomic_uint_fast64_t atomic_intptr_t atomic_uintptr_t atomic_size_t atomic_ptrdiff_t
     \ atomic_intmax_t atomic_uintmax_t
 
+" GCC built-in atomics
+syn keyword cOperator __atomic_add_fetch __atomic_and_fetch __atomic_always_lock_free __atomic_clear
+    \ __atomic_compare_exchange __atomic_compare_exchange_n __atomic_exchange __atomic_exchange_n
+    \ __atomic_fetch_add __atomic_fetch_and __atomic_fetch_nand __atomic_fetch_or __atomic_fetch_sub
+    \ __atomic_fetch_xor __atomic_is_lock_free __atomic_load __atomic_load_n __atomic_nand_fetch
+    \ __atomic_or_fetch __atomic_signal_fence __atomic_store __atomic_store_n __atomic_sub_fetch
+    \ __atomic_test_and_set __atomic_thread_fence __atomic_xor_fetch
+syn keyword cConstant __ATOMIC_ACQ_REL __ATOMIC_ACQUIRE __ATOMIC_CONSUME __ATOMIC_RELAXED
+    \ __ATOMIC_RELEASE __ATOMIC_SEQ_CST
+
 " GCC hacking
 syn keyword cOperator gcc_assert
 
