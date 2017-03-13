@@ -57,7 +57,7 @@ class Item(object):
                               ('guid', 'guid'),
                               ('duration', 'itunes:duration')):
             if member in self.kwargs:
-                ET.SubElement(parent, field).text = encode(self.kwargs[member])
+                ET.SubElement(i, field).text = encode(self.kwargs[member])
         return i
 
 def digest(path):
