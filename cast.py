@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 WIP
@@ -13,7 +13,7 @@ from mutagen.mp3 import MP3
 import xml.etree.cElementTree as ET
 
 def encode(text):
-    return cgi.escape(text.decode('utf8')).encode('ascii', 'xmlcharrefreplace')
+    return cgi.escape(text)
 
 class Channel(object):
     def __init__(self, title, link, description, **kwargs):
@@ -46,7 +46,7 @@ class Item(object):
 
     def attach(self, parent):
         i = ET.SubElement(parent, 'item')
-        ET.SubElement(i, 'title').text = self.title.decode('utf8')
+        ET.SubElement(i, 'title').text = self.title
         ET.SubElement(i, 'enclosure', url=self.url, length=self.length,
             type=self.type)
         ET.SubElement(i, 'pubDate').text = self.date
