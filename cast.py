@@ -131,6 +131,9 @@ def main(argv):
     et = ET.ElementTree(rss)
     et.write('feed.xml', encoding='UTF-8', xml_declaration=True)
 
+    # Validate the XML we just generated is legit.
+    subprocess.call(['xmllint', '--noout', 'feed.xml'])
+
     # Write a Lighttpd conf.
     with open(os.path.join(options.output, 'lighttpd.conf'), 'w') as f:
         f.write('server.document-root = "%s"\n'
