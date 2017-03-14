@@ -124,6 +124,7 @@ def main(argv):
     channel = Channel('My Music', options.prefix, 'My Music',
         author=getpass.getuser())
     rss = ET.Element('rss')
+    rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
     c = channel.attach(rss)
     for i in items:
         i.attach(c)
