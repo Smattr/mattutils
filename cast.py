@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 '''
-WIP
-
 This script takes a playlist of music files and constructs a directory suitable
 for serving a podcast from.
 '''
