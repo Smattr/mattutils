@@ -61,7 +61,7 @@ class Item(object):
 
 def digest(path):
     assert os.path.isfile(path)
-    with open(path) as f:
+    with open(path, 'rb') as f:
         return hashlib.sha256(f.read()).hexdigest()
 
 def main(argv):
