@@ -1,0 +1,2 @@
+The package.py script gives the user a decryption command as if the input was
+xz-compressed, even when compression is not used. This is obviously incorrect.
