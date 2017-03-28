@@ -1,0 +1,4 @@
+package.py calls 7za to do LZMA compression, presumably to take advantage of
+multicore machines. This is not necessarily useful when compressing a small
+file, but more to the point it fails when 7za is unavailable. We should probably
+just call xz here.
