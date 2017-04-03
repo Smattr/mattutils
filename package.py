@@ -149,7 +149,10 @@ def main(argv):
         sys.stdout.write(' | openssl enc -aes-256-cbc -d')
     if options.gpg_encrypt:
         sys.stdout.write(' | gpg --decrypt --no-use-agent')
-    sys.stdout.write(' | tar xJ\n')
+    sys.stdout.write(' | tar x')
+    if options.compress:
+        sys.stout.write('J')
+    sys.stdout.write('\n')
 
     return 0
 
