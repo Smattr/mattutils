@@ -158,7 +158,7 @@ function vcs_prompt {
             # Working directory contains changes to tracked files.
             echo -n "%{${fg_bold[red]}%}"
         fi
-        echo -n `git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2`
+        echo -n `git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-`
         echo -n "%{${fg_no_bold[default]}%}"
         # Show bisect status. Note that this expects to cooperate with the
         # `git bi` alias.
