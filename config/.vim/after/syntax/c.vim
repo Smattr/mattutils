@@ -93,7 +93,7 @@ syn keyword cConstant __ATOMIC_ACQ_REL __ATOMIC_ACQUIRE __ATOMIC_CONSUME __ATOMI
 syn keyword cOperator gcc_assert
 
 " LLVM hacking
-syn keyword cOperator llvm_unreachable
+syn keyword cOperator llvm_unreachable isa cast dyn_cast cast_or_null dyn_cast_or_null
 
 " Signal hacking
 syn keyword cConstant SG_SUCCESS SG_ERR_NOMEM SG_ERR_INVAL SG_ERR_UNKNOWN SG_ERR_DUPLICATE_MESSAGE
