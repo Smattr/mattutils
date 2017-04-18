@@ -263,6 +263,9 @@ fi
 if [ -e ~/.zshrc_mattbin ]; then
     source ~/.zshrc_mattbin
 fi
+if [ -e ~/.zshrc_nictabin ]; then
+    source ~/.zshrc_nictabin
+fi
 
 
 # Configure ssh-agent for gnome
