@@ -3,5 +3,5 @@
 " Maintainer: Matthew Fernandez <matthew.fernandez@gmail.com>
 " License: Public domain
 
-" Yes, I know return isn't a statement, but I enjoy thinking of it as one.
-syn match hsStatement "\<return\>"
+" Yes, I know these aren't statements, but I enjoy thinking of them as such.
+syn match hsStatement "\<\(return\|unless\|when\)\>"
