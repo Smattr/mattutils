@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+
+'''
+THIS IS A WORK-IN-PROGRESS AND SHOULD NOT BE RUN UNLESS YOU KNOW WHAT YOU'RE DOING
+
+A simple build-from-source package manager.
+
+This is designed to be little more than a glorified shell script. I use it
+mainly for automating the management of packages I reinstall frequently.
+'''
+
+import argparse, os, shutil, stat, subprocess, sys, tempfile
+
+KAGE_ROOT = os.environ.get('KAGE_ROOT', os.path.expanduser('~/.kage'))
+
+PACKAGES = {
+    'gcc-7.1.0':{
+        'dependencies':['gcc-multilib',
+                        'libgmp',
+                        'libmpc',
+                        'libmpfr',
+                        'sha512sum'],
+        'install':'#!/bin/bash -e\n'
+                  '\n'
+                  'echo Downloading...\n'
+                  'wget http://www.netgull.com/gcc/releases/gcc-7.1.0/gcc-7.1.0.tar.bz2\n'
+                  'wget http://www.netgull.com/gcc/releases/gcc-7.1.0/sha512.sum\n'
+                  '\n'
+                  'echo Validating...\n'
+                  'head -1 sha512.sum >justbz2.sum\n'
+                  'sha512sum --check justbz2.sum\n'
+                  '\n'
+                  'echo Extracting...\n'
+                  'tar xvf gcc-7.1.0.tar.bz2\n'
+                  '\n'
+                  'echo Configuring...\n'
+                  'cd gcc-7.1.0\n'
+                  './configure --prefix=${KAGE_ROOT}/gcc-7.1.0\n'
+                  '\n'
+                  'echo Compiling...\n'
+                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
+                  '\n'
+                  'echo Installing...\n'
+                  'make install\n',
+    },
+    'gcc-multilib':{
+        'check':'#!/bin/bash -e\n'
+                '\n'
+                'dpkg -s gcc-multilib | grep \'Status: install ok installed\' &>/dev/null\n',
+    },
+    'libgmp':{
+        'check':'#!/bin/bash -e\n'
+                '\n'
+                'ls /usr/include/gmpxx.h &>/dev/null\n',
+    },
+    'libmpc':{
+        'check':'#!/bin/bash -e\n'
+                '\n'
+                'ls /usr/include/mpc.h &>/dev/null\n',
+    },
+    'libmpfr':{
+        'check':'#!/bin/bash -e\n'
+                '\n'
+                'ls /usr/include/mpfr.h &>/dev/null\n',
+    },
+    'sha512sum':{
+        'check':'#!/bin/bash -e\n'
+                '\n'
+                'which sha512sum &>/dev/null\n',
+    },
+}
+
+class KageException(Exception):
+    pass
+
+def run_script(script):
+    tmp = tempfile.mkdtemp()
+
+    path = os.path.join(tmp, 'script.sh')
+    with open(path, 'wt') as f:
+        f.write(script)
+    st = os.stat(path)
+    os.chmod(path, st.st_mode | stat.S_IEXEC)
+
+    result = subprocess.call([path], cwd = tmp,
+        env = dict(os.environ, KAGE_ROOT = KAGE_ROOT))
+
+    shutil.rmtree(tmp)
+
+    return result
+
+def check(package):
+    try:
+        p = PACKAGES[package]
+    except KeyError:
+        raise KageException('unknown package %s' % package)
+
+    script = p.get('check', '#!/bin/bash -e\n'
+                            '\n'
+                            'ls \'%s\' &>/dev/null\n' %
+                                os.path.join(KAGE_ROOT, package))
+
+    return run_script(script) == 0
+
+
+def install(package):
+    def _install(package):
+        present = check(package)
+
+        if present:
+            sys.stdout.write('%s is already installed\n' % package)
+            return 0
+        else:
+            sys.stdout.write('Installing %s...\n' % package)
+
+            for dep in PACKAGES[package].get('dependencies', []):
+                sys.stdout.write('Considering dependency %s...\n' % dep)
+                result = _install(dep)
+                if result != 0:
+                    return result
+
+            try:
+                script = PACKAGES[package]['install']
+            except KeyError:
+                raise KageException('%s is not installed and I don\'t know how to install it' % package)
+
+            return run_script(script)
+
+    try:
+        return _install(package)
+    except KageException as e:
+        sys.stderr.write('failed: %s\n' % e)
+        return -1
+
+def status(package):
+    try:
+        present = check(package)
+    except KageException as e:
+        sys.stderr.write('failed: %s\n' % e)
+        return -1
+
+    sys.stdout.write('%s %s\n' % (package,
+        'installed' if present else 'not installed'))
+    return 0
+
+def uninstall(package):
+    pass
+
+def main(argv):
+
+    ACTIONS = {
+        'install':install,
+        'status':status,
+        'uninstall':uninstall,
+    }
+
+    parser = argparse.ArgumentParser(
+        description = 'a simple build-from-source package manager')
+    parser.add_argument('action', choices = ACTIONS.keys(),
+        help = 'action to run')
+    parser.add_argument('package', help = 'package to operator on')
+
+    opts = parser.parse_args(argv[1:])
+
+    return ACTIONS[opts.action](opts.package)
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
