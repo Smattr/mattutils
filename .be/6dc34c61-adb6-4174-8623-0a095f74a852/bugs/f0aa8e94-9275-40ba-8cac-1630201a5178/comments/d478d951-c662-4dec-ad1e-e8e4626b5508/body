@@ -1,0 +1,3 @@
+My reroute config used to be setup so I would get a notification when triggering
+an unmount of all attached drives. I don't seem to get this notification any
+more. Haven't done any investigation as to why yet.
