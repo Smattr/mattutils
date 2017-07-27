@@ -1,0 +1,5 @@
+The magic I have that triggers syntax highlighting in be comments no longer
+seems to work on newer Ubuntu. I suspect it's related to a differing Vim version
+rather than anything kernel-related itself, but haven't investigated yet.
+Manually setting be syntax works fine, so I don't think it's the syntax file
+itself.
