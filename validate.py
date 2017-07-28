@@ -12,13 +12,13 @@ FAILED = -1
 OK = 0
 
 def run(cmd, **kwargs):
-    with open(os.devnull, 'w') as null:
+    with open(os.devnull, 'wt') as null:
         try:
             subprocess.check_call(cmd, stdout=null, stderr=null, **kwargs)
-            print '\033[32mok (%s)\033[0m' % ' '.join(cmd)
+            sys.stdout.write('\033[32mok (%s)\033[0m\n' % ' '.join(cmd))
             return OK
         except subprocess.CalledProcessError:
-            print '\033[31mFAILED (%s)\033[0m' % ' '.join(cmd)
+            sys.stdout.write('\033[31mFAILED (%s)\033[0m\n' % ' '.join(cmd))
             return FAILED
 
 def main():
@@ -44,10 +44,10 @@ def main():
 
     while len(queue) > 0:
         item = os.path.abspath(queue.pop())
-        print ' %s ...' % item,
+        sys.stdout.write(' %s ...' % item)
         if not os.path.exists(item):
             results[item] = NOT_FOUND
-            print '\033[31mFAILED (does not exist)\033[0m'
+            sys.stdout.write('\033[31mFAILED (does not exist)\033[0m\n')
         elif os.path.isdir(item):
             dot_git = os.path.join(item, '.git')
             dot_hg = os.path.join(item, '.hg')
@@ -56,8 +56,8 @@ def main():
             elif os.path.exists(dot_hg) and os.path.isdir(dot_hg):
                 results[item] = run(['hg', 'verify'], cwd=item)
             else:
-                queue += map(lambda x: os.path.join(item, x), os.listdir(item))
-                print 'recursing'
+                queue += [os.path.join(item, x) for x in os.listdir(item)]
+                sys.stdout.write('recursing\n')
         else:
             filetype = ms.file(item)
             if filetype.startswith('Python script,'):
@@ -70,26 +70,26 @@ def main():
                 # For some reason markdown is incorrectly identified as a Fortran program.
                 results[item] = run(['markdown', item])
             elif 'ASCII text' in filetype:
-                with open(item, 'r') as f:
+                with open(item, 'rt') as f:
                     while True:
                         c = f.read(1)
                         if len(c) == 0:
-                            print '\033[32mok (printable ASCII)\033[0m'
+                            sys.stdout.write('\033[32mok (printable ASCII)\033[0m\n')
                             results[item] = OK
                             break
                         if not c in string.printable:
-                            print '\033[31mFAILED (printable ASCII)\033[0m'
+                            sys.stdout.write('\033[31mFAILED (printable ASCII)\033[0m\n')
                             results[item] = FAILED
                             break
             elif os.path.splitext(item.lower())[1] in ('.avi',):
                 # Many media container formats are misidentified by magic.
                 results[item] = run(['ffmpeg', '-i', item, '-f', 'null', os.devnull])
             else:
-                print '\033[31mno checker found for \'%s\'\033[0m' % filetype
+                sys.stdout.write('\033[31mno checker found for \'%s\'\033[0m\n' % filetype)
                 results[item] = NO_CHECKER
 
     if opts.db is None:
-        print json.dumps(results, indent=2)
+        sys.stdout.write(json.dumps(results, indent=2))
     else:
         json.dump(results, opts.db, indent=2)
 
