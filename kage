@@ -187,15 +187,11 @@ def status(package):
         'installed' if present else 'not installed'))
     return 0
 
-def uninstall(package):
-    pass
-
 def main(argv):
 
     ACTIONS = {
         'install':install,
         'status':status,
-        'uninstall':uninstall,
     }
 
     parser = argparse.ArgumentParser(
