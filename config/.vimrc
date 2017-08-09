@@ -126,3 +126,7 @@ let hs_highlight_boolean=1
 let hs_highlight_types=1
 let hs_highlight_more_types=1
 let hs_highlight_debug=1
+
+" Enable C++ highlighting for Flex/Bison
+let g:yacc_uses_cpp=1
+let g:lex_uses_cpp=1
