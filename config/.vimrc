@@ -130,3 +130,7 @@ let hs_highlight_debug=1
 " Enable C++ highlighting for Flex/Bison
 let g:yacc_uses_cpp=1
 let g:lex_uses_cpp=1
+
+" Enable some extra languages for highlighting within RST code blocks.
+let g:rst_syntax_code_list = ['vim', 'java', 'cpp', 'lisp', 'php', 'python',
+  \ 'perl', 'sh']
