@@ -6,7 +6,7 @@
 
 TMUX_VERSION=$(tmux -V | cut -d' ' -f 2)
 
-if [ $(echo "${TMUX_VERSION} >= 1.9" | bc) -eq 1 ]; then
+if [ $(awk 'BEGIN{ print "'${TMUX_VERSION}'">="1.9" }') -eq 1 ]; then
     tmux source-file ${HOME}/.tmux-modern.conf
 else
     tmux source-file ${HOME}/.tmux-legacy.conf
