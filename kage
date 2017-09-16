@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 '''
-THIS IS A WORK-IN-PROGRESS AND SHOULD NOT BE RUN UNLESS YOU KNOW WHAT YOU'RE DOING
-
 A simple build-from-source package manager.
 
 This is designed to be little more than a glorified shell script. I use it
@@ -82,6 +80,45 @@ PACKAGES = {
                   'echo Installing...\n'
                   'make install\n',
     },
+    'gcc-7.2.0':{
+        'dependencies':['libgmp-6.1.2',
+                        'libmpc-1.0.3',
+                        'libmpfr-3.1.6',
+                        'sha512sum'],
+        'install':'#!/bin/bash -e\n'
+                  '\n'
+                  'echo Downloading...\n'
+                  'wget http://www.netgull.com/gcc/releases/gcc-7.2.0/gcc-7.2.0.tar.xz\n'
+                  'wget http://www.netgull.com/gcc/releases/gcc-7.2.0/sha512.sum\n'
+                  '\n'
+                  'echo Validating...\n'
+                  'head -2 sha512.sum | tail -1 >justxz.sum\n'
+                  'sha512sum --check justxz.sum\n'
+                  '\n'
+                  'echo Extracting...\n'
+                  'tar xvf gcc-7.2.0.tar.xz\n'
+                  '\n'
+                  'echo Configuring...\n'
+                  'cd gcc-7.2.0\n'
+                  './configure --with-gmp-lib=${KAGE_ROOT}/libgmp-6.1.2/lib64 --with-gmp-include=${KAGE_ROOT}/libgmp-6.1.2/include --with-mpfr-lib=${KAGE_ROOT}/libmpfr-3.1.6/lib64 --with-mpfr-include=${KAGE_ROOT}/libmpfr-3.1.6/include --with-mpc-lib=${KAGE_ROOT}/libmpc-1.0.3/lib64 --with-mpc-include=${KAGE_ROOT}/libmpc-1.0.3/include --prefix=${KAGE_ROOT}/gcc-7.2.0\n'
+                  '\n'
+                  'echo Compiling...\n'
+                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
+                  '\n'
+                  'echo Installing...\n'
+                  'make install\n'
+                  '\n'
+                  'echo Setting up wrappers...\n'
+                  'mkdir -p ${KAGE_ROOT}/gcc-7.2.0/wrapper\n'
+                  'for f in $(ls ${KAGE_ROOT}/gcc-7.2.0/bin); do\n'
+                  '  cat - >${KAGE_ROOT}/gcc-7.2.0/wrapper/$f <<EOT\n'
+                  '#!/bin/bash\n'
+                  '\n'
+                  'LD_LIBRARY_PATH=${KAGE_ROOT}/libgmp-6.1.2/lib:${KAGE_ROOT}/libmpfr-3.1.6/lib:${KAGE_ROOT}/libmpc-1.0.3/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} ${KAGE_ROOT}/gcc-7.2.0/bin/$f "\\$@"\n'
+                  'EOT\n'
+                  '  chmod +x ${KAGE_ROOT}/gcc-7.2.0/wrapper/$f\n'
+                  'done\n',
+    },
     'gcc-multilib':{
         'check':'#!/bin/bash -e\n'
                 '\n'
@@ -92,15 +129,94 @@ PACKAGES = {
                 '\n'
                 'ls /usr/include/gmpxx.h &>/dev/null\n',
     },
+    'libgmp-6.1.2':{
+        'install':'#!/bin/bash -e\n'
+                  '\n'
+                  'echo Downloading...\n'
+                  'wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz\n'
+                  'wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz.sig\n'
+                  '\n'
+                  'echo Validating...\n'
+                  'gpg --recv-keys 28C67298\n'
+                  'gpg --verify gmp-6.1.2.tar.xz.sig\n'
+                  '\n'
+                  'echo Extracting...\n'
+                  'tar xvf gmp-6.1.2.tar.xz\n'
+                  '\n'
+                  'echo Configuring...\n'
+                  'cd gmp-6.1.2\n'
+                  './configure --prefix=${KAGE_ROOT}/libgmp-6.1.2\n'
+                  '\n'
+                  'echo Compiling...\n'
+                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
+                  '\n'
+                  'echo Installing...\n'
+                  'make install\n',
+    },
     'libmpc':{
         'check':'#!/bin/bash -e\n'
                 '\n'
                 'ls /usr/include/mpc.h &>/dev/null\n',
     },
+    'libmpc-1.0.3':{
+        # These dependencies are beyond the minimum versions required, but these
+        # versions are available at time of writing so we may as well depend on
+        # them.
+        'dependencies':['libgmp-6.1.2',
+                        'libmpfr-3.1.6'],
+        'install':'#!/bin/bash -e\n'
+                  '\n'
+                  'echo Downloading...\n'
+                  'wget ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz\n'
+                  'wget ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz.sig\n'
+                  '\n'
+                  'echo Validating...\n'
+                  'gpg --recv-keys F7D5C9BF765C61E3\n'
+                  'gpg --verify mpc-1.0.3.tar.gz.sig\n'
+                  '\n'
+                  'echo Extracting...\n'
+                  'tar xvf mpc-1.0.3.tar.gz\n'
+                  '\n'
+                  'echo Configuring...\n'
+                  'cd mpc-1.0.3\n'
+                  './configure --prefix=${KAGE_ROOT}/libmpc-1.0.3\n'
+                  '\n'
+                  'echo Compiling...\n'
+                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
+                  '\n'
+                  'echo Installing...\n'
+                  'make install\n',
+    },
     'libmpfr':{
         'check':'#!/bin/bash -e\n'
                 '\n'
                 'ls /usr/include/mpfr.h &>/dev/null\n',
+    },
+    'libmpfr-3.1.6':{
+        # As with libmpc-1.0.3, this is beyond the minimum requirements.
+        'dependencies':['libgmp-6.1.2'],
+        'install':'#!/bin/bash -e\n'
+                  '\n'
+                  'echo Downloading...\n'
+                  'wget http://www.mpfr.org/mpfr-current/mpfr-3.1.6.tar.xz\n'
+                  'wget http://www.mpfr.org/mpfr-current/mpfr-3.1.6.tar.xz.asc\n'
+                  '\n'
+                  'Validating...\n'
+                  'gpg --recv-keys 980C197698C3739D\n'
+                  'gpg --verify mpfr-3.1.6.tar.xz.asc\n'
+                  '\n'
+                  'echo Extracting...\n'
+                  'tar xvf mpfr-3.1.6.tar.xz\n'
+                  '\n'
+                  'echo Configuring...\n'
+                  'cd mpfr-3.1.6\n'
+                  './configure --prefix=${KAGE_ROOT}/libmpfr-3.1.6\n'
+                  '\n'
+                  'echo Compiling...\n'
+                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
+                  '\n'
+                  'echo Installing...\n'
+                  'make install\n',
     },
     'ninja':{
         'check':'#!/bin/bash -e\n'
