@@ -201,7 +201,7 @@ PACKAGES = {
                   'wget http://www.mpfr.org/mpfr-current/mpfr-3.1.6.tar.xz\n'
                   'wget http://www.mpfr.org/mpfr-current/mpfr-3.1.6.tar.xz.asc\n'
                   '\n'
-                  'Validating...\n'
+                  'echo Validating...\n'
                   'gpg --recv-keys 980C197698C3739D\n'
                   'gpg --verify mpfr-3.1.6.tar.xz.asc\n'
                   '\n'
