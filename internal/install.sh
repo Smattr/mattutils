@@ -38,6 +38,7 @@ for i in \
          search \
          sendmail.py \
          ssh-proxy \
+         t \
          ubiquity \
          validate.py \
          wim ; do
