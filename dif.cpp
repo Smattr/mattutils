@@ -76,14 +76,14 @@ class Child {
 
 };
 
-Child::Child(const char **argv, int cin, int cout) : m_cin(-1), m_cout(-1) {
+Child::Child(const char **argv, int cin_, int cout_) : m_cin(-1), m_cout(-1) {
   int cin_pipe[2], cout_pipe[2], signal_pipe[2];
   pid_t p;
 
-  if (cin == -1 && pipe(cin_pipe) < 0)
+  if (cin_ == -1 && pipe(cin_pipe) < 0)
     goto fail1;
 
-  if (cout == -1 && pipe(cout_pipe) < 0)
+  if (cout_ == -1 && pipe(cout_pipe) < 0)
     goto fail2;
 
   if (pipe2(signal_pipe, O_CLOEXEC) < 0)
@@ -100,19 +100,19 @@ Child::Child(const char **argv, int cin, int cout) : m_cin(-1), m_cout(-1) {
     close(signal_pipe[0]);
 
     int cin_fd;
-    if (cin == -1) {
+    if (cin_ == -1) {
       close(cin_pipe[1]);
       cin_fd = cin_pipe[0];
     } else {
-      cin_fd = cin;
+      cin_fd = cin_;
     }
 
     int cout_fd;
-    if (cout == -1) {
+    if (cout_ == -1) {
       close(cout_pipe[0]);
       cout_fd = cout_pipe[1];
     } else {
-      cout_fd = cout;
+      cout_fd = cout_;
     }
 
     if (cin_fd != STDIN_FILENO && dup2(cin_fd, STDIN_FILENO) < 0)
@@ -139,12 +139,12 @@ child_fail:;
 
   close(signal_pipe[0]);
 
-  if (cin == -1) {
+  if (cin_ == -1) {
     close(cin_pipe[0]);
     m_cin = cin_pipe[1];
   }
 
-  if (cout == -1) {
+  if (cout_ == -1) {
     close(cout_pipe[1]);
     m_cout = cout_pipe[0];
   }
@@ -161,12 +161,12 @@ fail4:
   if (signal_pipe[1] >= 0)
     close(signal_pipe[1]);
 fail3:
-  if (cout == -1) {
+  if (cout_ == -1) {
     close(cout_pipe[0]);
     close(cout_pipe[1]);
   }
 fail2:
-  if (cin == -1) {
+  if (cin_ == -1) {
     close(cin_pipe[0]);
     close(cin_pipe[1]);
   }
