@@ -97,13 +97,13 @@ fi
 
 # Build some utils.
 if [ ! -e "${HOME}/bin/balloon" ]; then
-    cc -O3 -std=c11 -W -Wall -Wextra -Werror -o "${HOME}/bin/balloon" "${REPO}/balloon.c" $(pkg-config --libs ncurses)
+    cc -O3 -std=c11 -W -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wmissing-declarations -o "${HOME}/bin/balloon" "${REPO}/balloon.c" $(pkg-config --libs ncurses)
 fi
 if [ ! -e "${HOME}/bin/rerebase" ]; then
-    cc -O3 -std=c11 -W -Wall -Wextra -Werror -o "${HOME}/bin/rerebase" "${REPO}/rerebase.c"
+    cc -O3 -std=c11 -W -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wmissing-declarations -o "${HOME}/bin/rerebase" "${REPO}/rerebase.c"
 fi
 if [ ! -e "${HOME}/bin/dif" ]; then
-    c++ -O3 -std=c++11 -W -Wall -Wextra -Werror -o "${HOME}/bin/dif" "${REPO}/dif.cpp"
+    c++ -O3 -std=c++11 -W -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wmissing-declarations -o "${HOME}/bin/dif" "${REPO}/dif.cpp"
 fi
 
 # Re-route links.
