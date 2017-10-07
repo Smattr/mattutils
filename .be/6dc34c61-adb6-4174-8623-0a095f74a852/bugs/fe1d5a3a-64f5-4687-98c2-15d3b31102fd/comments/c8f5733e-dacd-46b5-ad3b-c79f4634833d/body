@@ -1,0 +1,3 @@
+The long wait for Clang 5.0.0 is over and it seems it is enough of a jump in
+functionality that we probably don't need support for tip right now. Closing
+this as WONTFIX.
