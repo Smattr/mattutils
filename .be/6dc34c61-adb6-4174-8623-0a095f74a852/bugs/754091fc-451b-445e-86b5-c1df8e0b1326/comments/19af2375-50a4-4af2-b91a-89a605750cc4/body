@@ -1,0 +1,5 @@
+When working with commits that contain triple close braces ("}}}"), this is
+identified by Vim as the end of that commit's fold, and the rebase list does not
+appear correctly on first open. I noticed this recently while rebasing a LaTeX
+repo. This isn't really a bug, so much as an unintended interaction between
+rerebase and Git, but it would be nice to avoid it.
