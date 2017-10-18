@@ -1,0 +1,5 @@
+For now I've just blown away the remaining Mercurial repo I needed to sync
+(passwand) and replaced it with a Git repo. I don't think this tool is a
+priority now as all future development on my todo list is in Git. Closing as
+WONTFIX.
+
