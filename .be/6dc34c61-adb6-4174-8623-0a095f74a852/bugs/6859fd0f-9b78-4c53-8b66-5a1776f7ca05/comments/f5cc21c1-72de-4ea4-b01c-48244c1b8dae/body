@@ -1,0 +1,4 @@
+This pulls in a huge amount of Python dependencies which actually exceed the
+disk space of some smaller VMs I want to run. We may as well handle this by
+optionally shelling out to notify-send that would remove this as a hard
+dependency.
