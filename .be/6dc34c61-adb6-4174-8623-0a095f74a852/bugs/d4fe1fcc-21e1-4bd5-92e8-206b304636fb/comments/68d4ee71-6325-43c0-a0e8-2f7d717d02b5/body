@@ -1,0 +1,3 @@
+The case I ran across was ag on a machine that does not have ag installed. We
+should really handle this more cleanly, as the failure scenario is quite
+confusing.
