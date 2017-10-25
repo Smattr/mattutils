@@ -24,7 +24,6 @@ for i in \
          generate-passwd \
          g \
          ifind \
-         repty \
          rsync \
          timestamp \
          toggle-screensaver \
