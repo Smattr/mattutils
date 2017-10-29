@@ -178,7 +178,8 @@ PACKAGES = {
                   '  cat - >${KAGE_ROOT}/gcc-7.2.0/wrapper/$f <<EOT\n'
                   '#!/bin/bash\n'
                   '\n'
-                  'LD_LIBRARY_PATH=${KAGE_ROOT}/libgmp-6.1.2/lib:${KAGE_ROOT}/libmpfr-3.1.6/lib:${KAGE_ROOT}/libmpc-1.0.3/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} ${KAGE_ROOT}/gcc-7.2.0/bin/$f "\\$@"\n'
+                  'export LD_LIBRARY_PATH=${KAGE_ROOT}/libgmp-6.1.2/lib:${KAGE_ROOT}/libmpfr-3.1.6/lib:${KAGE_ROOT}/libmpc-1.0.3/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}\n'
+                  'exec ${KAGE_ROOT}/gcc-7.2.0/bin/$f "\\$@"\n'
                   'EOT\n'
                   '  chmod +x ${KAGE_ROOT}/gcc-7.2.0/wrapper/$f\n'
                   'done\n',
