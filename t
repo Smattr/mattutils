@@ -4,7 +4,7 @@
 
 tmux list-sessions &>/dev/null
 if [ $? -eq 0 ]; then
-    ssh-agent tmux attach
+    exec ssh-agent tmux attach
 else
-    ssh-agent tmux
+    exec ssh-agent tmux
 fi
