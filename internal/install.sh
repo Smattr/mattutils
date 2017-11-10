@@ -117,9 +117,6 @@ fi
 if [ ! -e "${HOME}/bin/cmake" ]; then
     ln -s "${REPO}/reroute.py" "${HOME}/bin/cmake"
 fi
-if [ ! -e "${HOME}/bin/gdb" ]; then
-    ln -s "${REPO}/reroute.py" "${HOME}/bin/gdb"
-fi
 
 if [ ! -e "${HOME}/.tmux/plugins/tpm" ]; then
     echo "Warning: Tmux Plugin Manager not found (~/.tmux/plugins/tpm)" >&2

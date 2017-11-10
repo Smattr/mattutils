@@ -162,5 +162,3 @@ def meta_z(api, argv):
 
 cmake = ['cmake', '-G', 'Ninja']
 ag = ['ag', '--group', '--color', '--pager', 'less']
-
-gdb = ['gdb', '-tui']
