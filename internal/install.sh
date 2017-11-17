@@ -15,6 +15,7 @@ mkdir -p "${HOME}/bin"
 for i in \
          addcert.sh \
          after \
+         ag \
          bashd.sh \
          check_tmux_version.sh \
          cmake \
@@ -112,9 +113,6 @@ for i in c h l o u x z; do
         ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
     fi
 done
-if [ ! -e "${HOME}/bin/ag" ]; then
-    ln -s "${REPO}/reroute.py" "${HOME}/bin/ag"
-fi
 
 if [ ! -e "${HOME}/.tmux/plugins/tpm" ]; then
     echo "Warning: Tmux Plugin Manager not found (~/.tmux/plugins/tpm)" >&2
