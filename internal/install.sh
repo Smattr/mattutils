@@ -17,6 +17,7 @@ for i in \
          after \
          bashd.sh \
          check_tmux_version.sh \
+         cmake \
          compresspdf.sh \
          fifi.sh \
          find-broken.sh \
@@ -113,9 +114,6 @@ for i in c h l o u x z; do
 done
 if [ ! -e "${HOME}/bin/ag" ]; then
     ln -s "${REPO}/reroute.py" "${HOME}/bin/ag"
-fi
-if [ ! -e "${HOME}/bin/cmake" ]; then
-    ln -s "${REPO}/reroute.py" "${HOME}/bin/cmake"
 fi
 
 if [ ! -e "${HOME}/.tmux/plugins/tpm" ]; then

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ME=$(readlink --canonicalize "$0")
+
+for candidate in $(which -a $(basename "$0")); do
+  RESOLVED=$(readlink --canonicalize "${candidate}")
+  if [ "${ME}" != "${RESOLVED}" ]; then
+    REAL=${RESOLVED}
+  fi
+done
+
+if [ -z "${REAL}" ]; then
+  echo "$(basename "$0") not found" >&2
+  exit 1
+fi
+
+exec "${REAL}" -G Ninja "$@"

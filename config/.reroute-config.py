@@ -62,5 +62,4 @@ def meta_z(api, argv):
     cmd = ['chromium-browser', '--incognito']
     return api['run'](cmd + argv[1:])[0]
 
-cmake = ['cmake', '-G', 'Ninja']
 ag = ['ag', '--group', '--color', '--pager', 'less']
