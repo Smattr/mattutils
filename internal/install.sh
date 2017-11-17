@@ -106,7 +106,7 @@ if [ ! -e "${HOME}/bin/dif" ]; then
 fi
 
 # Re-route links.
-for i in c h l o u v x z; do
+for i in c h l o u x z; do
     if [ ! -e "${HOME}/bin/meta_$i" ]; then
         ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
     fi
