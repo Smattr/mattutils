@@ -59,12 +59,7 @@ def meta_x(api, argv):
 
 def meta_z(api, argv):
     '''browser'''
-    import os, socket
-    FIREWALLED_MACHINES = frozenset(['synecdoche'])
     cmd = ['chromium-browser', '--incognito']
-    if socket.gethostname() in FIREWALLED_MACHINES:
-        cmd.append('--proxy-pac-url=file://%s' % \
-            os.path.expanduser('~/bin/nictabin/nicta-proxy.pac'))
     return api['run'](cmd + argv[1:])[0]
 
 cmake = ['cmake', '-G', 'Ninja']
