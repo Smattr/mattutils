@@ -26,6 +26,7 @@ for i in \
          generate-passwd \
          g \
          ifind \
+         kage \
          rsync \
          timestamp \
          toggle-screensaver \
