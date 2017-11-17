@@ -8,28 +8,6 @@ def meta_c(api, argv):
     api['run'](['killall', '--quiet', '--wait', 'thunderbird'])
     return api['run'](['thunderbird'] + argv[1:])[0]
 
-def meta_g(api, argv):
-    '''news'''
-    import feedparser
-    RETRIES = 3
-    if not api['which']('mplayer'):
-        api['error']('mplayer not available')
-        return -1
-    if not api['which']('wget'):
-        api['error']('wget not available')
-        return -1
-    for _ in range(RETRIES):
-        entries = feedparser.parse('http://downloads.bbc.co.uk/podcasts/worldservice/globalnews/rss.xml').entries
-        if len(entries) > 0:
-            entry = entries[0]
-            break
-    else:
-        api['error']('no entries in feed')
-        return -1
-    url = entry['media_content'][0]['url']
-    api['notify']('streaming BBC Global News')
-    return api['run']('wget %s -O - | mplayer -' % url)[0]
-
 def meta_h(api, argv):
     '''Toggle unclutter'''
     import os, signal
