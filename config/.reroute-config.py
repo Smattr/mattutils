@@ -1,5 +1,3 @@
-meta_l = ['gnome-screensaver-command', '--lock']
-
 def meta_o(api, argv):
     '''type password'''
     import os
