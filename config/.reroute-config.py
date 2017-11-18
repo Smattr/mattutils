@@ -1,8 +1,3 @@
-def meta_o(api, argv):
-    '''type password'''
-    import os
-    return api['run']([os.path.expanduser('~/bin/pw-gui')] + argv[1:])[0]
-
 def meta_u(api, argv):
     '''unmount all user drives we currently have mounted'''
     import os
