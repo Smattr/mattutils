@@ -113,7 +113,7 @@ if [ ! -e "${HOME}/bin/dif" ]; then
 fi
 
 # Re-route links.
-for i in x z; do
+for i in z; do
     if [ ! -e "${HOME}/bin/meta_$i" ]; then
         ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
     fi
