@@ -78,6 +78,8 @@ syn keyword cType atomic_bool atomic_char atomic_schar atomic_uchar atomic_short
     \ atomic_uint_fast16_t atomic_int_fast32_t atomic_uint_fast32_t atomic_int_fast64_t
     \ atomic_uint_fast64_t atomic_intptr_t atomic_uintptr_t atomic_size_t atomic_ptrdiff_t
     \ atomic_intmax_t atomic_uintmax_t
+syn keyword cConstant memory_order_relaxed memory_order_consume memory_order_acquire
+    \ memory_order_release memory_order_acq_rel memory_order_seq_cst
 
 " GCC built-in atomics
 syn keyword cOperator __atomic_add_fetch __atomic_and_fetch __atomic_always_lock_free __atomic_clear
