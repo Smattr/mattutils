@@ -36,6 +36,7 @@ for i in \
          meta_h \
          meta_l \
          meta_u \
+         meta_z \
          notate.py \
          package.py \
          pdfcrop.sh \
@@ -72,7 +73,6 @@ for i in .agignore \
          .gitconfig \
          .hgrc \
          .mplayer \
-         .reroute-config.py \
          .screenrc \
          .tmux.conf \
          .tmux-legacy.conf \
@@ -111,13 +111,6 @@ fi
 if [ ! -e "${HOME}/bin/dif" ]; then
     c++ -O3 -std=c++11 -W -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wmissing-declarations -o "${HOME}/bin/dif" "${REPO}/dif.cpp"
 fi
-
-# Re-route links.
-for i in z; do
-    if [ ! -e "${HOME}/bin/meta_$i" ]; then
-        ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
-    fi
-done
 
 if [ ! -e "${HOME}/.tmux/plugins/tpm" ]; then
     echo "Warning: Tmux Plugin Manager not found (~/.tmux/plugins/tpm)" >&2
