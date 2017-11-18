@@ -1,13 +1,3 @@
-def meta_c(api, argv):
-    '''email'''
-    if not api['which']('thunderbird'):
-        api['error']('thunderbird not available')
-        return -1
-    # Restart Thunderbird if it's already running to cope with its shitty
-    # inability to roam across networks.
-    api['run'](['killall', '--quiet', '--wait', 'thunderbird'])
-    return api['run'](['thunderbird'] + argv[1:])[0]
-
 def meta_h(api, argv):
     '''Toggle unclutter'''
     import os, signal
