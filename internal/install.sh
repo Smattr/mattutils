@@ -35,6 +35,7 @@ for i in \
          meta_c \
          meta_h \
          meta_l \
+         meta_u \
          notate.py \
          package.py \
          pdfcrop.sh \
@@ -112,7 +113,7 @@ if [ ! -e "${HOME}/bin/dif" ]; then
 fi
 
 # Re-route links.
-for i in u x z; do
+for i in x z; do
     if [ ! -e "${HOME}/bin/meta_$i" ]; then
         ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
     fi

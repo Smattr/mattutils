@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# unmount all user drives we currently have mounted
+
+ret=0
+for i in /media/${USER}/*; do
+  mountpoint "$i" &>/dev/null
+  if [ $? -ne 0 ]; then
+    continue
+  fi
+  umount "$i"
+  if [ $? -eq 0 ]; then
+    which notify-send &>/dev/null
+    if [ $? -eq 0 ]; then
+      notify-send "$0" "unmounted $i"
+    else
+      echo "unmounted $i"
+    fi
+  else
+    which notify-send &>/dev/null
+    if [ $? -eq 0 ]; then
+      notify-send --urgency=critical "$0" "failed to unmount $i"
+    else
+      echo "failed to unmount $i" >&2
+    fi
+    ret=1
+  fi
+done
+
+exit ${ret}
