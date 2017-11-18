@@ -33,6 +33,7 @@ for i in \
          term \
          mediawatch.py \
          meta_c \
+         meta_h \
          notate.py \
          package.py \
          pdfcrop.sh \
@@ -110,7 +111,7 @@ if [ ! -e "${HOME}/bin/dif" ]; then
 fi
 
 # Re-route links.
-for i in h l o u x z; do
+for i in l o u x z; do
     if [ ! -e "${HOME}/bin/meta_$i" ]; then
         ln -s "${REPO}/reroute.py" "${HOME}/bin/meta_$i"
     fi

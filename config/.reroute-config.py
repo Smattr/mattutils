@@ -1,19 +1,3 @@
-def meta_h(api, argv):
-    '''Toggle unclutter'''
-    import os, signal
-    if not api['which']('unclutter'):
-        api['error']('unclutter not available')
-        return -1
-    procs = api['ps']('unclutter')
-    if len(procs) > 0:
-        api['notify']('disabling unclutter')
-        for p in procs:
-            os.kill(p.pid, signal.SIGTERM)
-        return 0
-    else:
-        api['notify']('enabling unclutter')
-        return api['run']('unclutter')[0]
-
 meta_l = ['gnome-screensaver-command', '--lock']
 
 def meta_o(api, argv):
