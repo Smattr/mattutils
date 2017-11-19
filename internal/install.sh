@@ -27,7 +27,6 @@ for i in \
          g \
          ifind \
          kage \
-         rsync \
          timestamp \
          toggle-screensaver \
          term \
