@@ -41,7 +41,6 @@ for i in \
          prefix \
          pyman \
          search \
-         sendmail.py \
          ssh-proxy \
          t \
          ubiquity \
