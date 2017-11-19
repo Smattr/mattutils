@@ -8,7 +8,6 @@ a CC BY 3.0 licence (http://creativecommons.org/licenses/by/3.0/). You are free
 to use this code for any purpose provided you retain attribution to the
 original author, Matthew Fernandez <matthew.fernandez@gmail.com>.
 
-ABC News 24.py - Script for watching ABC News 24 with mplayer.
 addcert.sh - Tool for adding an SSL certificate to multiple sources on a
     system.
 bashd.sh - A script for connecting bash to a local port. Handy for probing
