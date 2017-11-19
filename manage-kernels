@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Utility for uninstalling Linux kernels. I can never remember which exact
@@ -33,14 +33,14 @@ def main():
     kernels = sorted(k for k in kernels if k not in remove)
 
     sys.stdout.write('Checking free space...')
-    stdout = subprocess.check_output(['df', '-h', '/boot'])
+    stdout = subprocess.check_output(['df', '-h', '/boot'], universal_newlines=True)
     free = stdout.split('\n')[1].split()[3]
     sys.stdout.write('%s\n' % free)
 
     for index, k in enumerate(kernels):
         sys.stdout.write(' [%d] Remove %s\n' % (index, k))
 
-    inp = raw_input('What would you like to do? ')
+    inp = input('What would you like to do? ')
     try:
         index = int(inp)
         if index < 0 or index >= len(kernels):
