@@ -31,7 +31,6 @@ for i in \
          timestamp \
          toggle-screensaver \
          term \
-         mediawatch.py \
          meta_c \
          meta_h \
          meta_l \
