@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Quick and dirty C undefined behaviour finder.
@@ -92,9 +92,16 @@ def main(argv):
         for root, _, files in os.walk(opts.path):
             for f in (x for x in files if os.path.splitext(x)[-1] in
                     ('.c', '.cpp', '.h', '.hpp')):
-                scan_file(os.path.join(root, f))
+                path = os.path.join(root, f)
+                try:
+                    scan_file(path)
+                except UnicodeDecodeError:
+                    sys.stderr.write(' unicode decoding error when reading %s\n' % path)
     elif os.path.isfile(opts.path):
-        scan_file(opts.path)
+        try:
+            scan_file(opts.path)
+        except UnicodeDecodeError:
+            sys.stderr.write(' unicode decoding error when reading %s\n' % opts.path)
     else:
         sys.stderr.write('%s does not exist\n' % opts.path)
         return -1
