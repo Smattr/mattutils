@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Infinitely cat some sources into a FIFO. Useful for faking `include` in conf
 # files that have no support for this.

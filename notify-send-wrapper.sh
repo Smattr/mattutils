@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # From certain environments like a crontab, notify-send does not have access to
 # the DBUS_SESSION_BUS_ADDRESS variable that it needs to determine where to

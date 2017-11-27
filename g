@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Grep is indispensible for navigating large, dynamic code bases, but you often
 # want a smarter, faster alternative. This script tries to find you such a thing

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Restart Thunderbird if it's already running to cope with its shitty
 # inability to roam across networks.

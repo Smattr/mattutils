@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 WIDTH=180 # Characters
 HEIGHT=45 # Lines

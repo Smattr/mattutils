@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Rejoin a Tmux session, or start a new one if there is no current one.
 

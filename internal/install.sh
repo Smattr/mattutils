@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script symlinks all relevant scripts from this repository into ~/bin and
 # configuration settings into your home directory.

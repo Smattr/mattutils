@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check if we're running Tmux ≥1.9 and enable some more advanced features that
 # only work after 1.9. We need to do this in a separate shell script rather

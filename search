@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Searches for everywhere some pesky command could be hiding.
 

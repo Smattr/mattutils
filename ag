@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ME=$(readlink --canonicalize "$0")
 

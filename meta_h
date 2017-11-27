@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 which unclutter &>/dev/null
 if [ $? -ne 0 ]; then

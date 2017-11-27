@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Timestamp each output line from a program passed as an argument or piped in.
 

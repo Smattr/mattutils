@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Sometimes you want to know the size of of a C entity that cannot be
 # determined using `sizeof` alone. In my original case, I wanted to know the

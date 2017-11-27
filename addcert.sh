@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Irritatingly there are multiple SSL certificate sources on most Linux
 # systems. This script adds a given certificate to the system store and NSS

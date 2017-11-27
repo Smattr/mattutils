@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script connects a port on your computer to a bash instance. I use it for
 # things like probing the environment in my crontab. Run it with a chosen port

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Some PDFs come with obscenely large margins (I'm looking at you, research
 # papers). Printing these 2-up and then trying to make out the minute font makes
