@@ -72,8 +72,11 @@ for i in .agignore \
          .mplayer \
          .screenrc \
          .tmux.conf \
-         .tmux-legacy.conf \
-         .tmux-modern.conf \
+         .tmux-new-pane_current_path.conf \
+         .tmux-new-vi-copy.conf \
+         .tmux-old-pane_current_path.conf \
+         .tmux-old-vi-copy.conf \
+         .tmux-tpm.conf
          .vimrc \
          .vim \
          .wgetrc \

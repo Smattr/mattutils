@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
 
-# Check if we're running Tmux ≥1.9 and enable some more advanced features that
-# only work after 1.9. We need to do this in a separate shell script rather
-# than Tmux's if-shell, because Tmux mangles some of the conditional logic.
+# Check what version of Tmux we're running to enable various compatibility
+# tweaks. We need to do this in a separate shell script rather than Tmux's
+# if-shell, because Tmux mangles some of the conditional logic.
 
 TMUX_VERSION=$(tmux -V | cut -d' ' -f 2)
 
-if [ $(awk 'BEGIN{ print "'${TMUX_VERSION}'">="1.9" }') -eq 1 ]; then
-    tmux source-file ${HOME}/.tmux-modern.conf
+if [ $(awk 'BEGIN{ print ("'${TMUX_VERSION}'">="1.9") }') -eq 1 ]; then
+    tmux source-file ${HOME}/.tmux-new-pane_current_path.conf
 else
-    tmux source-file ${HOME}/.tmux-legacy.conf
+    tmux source-file ${HOME}/.tmux-old-pane_current_path.conf
+fi
+
+if [ $(awk 'BEGIN{ print ("'${TMUX_VERSION}'">="2.3") }') -eq 1 ]; then
+    tmux source-file ${HOME}/.tmux-new-vi-copy.conf
+else
+    tmux source-file ${HOME}/.tmux-old-vi-copy.conf
+fi
+
+if [ $(awk 'BEGIN{ print ("'${TMUX_VERSION}'">="1.9") }') -eq 1 ]; then
+    tmux source-file ${HOME}/.tmux-tpm.conf
 fi
