@@ -13,7 +13,9 @@ KAGE_ROOT = os.environ.get('KAGE_ROOT', os.path.expanduser('~/.kage'))
 
 PACKAGES = {
     'cmake':{
-        'check':'#!/usr/bin/env bash -e\n'
+        'check':'#!/usr/bin/env bash\n'
+                '\n'
+                'set -e\n'
                 '\n'
                 'which cmake &>/dev/null\n',
     },
@@ -21,7 +23,9 @@ PACKAGES = {
         'dependencies':['cmake',
                         'gcc-7.1.0',
                         'ninja'],
-        'install':'#!/usr/bin/env bash -e\n'
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
                   '\n'
                   'echo Downloading LLVM...\n'
                   'wget http://releases.llvm.org/4.0.1/llvm-4.0.1.src.tar.xz\n'
@@ -55,7 +59,9 @@ PACKAGES = {
         'dependencies':['cmake',
                         'gcc-7.1.0',
                         'ninja'],
-        'install':'#!/usr/bin/env bash -e\n'
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
                   '\n'
                   'echo Downloading LLVM...\n'
                   'wget http://releases.llvm.org/5.0.0/llvm-5.0.0.src.tar.xz\n'
@@ -121,7 +127,9 @@ PACKAGES = {
                         'libmpc',
                         'libmpfr',
                         'sha512sum'],
-        'install':'#!/usr/bin/env bash -e\n'
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
                   '\n'
                   'echo Downloading...\n'
                   'wget http://www.netgull.com/gcc/releases/gcc-7.1.0/gcc-7.1.0.tar.bz2\n'
@@ -149,7 +157,9 @@ PACKAGES = {
                         'libmpc-1.0.3',
                         'libmpfr-3.1.6',
                         'sha512sum'],
-        'install':'#!/usr/bin/env bash -e\n'
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
                   '\n'
                   'echo Downloading...\n'
                   'wget http://www.netgull.com/gcc/releases/gcc-7.2.0/gcc-7.2.0.tar.xz\n'
@@ -185,17 +195,23 @@ PACKAGES = {
                   'done\n',
     },
     'gcc-multilib':{
-        'check':'#!/usr/bin/env bash -e\n'
+        'check':'#!/usr/bin/env bash\n'
+                '\n'
+                'set -e\n'
                 '\n'
                 'dpkg -s gcc-multilib | grep \'Status: install ok installed\' &>/dev/null\n',
     },
     'libgmp':{
-        'check':'#!/usr/bin/env bash -e\n'
+        'check':'#!/usr/bin/env bash\n'
+                '\n'
+                'set -e\n'
                 '\n'
                 'ls /usr/include/gmpxx.h &>/dev/null\n',
     },
     'libgmp-6.1.2':{
-        'install':'#!/usr/bin/env bash -e\n'
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
                   '\n'
                   'echo Downloading...\n'
                   'wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz\n'
@@ -219,7 +235,9 @@ PACKAGES = {
                   'make install\n',
     },
     'libmpc':{
-        'check':'#!/usr/bin/env bash -e\n'
+        'check':'#!/usr/bin/env bash\n'
+                '\n'
+                'set -e\n'
                 '\n'
                 'ls /usr/include/mpc.h &>/dev/null\n',
     },
@@ -229,7 +247,9 @@ PACKAGES = {
         # them.
         'dependencies':['libgmp-6.1.2',
                         'libmpfr-3.1.6'],
-        'install':'#!/usr/bin/env bash -e\n'
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
                   '\n'
                   'echo Downloading...\n'
                   'wget ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz\n'
@@ -253,14 +273,18 @@ PACKAGES = {
                   'make install\n',
     },
     'libmpfr':{
-        'check':'#!/usr/bin/env bash -e\n'
+        'check':'#!/usr/bin/env bash\n'
+                '\n'
+                'set -e\n'
                 '\n'
                 'ls /usr/include/mpfr.h &>/dev/null\n',
     },
     'libmpfr-3.1.6':{
         # As with libmpc-1.0.3, this is beyond the minimum requirements.
         'dependencies':['libgmp-6.1.2'],
-        'install':'#!/usr/bin/env bash -e\n'
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
                   '\n'
                   'echo Downloading...\n'
                   'wget http://www.mpfr.org/mpfr-current/mpfr-3.1.6.tar.xz\n'
@@ -284,12 +308,16 @@ PACKAGES = {
                   'make install\n',
     },
     'ninja':{
-        'check':'#!/usr/bin/env bash -e\n'
+        'check':'#!/usr/bin/env bash\n'
+                '\n'
+                'set -e\n'
                 '\n'
                 'which ninja &>/dev/null\n',
     },
     'sha512sum':{
-        'check':'#!/usr/bin/env bash -e\n'
+        'check':'#!/usr/bin/env bash\n'
+                '\n'
+                'set -e\n'
                 '\n'
                 'which sha512sum &>/dev/null\n',
     },
@@ -320,7 +348,9 @@ def check(package):
     except KeyError:
         raise KageException('unknown package %s' % package)
 
-    script = p.get('check', '#!/usr/bin/env bash -e\n'
+    script = p.get('check', '#!/usr/bin/env bash\n'
+                            '\n'
+                            'set -e\n'
                             '\n'
                             'ls \'%s\' &>/dev/null\n' %
                                 os.path.join(KAGE_ROOT, package))
