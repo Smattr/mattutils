@@ -6,7 +6,7 @@ TMP=$(mktemp -d)
 trap "rm -r ${TMP}" EXIT
 
 # Scrape a couple of Triple J's feeds and FBi's beforecast.
-python >${TMP}/playlist.pls <<EOT
+python3 >${TMP}/playlist.pls <<EOT
 import feedparser
 
 def links(url):
@@ -20,7 +20,7 @@ for url in ('http://www.cpod.org.au/feed.php?id=31',
             'http://www.abc.net.au/triplej/unearthed/podcast/mixtape/podcast.xml',
             'http://www.abc.net.au/triplej/unearthed/podcast/tops/podcast.xml'):
     for l in (l for l in links(url) if l.lower().endswith('.mp3')):
-        print l
+        print(l)
 EOT
 
 # Shuffle it all.
