@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 This script forwards your local UNIX mail to a given remote address using the
@@ -134,9 +134,9 @@ Forwarded email from %(hostname)s:%(mailbox)s:
 if __name__ == '__main__':
     if sys.stdout.isatty():
         def stdout(msg):
-            print >>sys.stdout, msg
+            sys.stdout.write('%s\n' % msg)
         def stderr(msg):
-            print >>sys.stderr, msg
+            sys.stderr.write('%s\n' % msg)
     else:
         # We seem to be running from a crontab.
         syslog.openlog('fwdmail', syslog.LOG_PID, syslog.LOG_MAIL)
