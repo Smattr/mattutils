@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Script for preparing file(s) to send to someone else.
@@ -20,7 +20,8 @@ import argparse, getpass, os, subprocess, sys
 def which(command):
     try:
         with open(os.devnull, 'w') as f:
-            return subprocess.check_output(['which', command], stderr=f).strip()
+            return subprocess.check_output(['which', command], stderr=f,
+                universal_newlines=True).strip()
     except subprocess.CalledProcessError:
         return None
 
