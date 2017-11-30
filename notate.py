@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Script for taking notes on PDFs. I don't really have a good way of doing this
@@ -57,17 +57,17 @@ def main(argv):
     opts = parser.parse_args(argv[1:])
 
     if not os.path.exists(opts.file):
-        print >>sys.stderr, '%s not found' % opts.file
+        sys.stderr.write('%s not found\n' % opts.file)
         return -1
 
     with open(os.devnull, 'w') as null:
         ret = subprocess.call(['which', 'pdftk'], stdout=null, stderr=null)
         if ret != 0:
-            print >>sys.stderr, 'pdftk not found'
+            sys.stderr.write('pdftk not found\n')
             return -1
         ret = subprocess.call(['which', 'inkscape'], stdout=null, stderr=null)
         if ret != 0:
-            print >>sys.stderr, 'inkscape not found'
+            sys.stderr.write('inkscape not found\n')
             return -1
 
     opts.file = os.path.abspath(opts.file)
@@ -78,7 +78,7 @@ def main(argv):
         os.makedirs(metadir)
 
     if not contains_pages(metadir):
-        print 'splitting PDF...'
+        sys.stdout.write('splitting PDF...\n')
         pdf_split(opts.file, metadir)
 
     pgs = list(pages(metadir))
@@ -109,7 +109,7 @@ def main(argv):
 
         elif c == ord('n'):
             deinit(screen)
-            print 'Editing %s...' % pgs[selected]
+            sys.stdout.write('Editing %s...\n' % pgs[selected])
             pdf_edit(pgs[selected])
             screen = init()
 
@@ -118,9 +118,9 @@ def main(argv):
 
         elif c == ord('r'):
             deinit(screen)
-            print 'Reassembling...',
+            sys.stdout.write('Reassembling...')
             pdf_reassemble(metadir, opts.file)
-            raw_input('Done. Hit enter to continue.')
+            input('Done. Hit enter to continue.')
             screen = init()
 
     deinit(screen)
