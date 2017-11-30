@@ -151,7 +151,7 @@ def main(argv):
         sys.stdout.write(' | gpg --decrypt --no-use-agent')
     sys.stdout.write(' | tar x')
     if options.compress:
-        sys.stout.write('J')
+        sys.stdout.write('J')
     sys.stdout.write('\n')
 
     return 0
