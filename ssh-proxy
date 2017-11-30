@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 SSH proxy script for handling multipath redundancy.
@@ -37,7 +37,7 @@ def main(argv):
     # SSH to all the gateways to see which are reachable.
     for g in options.gateway:
         p = subprocess.Popen(['ssh', g, 'exit 0'], stdin=devnullin,
-            stdout=devnullout, stderr=devnullout)
+            stdout=devnullout, stderr=devnullout, universal_newlines=True)
         procs[p.pid] = g
 
     # Wait until one responds with success.
