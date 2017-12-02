@@ -76,7 +76,7 @@ for i in .agignore \
          .tmux-new-vi-copy.conf \
          .tmux-old-pane_current_path.conf \
          .tmux-old-vi-copy.conf \
-         .tmux-tpm.conf
+         .tmux-tpm.conf \
          .vimrc \
          .vim \
          .wgetrc \
