@@ -6,8 +6,7 @@
 # Make a failure terminate the script
 set -e
 
-REPO=`dirname $0`
-REPO=`readlink -f "${REPO}/.."`
+REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 mkdir -p "${HOME}/bin"
 
