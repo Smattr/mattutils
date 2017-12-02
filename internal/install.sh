@@ -101,9 +101,6 @@ elif [ ! -L "${HOME}/.ssh/config_mattutils" ]; then
 fi
 
 # Build some utils.
-if [ ! -e "${HOME}/bin/balloon" ]; then
-    cc -O3 -std=c11 -W -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wmissing-declarations -o "${HOME}/bin/balloon" "${REPO}/balloon.c" $(pkg-config --libs ncurses)
-fi
 if [ ! -e "${HOME}/bin/rerebase" ]; then
     cc -O3 -std=c11 -W -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wmissing-declarations -o "${HOME}/bin/rerebase" "${REPO}/rerebase.c"
 fi
