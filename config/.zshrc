@@ -21,7 +21,12 @@ autoload -U colors && colors
 limit coredumpsize 0
 
 # Enable directory colours
-eval `dircolors -b ~/.dircolors`
+if whence dircolors >/dev/null; then
+    eval "$(dircolors -b ~/.dircolors)"
+    alias ls='ls --color=auto'
+else
+    export CLICOLOR=1
+fi
 
 # Ensure HOST == HOSTNAME and both are set. Some finicky scripts expect one or
 # the other.
@@ -58,7 +63,6 @@ fi
 # Aliases
 #
 
-alias ls="ls --color=auto"
 alias grep="grep --color=always"
 alias l="ls"
 alias cp="cp -i"
