@@ -293,34 +293,6 @@ if [ -f /etc/zsh_command_not_found ]; then
     . /etc/zsh_command_not_found
 fi
 
-# \<forall> helper.
-function _forall() {
-    TYPE=$1
-    shift
-    find . -type ${TYPE} \
-        ! -name '.' \
-        ! -path '*/.hg/*'  ! -name '.hg'  ! -name '.hgkeep'  ! -name '.hgignore' \
-        ! -path '*/.git/*' ! -name '.git' ! -name '.gitkeep' ! -name '.gitignore' \
-        ! -path '*/.svn/*' ! -name '.svn' ! -name '.svnkeep' \
-        ! -path '*/.cvs/*' ! -name '.cvs' ! -name '.cvskeep' \
-        ! -name '*.swp' \
-        -exec $@ "{}" \;
-}
-function forall() {
-    if [ $# -eq 0 ]; then
-        _forall f echo
-    else
-        _forall f $@
-    fi
-}
-function foralld() {
-    if [ $# -eq 0 ]; then
-        _forall d echo
-    else
-        _forall d $@
-    fi
-}
-
 # Unmap Ctrl-s and Ctrl-q. Thank you http://feedproxy.google.com/~r/catonmat/~3/pbN7TgpMiyg/annoying-keypress-in-linux.
 stty stop undef
 stty start undef
