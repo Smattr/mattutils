@@ -297,10 +297,6 @@ fi
 stty stop undef
 stty start undef
 
-if [ -n "${PHD}" ]; then
-    export PROMPT="%{${fg_bold[blue]}%}[phd]%{${fg_no_bold[default]}%} ${PROMPT}"
-fi
-
 # Export of environment variables with a visible reminder.
 function exp() {
   if [ $# -eq 0 ]; then
