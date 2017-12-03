@@ -1,9 +1,24 @@
 #!/usr/bin/env bash
 
-ME=$(readlink --canonicalize "$0")
+# `readlink -f`
+function readlinkf() {
+  TARGET=$1
+  cd "$(dirname "${TARGET}")"
+  TARGET=$(basename "${TARGET}")
+
+  while [ -L "${TARGET}" ]; do
+    TARGET=$(readlink "${TARGET}")
+    cd $(dirname "${TARGET}")
+    TARGET=$(basename "${TARGET}")
+  done
+
+  echo "$(pwd -P)/${TARGET}"
+}
+
+ME=$(readlinkf "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/cmake")
 
 for candidate in $(which -a $(basename "$0")); do
-  RESOLVED=$(readlink --canonicalize "${candidate}")
+  RESOLVED=$(readlinkf "${candidate}")
   if [ "${ME}" != "${RESOLVED}" ]; then
     REAL=${RESOLVED}
   fi
