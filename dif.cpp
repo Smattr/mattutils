@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <new>
@@ -44,6 +45,38 @@
 #include <unistd.h>
 
 using namespace std;
+
+#ifndef __linux__
+// pipe2 is only available on Linux, so reimplement it for others.
+static int pipe2(int pipefd[2], int flags) {
+  assert(flags == O_CLOEXEC && "pipe2 only implemented for O_CLOEXEC");
+  if (flags != O_CLOEXEC) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  int r = pipe(pipefd);
+  if (r < 0)
+    return r;
+
+  for (int i = 0; i < 2; i++) {
+    int fd_flags = fcntl(pipefd[i], F_GETFD);
+    if (fd_flags == -1) {
+      close(pipefd[0]);
+      close(pipefd[1]);
+      return -1;
+    }
+
+    if (fcntl(pipefd[i], F_SETFD, fd_flags|FD_CLOEXEC) < 0) {
+      close(pipefd[0]);
+      close(pipefd[1]);
+      return -1;
+    }
+  }
+
+  return 0;
+}
+#endif
 
 static bool which(const char *command) {
   char *cmd;
