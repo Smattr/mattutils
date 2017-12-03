@@ -59,10 +59,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/sendfile.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#if defined(__APPLE__) || defined(__FreeBSD__)
+    #include <copyfile.h>
+#else
+    #include <sys/sendfile.h>
+#endif
 
 // `rename`, but works across devices
 static int move(const char *oldpath, const char *newpath) {
@@ -76,13 +81,18 @@ static int move(const char *oldpath, const char *newpath) {
                 close(src);
                 return -1;
             }
+            int r;
+#if defined(__APPLE__) || defined(__FreeBSD__)
+            r = fcopyfile(src, dst, NULL, COPYFILE_DATA);
+#else
             struct stat st;
             if (fstat(src, &st) < 0) {
                 close(dst);
                 close(src);
                 return -1;
             }
-            int r = sendfile(dst, src, NULL, st.st_size);
+            r = sendfile(dst, src, NULL, st.st_size);
+#endif
             close(dst);
             close(src);
             if (r == 0)
