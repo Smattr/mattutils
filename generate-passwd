@@ -8,6 +8,6 @@ else
     PWD_LEN=$1
 fi
 
-< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${PWD_LEN}
+LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${PWD_LEN}
 echo ""
 
