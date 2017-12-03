@@ -200,7 +200,7 @@ function reboot_prompt {
     fi
 }
 
-export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)$(reboot_prompt)]'
+export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | sed "s/^[ \\t]*//" | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)$(reboot_prompt)]'
 
 # Reload scripts
 r() {
