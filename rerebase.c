@@ -137,7 +137,7 @@ static int insert_diffs(FILE *in, FILE *out) {
 
             // Create a Git command to get a diff of this commit
             char *command;
-            if (asprintf(&command, "git show %.*s", match[2].rm_eo - match[2].rm_so,
+            if (asprintf(&command, "git show %.*s", (int)(match[2].rm_eo - match[2].rm_so),
                     &line[match[2].rm_so]) < 0) {
                 ret = -ENOMEM;
                 goto end;
