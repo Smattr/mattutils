@@ -159,11 +159,11 @@ function vcs_prompt {
         fi
         echo -n `git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-`
         echo -n "%{${fg_no_bold[default]}%}"
-        # Show bisect status. Note that this expects to cooperate with the
-        # `git bi` alias.
-        git bi visualize &>/dev/null
+        # Show bisect status.
+        cd $(git rev-parse --show-toplevel)
+        git bisect log &>/dev/null
         if [ $? -eq 0 ]; then
-          REMAINING=$(git bi visualize | grep '^commit' | wc -l)
+          REMAINING=$(git bisect visualize 2>/dev/null | grep '^commit' | wc -l | sed 's/^[ \t]*//')
           if [ ${REMAINING} -le 1 ]; then
             echo -n "-%{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
           else
