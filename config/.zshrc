@@ -142,25 +142,20 @@ function vcs_prompt {
         echo "-%{${fg_bold[magenta]}%}DISABLED%{${fg_no_bold[default]}%}"
         exit 0
     fi
-    for i in git hg; do
-        which $i &>/dev/null
-        if [ $? -ne 0 ]; then
-            echo "zshrc: $i not found; vcs_prompt bailing out." 1>&2
-            exit 1
-        fi
-    done
-    git branch &>/dev/null
+    which git &>/dev/null
     if [ $? -eq 0 ]; then
+      git branch &>/dev/null
+      if [ $? -eq 0 ]; then
         echo -n '-±-'
         if [ -z "`git status --short 2>/dev/null`" ]; then
-            # Working directory is clean.
-            echo -n "%{${fg_bold[green]}%}"
+          # Working directory is clean.
+          echo -n "%{${fg_bold[green]}%}"
         elif [ -z "`git status --short 2>/dev/null | grep -v '^?'`" ]; then
-            # Working directory only contains changes to untracked files.
-            echo -n "%{${fg_bold[yellow]}%}"
+          # Working directory only contains changes to untracked files.
+          echo -n "%{${fg_bold[yellow]}%}"
         else
-            # Working directory contains changes to tracked files.
-            echo -n "%{${fg_bold[red]}%}"
+          # Working directory contains changes to tracked files.
+          echo -n "%{${fg_bold[red]}%}"
         fi
         echo -n `git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-`
         echo -n "%{${fg_no_bold[default]}%}"
@@ -168,29 +163,33 @@ function vcs_prompt {
         # `git bi` alias.
         git bi visualize &>/dev/null
         if [ $? -eq 0 ]; then
-            REMAINING=$(git bi visualize | grep '^commit' | wc -l)
-            if [ ${REMAINING} -le 1 ]; then
-                echo -n "-%{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
-            else
-                echo -n "-%{${fg_bold[magenta]}%}⥷ ${REMAINING}%{${fg_no_bold[default]}%}"
-            fi
+          REMAINING=$(git bi visualize | grep '^commit' | wc -l)
+          if [ ${REMAINING} -le 1 ]; then
+            echo -n "-%{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
+          else
+            echo -n "-%{${fg_bold[magenta]}%}⥷ ${REMAINING}%{${fg_no_bold[default]}%}"
+          fi
         fi
+      fi
     fi
-    hg root &>/dev/null
+    which hg &>/dev/null
     if [ $? -eq 0 ]; then
+      hg root &>/dev/null
+      if [ $? -eq 0 ]; then
         echo -n '-☿-'
         if [ -z "`hg status 2>/dev/null`" ]; then
-            # Working directory is clean.
-            echo -n "%{${fg_bold[green]}%}"
+          # Working directory is clean.
+          echo -n "%{${fg_bold[green]}%}"
         elif [ -z "`hg status 2>/dev/null | grep -v '^?'`" ]; then
-            # Working directory only contains changes to untracked files.
-            echo -n "%{${fg_bold[yellow]}%}"
+          # Working directory only contains changes to untracked files.
+          echo -n "%{${fg_bold[yellow]}%}"
         else
-            # Working directory contains changes to tracked files.
-            echo -n "%{${fg_bold[red]}%}"
+          # Working directory contains changes to tracked files.
+          echo -n "%{${fg_bold[red]}%}"
         fi
         echo -n `hg branch 2>/dev/null`
         echo -n "%{${fg_no_bold[default]}%}"
+      fi
     fi
 }
 
