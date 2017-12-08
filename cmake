@@ -29,4 +29,9 @@ if [ -z "${REAL}" ]; then
   exit 1
 fi
 
-exec "${REAL}" -G Ninja "$@"
+which ninja &>/dev/null
+if [ $? -eq 0 ]; then
+  exec "${REAL}" -G Ninja "$@"
+else
+  exec "${REAL}" "$@"
+fi
