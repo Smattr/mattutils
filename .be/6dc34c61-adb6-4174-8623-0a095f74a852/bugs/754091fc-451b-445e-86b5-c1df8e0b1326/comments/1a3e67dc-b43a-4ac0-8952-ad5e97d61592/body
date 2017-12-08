@@ -1,0 +1,4 @@
+Avoiding this basically involves reassigning the fold markers, which always runs
+the risk of colliding with some other syntax. I don't think it's worth changing
+this and we may as well just live with accidental conflicts sometimes. Closing
+as WONTFIX.
