@@ -7,24 +7,24 @@
 # Preference 1: Ripgrep
 which rg &>/dev/null
 if [ $? -eq 0 ]; then
-  rg "$@"
-else
+  exec rg "$@"
+fi
 
-  # Preference 2: The Silver Searcher
-  which ag &>/dev/null
+
+# Preference 2: The Silver Searcher
+which ag &>/dev/null
+if [ $? -eq 0 ]; then
+  ag --version &>/dev/null
   if [ $? -eq 0 ]; then
-    ag "$@"
-  else
-
-    # Preference 3: Ack
-    which ack &>/dev/null
-    if [ $? -eq 0 ]; then
-      ack "$@"
-    else
-
-      # Fallback: grep
-      find . 2>/dev/null -type f -exec grep --color=always -HI "$@" "{}" \; | less -iRnSFX
-
-    fi
+    exec ag "$@"
   fi
 fi
+
+# Preference 3: Ack
+which ack &>/dev/null
+if [ $? -eq 0 ]; then
+  exec ack "$@"
+fi
+
+# Fallback: grep
+exec find . 2>/dev/null -type f -exec grep --color=always -HI "$@" "{}" \; | less -iRnSFX
