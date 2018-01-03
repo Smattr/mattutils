@@ -9,12 +9,12 @@ import os, re, subprocess, sys
 
 def main():
 
+    sys.stdout.write('You are currently running %s' %
+        subprocess.check_output(['uname', '-rs'], universal_newlines=True))
+
     if not sys.platform.startswith('linux'):
         sys.stderr.write('you do not appear to be running Linux\n')
         return -1
-
-    sys.stdout.write('You are currently running %s' %
-        subprocess.check_output(['uname', '-r']))
 
     sys.stdout.write('Finding installed kernels...\n')
     kernels = []
