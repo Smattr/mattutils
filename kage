@@ -12,6 +12,24 @@ import argparse, os, shutil, stat, subprocess, sys, tempfile
 KAGE_ROOT = os.environ.get('KAGE_ROOT', os.path.expanduser('~/.kage'))
 
 PACKAGES = {
+    'aflafl-2.52b':{
+        'install':'#!/usr/bin/env bash\n'
+                  '\n'
+                  'set -e\n'
+                  '\n'
+                  'echo Downloading AFL...\n'
+                  'wget http://lcamtuf.coredump.cx/afl/releases/afl-2.52b.tgz\n'
+                  '\n'
+                  'echo Extracting AFL...\n'
+                  'tar xvf afl-2.52b.tgz\n'
+                  'cd afl-2.52b\n'
+                  '\n'
+                  'echo Compiling...\n'
+                  'make PREFIX=${KAGE_ROOT}/afl-2.52b\n'
+                  '\n'
+                  'echo Installing...\n'
+                  'make PREFIX=${KAGE_ROOT}/afl-2.52b install\n',
+    },
     'cmake':{
         'check':'#!/usr/bin/env bash\n'
                 '\n'
