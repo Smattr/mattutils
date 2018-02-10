@@ -7,9 +7,6 @@
     diff = "less -FRSX +Gg"
     branch = True
 
-[github]
-	user = Smattr
-
 [alias]
     co = clone
     st = status
