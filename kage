@@ -427,7 +427,7 @@ def main(argv):
         description = 'a simple build-from-source package manager')
     parser.add_argument('action', choices = ACTIONS.keys(),
         help = 'action to run')
-    parser.add_argument('package', help = 'package to operator on')
+    parser.add_argument('package', help = 'package to operate on')
 
     opts = parser.parse_args(argv[1:])
 
