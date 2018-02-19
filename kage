@@ -7,353 +7,15 @@ This is designed to be little more than a glorified shell script. I use it
 mainly for automating the management of packages I reinstall frequently.
 '''
 
-import argparse, os, shutil, stat, subprocess, sys, tempfile
+import argparse, os, pathlib, shutil, subprocess, sys, tempfile
 
-KAGE_ROOT = os.environ.get('KAGE_ROOT', os.path.expanduser('~/.kage'))
+KAGE_ROOT = pathlib.Path(os.environ.get('KAGE_ROOT', pathlib.Path.home() / '.kage'))
+PACKAGES = pathlib.Path(__file__).resolve().parent / 'packages'
 
-PACKAGES = {
-    'aflafl-2.52b':{
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading AFL...\n'
-                  'wget http://lcamtuf.coredump.cx/afl/releases/afl-2.52b.tgz\n'
-                  '\n'
-                  'echo Extracting AFL...\n'
-                  'tar xvf afl-2.52b.tgz\n'
-                  'cd afl-2.52b\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'make PREFIX=${KAGE_ROOT}/afl-2.52b\n'
-                  '\n'
-                  'echo Installing...\n'
-                  'make PREFIX=${KAGE_ROOT}/afl-2.52b install\n',
-    },
-    'cmake':{
-        'check':'#!/usr/bin/env bash\n'
-                '\n'
-                'set -e\n'
-                '\n'
-                'which cmake &>/dev/null\n',
-    },
-    'clang-4.0.1':{
-        'dependencies':['cmake',
-                        'gcc-7.1.0',
-                        'ninja'],
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading LLVM...\n'
-                  'wget http://releases.llvm.org/4.0.1/llvm-4.0.1.src.tar.xz\n'
-                  'tar xvf llvm-4.0.1.src.tar.xz\n'
-                  'mv llvm-4.0.1.src llvm\n'
-                  '\n'
-                  'echo Downloading Clang...\n'
-                  'wget http://releases.llvm.org/4.0.1/cfe-4.0.1.src.tar.xz\n'
-                  'tar xvf cfe-4.0.1.src.tar.xz\n'
-                  'mv cfe-4.0.1.src llvm/tools/clang\n'
-                  '\n'
-                  'echo Downloading clang-tools-extra...\n'
-                  'wget http://releases.llvm.org/4.0.1/clang-tools-extra-4.0.1.src.tar.xz\n'
-                  'tar xvf clang-tools-extra-4.0.1.src.tar.xz\n'
-                  'mv clang-tools-extra-4.0.1.src llvm/tools/clang/tools/extra\n'
-                  '\n'
-                  'echo Downloading compiler-rt...\n'
-                  'wget http://releases.llvm.org/4.0.1/compiler-rt-4.0.1.src.tar.xz\n'
-                  'tar xvf compiler-rt-4.0.1.src.tar.xz\n'
-                  'mv compiler-rt-4.0.1.src llvm/projects/compiler-rt\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'mkdir build\n'
-                  'cd build\n'
-                  # Use GCC 7.1.0 instead of the local GCC so we know we'll have C++17 etc support.
-                  'cmake -G Ninja -DCMAKE_C_COMPILER=${KAGE_ROOT}/gcc-7.1.0/bin/gcc -DCMAKE_CXX_COMPILER=${KAGE_ROOT}/gcc-7.1.0/bin/g++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${KAGE_ROOT}/clang-4.0.1 -DGCC_INSTALL_PREFIX=${KAGE_ROOT}/gcc-7.1.0 -DCMAKE_CXX_LINK_FLAGS="-L${KAGE_ROOT}/gcc-7.1.0/lib64 -Wl,-rpath,${KAGE_ROOT}/gcc-7.1.0/lib64" ../llvm\n'
-                  'ninja\n'
-                  'ninja install\n',
-    },
-    'clang-5.0.0':{
-        'dependencies':['cmake',
-                        'gcc-7.1.0',
-                        'ninja'],
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading LLVM...\n'
-                  'wget http://releases.llvm.org/5.0.0/llvm-5.0.0.src.tar.xz\n'
-                  'wget http://releases.llvm.org/5.0.0/llvm-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Validating LLVM...\n'
-                  'gpg --keyserver pool.sks-keyservers.net --recv-keys 345AD05D\n'
-                  'gpg --verify llvm-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Extracting LLVM...\n'
-                  'tar xvf llvm-5.0.0.src.tar.xz\n'
-                  'mv llvm-5.0.0.src llvm\n'
-                  '\n'
-                  'echo Downloading Clang...\n'
-                  'wget http://releases.llvm.org/5.0.0/cfe-5.0.0.src.tar.xz\n'
-                  'wget http://releases.llvm.org/5.0.0/cfe-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Validating Clang...\n'
-                  'gpg --verify cfe-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Extracting Clang...\n'
-                  'tar xvf cfe-5.0.0.src.tar.xz\n'
-                  'mv cfe-5.0.0.src llvm/tools/clang\n'
-                  '\n'
-                  'echo Downloading clang-tools-extra...\n'
-                  'wget http://releases.llvm.org/5.0.0/clang-tools-extra-5.0.0.src.tar.xz\n'
-                  'wget http://releases.llvm.org/5.0.0/clang-tools-extra-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Validating clang-tools-extra...\n'
-                  'gpg --verify clang-tools-extra-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Extracting clang-tools-extra...\n'
-                  'tar xvf clang-tools-extra-5.0.0.src.tar.xz\n'
-                  'mv clang-tools-extra-5.0.0.src llvm/tools/clang/tools/extra\n'
-                  '\n'
-                  'echo Downloading compiler-rt...\n'
-                  'wget http://releases.llvm.org/5.0.0/compiler-rt-5.0.0.src.tar.xz\n'
-                  'wget http://releases.llvm.org/5.0.0/compiler-rt-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Validating compiler-rt...\n'
-                  'gpg --verify compiler-rt-5.0.0.src.tar.xz.sig\n'
-                  '\n'
-                  'echo Extracting compiler-rt...\n'
-                  'tar xvf compiler-rt-5.0.0.src.tar.xz\n'
-                  'mv compiler-rt-5.0.0.src llvm/projects/compiler-rt\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'mkdir build\n'
-                  'cd build\n'
-                  # Use GCC 7.1.0 instead of the local GCC so we know we'll have C++17 etc support.
-                  'cmake -G Ninja -DCMAKE_C_COMPILER=${KAGE_ROOT}/gcc-7.1.0/bin/gcc '
-                    '-DCMAKE_CXX_COMPILER=${KAGE_ROOT}/gcc-7.1.0/bin/g++ '
-                    '-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${KAGE_ROOT}/clang-5.0.0 '
-                    '-DGCC_INSTALL_PREFIX=${KAGE_ROOT}/gcc-7.1.0 '
-                    '-DCMAKE_CXX_LINK_FLAGS="-L${KAGE_ROOT}/gcc-7.1.0/lib64 -Wl,-rpath,${KAGE_ROOT}/gcc-7.1.0/lib64" '
-                    '../llvm\n'
-                  'ninja\n'
-                  'ninja install\n',
-    },
-    'gcc-7.1.0':{
-        'dependencies':['gcc-multilib',
-                        'libgmp',
-                        'libmpc',
-                        'libmpfr',
-                        'sha512sum'],
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading...\n'
-                  'wget http://www.netgull.com/gcc/releases/gcc-7.1.0/gcc-7.1.0.tar.bz2\n'
-                  'wget http://www.netgull.com/gcc/releases/gcc-7.1.0/sha512.sum\n'
-                  '\n'
-                  'echo Validating...\n'
-                  'head -1 sha512.sum >justbz2.sum\n'
-                  'sha512sum --check justbz2.sum\n'
-                  '\n'
-                  'echo Extracting...\n'
-                  'tar xvf gcc-7.1.0.tar.bz2\n'
-                  '\n'
-                  'echo Configuring...\n'
-                  'cd gcc-7.1.0\n'
-                  './configure --prefix=${KAGE_ROOT}/gcc-7.1.0\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
-                  '\n'
-                  'echo Installing...\n'
-                  'make install\n',
-    },
-    'gcc-7.2.0':{
-        'dependencies':['libgmp-6.1.2',
-                        'libmpc-1.0.3',
-                        'libmpfr-3.1.6',
-                        'sha512sum'],
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading...\n'
-                  'wget http://www.netgull.com/gcc/releases/gcc-7.2.0/gcc-7.2.0.tar.xz\n'
-                  'wget http://www.netgull.com/gcc/releases/gcc-7.2.0/sha512.sum\n'
-                  '\n'
-                  'echo Validating...\n'
-                  'head -2 sha512.sum | tail -1 >justxz.sum\n'
-                  'sha512sum --check justxz.sum\n'
-                  '\n'
-                  'echo Extracting...\n'
-                  'tar xvf gcc-7.2.0.tar.xz\n'
-                  '\n'
-                  'echo Configuring...\n'
-                  'cd gcc-7.2.0\n'
-                  './configure --with-gmp=${KAGE_ROOT}/libgmp-6.1.2 --with-mpfr=${KAGE_ROOT}/libmpfr-3.1.6 --with-mpc=${KAGE_ROOT}/libmpc-1.0.3 --prefix=${KAGE_ROOT}/gcc-7.2.0\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
-                  '\n'
-                  'echo Installing...\n'
-                  'make install\n'
-                  '\n'
-                  'echo Setting up wrappers...\n'
-                  'mkdir -p ${KAGE_ROOT}/gcc-7.2.0/wrapper\n'
-                  'for f in $(ls ${KAGE_ROOT}/gcc-7.2.0/bin); do\n'
-                  '  cat - >${KAGE_ROOT}/gcc-7.2.0/wrapper/$f <<EOT\n'
-                  '#!/usr/bin/env bash\n'
-                  '\n'
-                  'export LD_LIBRARY_PATH=${KAGE_ROOT}/libgmp-6.1.2/lib:${KAGE_ROOT}/libmpfr-3.1.6/lib:${KAGE_ROOT}/libmpc-1.0.3/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}\n'
-                  'exec ${KAGE_ROOT}/gcc-7.2.0/bin/$f "\\$@"\n'
-                  'EOT\n'
-                  '  chmod +x ${KAGE_ROOT}/gcc-7.2.0/wrapper/$f\n'
-                  'done\n',
-    },
-    'gcc-multilib':{
-        'check':'#!/usr/bin/env bash\n'
-                '\n'
-                'set -e\n'
-                '\n'
-                'dpkg -s gcc-multilib | grep \'Status: install ok installed\' &>/dev/null\n',
-    },
-    'libgmp':{
-        'check':'#!/usr/bin/env bash\n'
-                '\n'
-                'set -e\n'
-                '\n'
-                'ls /usr/include/gmpxx.h &>/dev/null\n',
-    },
-    'libgmp-6.1.2':{
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading...\n'
-                  'wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz\n'
-                  'wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz.sig\n'
-                  '\n'
-                  'echo Validating...\n'
-                  'gpg --keyserver pool.sks-keyservers.net --recv-keys 28C67298\n'
-                  'gpg --verify gmp-6.1.2.tar.xz.sig\n'
-                  '\n'
-                  'echo Extracting...\n'
-                  'tar xvf gmp-6.1.2.tar.xz\n'
-                  '\n'
-                  'echo Configuring...\n'
-                  'cd gmp-6.1.2\n'
-                  './configure --prefix=${KAGE_ROOT}/libgmp-6.1.2\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
-                  '\n'
-                  'echo Installing...\n'
-                  'make install\n',
-    },
-    'libmpc':{
-        'check':'#!/usr/bin/env bash\n'
-                '\n'
-                'set -e\n'
-                '\n'
-                'ls /usr/include/mpc.h &>/dev/null\n',
-    },
-    'libmpc-1.0.3':{
-        # These dependencies are beyond the minimum versions required, but these
-        # versions are available at time of writing so we may as well depend on
-        # them.
-        'dependencies':['libgmp-6.1.2',
-                        'libmpfr-3.1.6'],
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading...\n'
-                  'wget ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz\n'
-                  'wget ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz.sig\n'
-                  '\n'
-                  'echo Validating...\n'
-                  'gpg --keyserver pool.sks-keyservers.net --recv-keys F7D5C9BF765C61E3\n'
-                  'gpg --verify mpc-1.0.3.tar.gz.sig\n'
-                  '\n'
-                  'echo Extracting...\n'
-                  'tar xvf mpc-1.0.3.tar.gz\n'
-                  '\n'
-                  'echo Configuring...\n'
-                  'cd mpc-1.0.3\n'
-                  './configure --prefix=${KAGE_ROOT}/libmpc-1.0.3 --with-mpfr=${KAGE_ROOT}/libmpfr-3.1.6 --with-gmp=${KAGE_ROOT}/libgmp-6.1.2\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
-                  '\n'
-                  'echo Installing...\n'
-                  'make install\n',
-    },
-    'libmpfr':{
-        'check':'#!/usr/bin/env bash\n'
-                '\n'
-                'set -e\n'
-                '\n'
-                'ls /usr/include/mpfr.h &>/dev/null\n',
-    },
-    'libmpfr-3.1.6':{
-        # As with libmpc-1.0.3, this is beyond the minimum requirements.
-        'dependencies':['libgmp-6.1.2'],
-        'install':'#!/usr/bin/env bash\n'
-                  '\n'
-                  'set -e\n'
-                  '\n'
-                  'echo Downloading...\n'
-                  'wget http://www.mpfr.org/mpfr-current/mpfr-3.1.6.tar.xz\n'
-                  'wget http://www.mpfr.org/mpfr-current/mpfr-3.1.6.tar.xz.asc\n'
-                  '\n'
-                  'echo Validating...\n'
-                  'gpg --keyserver pool.sks-keyservers.net --recv-keys 980C197698C3739D\n'
-                  'gpg --verify mpfr-3.1.6.tar.xz.asc\n'
-                  '\n'
-                  'echo Extracting...\n'
-                  'tar xvf mpfr-3.1.6.tar.xz\n'
-                  '\n'
-                  'echo Configuring...\n'
-                  'cd mpfr-3.1.6\n'
-                  './configure --prefix=${KAGE_ROOT}/libmpfr-3.1.6 --with-gmp=${KAGE_ROOT}/libgmp-6.1.2\n'
-                  '\n'
-                  'echo Compiling...\n'
-                  'make -j$(grep processor /proc/cpuinfo | wc -l)\n'
-                  '\n'
-                  'echo Installing...\n'
-                  'make install\n',
-    },
-    'ninja':{
-        'check':'#!/usr/bin/env bash\n'
-                '\n'
-                'set -e\n'
-                '\n'
-                'which ninja &>/dev/null\n',
-    },
-    'sha512sum':{
-        'check':'#!/usr/bin/env bash\n'
-                '\n'
-                'set -e\n'
-                '\n'
-                'which sha512sum &>/dev/null\n',
-    },
-}
-
-class KageException(Exception):
-    pass
-
-def run_script(script):
+def run(args):
     tmp = tempfile.mkdtemp()
 
-    path = os.path.join(tmp, 'script.sh')
-    with open(path, 'wt') as f:
-        f.write(script)
-    st = os.stat(path)
-    os.chmod(path, st.st_mode | stat.S_IEXEC)
-
-    result = subprocess.call([path], cwd = tmp,
+    result = subprocess.call(args, cwd = tmp,
         env = dict(os.environ, KAGE_ROOT = KAGE_ROOT))
 
     shutil.rmtree(tmp)
@@ -361,56 +23,38 @@ def run_script(script):
     return result
 
 def check(package):
-    try:
-        p = PACKAGES[package]
-    except KeyError:
-        raise KageException('unknown package %s' % package)
+    p = PACKAGES / package / 'check'
+    if not p.is_file():
+        p = PACKAGES / 'default' / 'check'
 
-    script = p.get('check', '#!/usr/bin/env bash\n'
-                            '\n'
-                            'set -e\n'
-                            '\n'
-                            'ls \'%s\' &>/dev/null\n' %
-                                os.path.join(KAGE_ROOT, package))
-
-    return run_script(script) == 0
-
+    return run([p, package]) == 0
 
 def install(package):
-    def _install(package):
-        present = check(package)
+    present = check(package)
 
-        if present:
-            sys.stdout.write('%s is already installed\n' % package)
-            return 0
-        else:
-            sys.stdout.write('Installing %s...\n' % package)
+    if present:
+        sys.stdout.write('%s is already installed\n' % package)
+        return 0
+    else:
+        sys.stdout.write('Installing %s...\n' % package)
 
-            for dep in PACKAGES[package].get('dependencies', []):
+        script = PACKAGES / package / 'install'
+        if not script.is_file():
+            sys.stderr.write('%s is not installed and I don\'t know how to install it\n' % package)
+            return -1
+
+        deps = PACKAGES / package / 'dependencies'
+        if deps.is_dir():
+            for dep in [d.name for d in deps.iterdir()]:
                 sys.stdout.write('Considering dependency %s...\n' % dep)
-                result = _install(dep)
-                if result != 0:
-                    return result
+                r = install(dep)
+                if r != 0:
+                    return r
 
-            try:
-                script = PACKAGES[package]['install']
-            except KeyError:
-                raise KageException('%s is not installed and I don\'t know how to install it' % package)
-
-            return run_script(script)
-
-    try:
-        return _install(package)
-    except KageException as e:
-        sys.stderr.write('failed: %s\n' % e)
-        return -1
+        return run([script, package])
 
 def status(package):
-    try:
-        present = check(package)
-    except KageException as e:
-        sys.stderr.write('failed: %s\n' % e)
-        return -1
+    present = check(package)
 
     sys.stdout.write('%s %s\n' % (package,
         'installed' if present else 'not installed'))

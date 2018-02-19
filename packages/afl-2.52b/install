@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Exit on error
+set -e
+
+# Figure out how many CPUs we have
+JOBS=1
+if which getconf &>/dev/null; then
+  if getconf _NPROCESSORS_ONLN &>/dev/null; then
+    JOBS=$(getconf _NPROCESSORS_ONLN)
+  elif getconf NPROCESSORS_ONLN &>/dev/null; then
+    JOBS=$(getconf NPROCESSORS_ONLN)
+  fi
+fi
+
+function download() {
+  if which wget &>/dev/null; then
+    wget "$1"
+  elif which curl &>/dev/null; then
+    curl --remote-name "$1"
+  else
+    printf "no suitable download tool found\n" >&2
+    exit 1
+  fi
+}
+
+printf "Downloading AFL...\n"
+download http://lcamtuf.coredump.cx/afl/releases/afl-2.52b.tgz
+
+printf "Extracting AFL...\n"
+tar xvf afl-2.52b.tgz
+cd afl-2.52b
+
+printf "Compiling...\n"
+make --jobs=${JOBS} PREFIX=${KAGE_ROOT}/afl-2.52b
+
+printf "Installing...\n"
+make PREFIX=${KAGE_ROOT}/afl-2.52b install

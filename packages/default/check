@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+  printf "usage: %s package\n" "$0" >&2
+  exit 1
+fi
+
+set -e
+
+ls "${KAGE_ROOT}/$1" &>/dev/null
