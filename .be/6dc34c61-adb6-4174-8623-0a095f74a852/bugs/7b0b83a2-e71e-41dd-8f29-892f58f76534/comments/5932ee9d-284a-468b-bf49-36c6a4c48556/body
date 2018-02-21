@@ -1,8 +1,0 @@
-A couple of tools I run seem to deliberately double-fork, not to
-daemonize, but to escape being reaped when the parent exits or is
-killed. This is rude and undesirable, but they don't seem to expose
-options for changing this behaviour. These could be wrapped in a monitor
-process that forwards signals and uses a process group (or a PID
-namespace) to contain, monitor, and reap the children. Basically
-something that acts like a more generalised version of init. Some
-investigation is required to see if an OTS tool exists to do this.

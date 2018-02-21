@@ -1,4 +1,0 @@
-When completing a git-linear via `run` you are not returned to an attached
-state, even if you started from one. I haven't checked, but I would assume this
-is also the case if you complete the testing manually. Similarly, I have not
-checked if this is the case during `reset`.

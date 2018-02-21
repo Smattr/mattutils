@@ -1,4 +1,0 @@
-It turns out that Clang releases lag enough that desirable features are often
-only available on the trunk. For example, template argument deduction (C++17) is
-presently only available on trunk. Making this available in Kage would simplify
-some dev/deploy scenarios.

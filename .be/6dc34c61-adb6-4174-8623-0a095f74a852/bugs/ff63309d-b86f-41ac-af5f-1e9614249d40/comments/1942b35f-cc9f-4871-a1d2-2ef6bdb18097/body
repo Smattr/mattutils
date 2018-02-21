@@ -1,2 +1,0 @@
-If you Ctrl+C ifind, ncurses teardown doesn't happen and your terminal
-is left corrupted. Unpleasant.

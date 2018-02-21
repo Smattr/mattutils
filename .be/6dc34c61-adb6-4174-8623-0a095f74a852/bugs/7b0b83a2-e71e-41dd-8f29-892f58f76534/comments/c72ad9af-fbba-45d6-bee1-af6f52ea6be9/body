@@ -1,4 +1,0 @@
-It turns out Yelp's [dumb-init] does exactly what we need here. It's nice when
-you call and the internet answers.
-
-  [dumb-init]: https://github.com/Yelp/dumb-init/blob/master/dumb-init.c
