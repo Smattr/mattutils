@@ -35,7 +35,6 @@ for i in \
          meta_u \
          meta_z \
          notate.py \
-         package.py \
          pdfcrop.sh \
          prefix \
          pyman \
