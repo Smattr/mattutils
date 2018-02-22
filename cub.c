@@ -117,7 +117,7 @@ static int analyse_path(const char *path) {
   }
 }
 
-static int analyse(char **paths, size_t paths_len) {
+static int analyse(const char **paths, size_t paths_len) {
 
   // Initialise all analysis passes
   for (size_t i = 0; i < sizeof(ANALYSES) / sizeof(ANALYSES[0]); i++) {
@@ -153,9 +153,9 @@ int main(int argc, char **argv) {
   }
 
   if (argc == 1) {
-    char *paths[] = { "." };
+    const char *paths[] = { "." };
     return analyse(paths, sizeof(paths) / sizeof(paths[0]));
   } else {
-    return analyse(argv + 1, (size_t)(argc - 1));
+    return analyse((const char**)(argv + 1), (size_t)(argc - 1));
   }
 }
