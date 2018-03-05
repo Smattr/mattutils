@@ -3,11 +3,10 @@
 # Generate a random password.
 
 if [ "$1" == "" ]; then
-    PWD_LEN=15
+  PWD_LEN=15
 else
-    PWD_LEN=$1
+  PWD_LEN=$1
 fi
 
 LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${PWD_LEN}
-echo ""
-
+printf '\n'
