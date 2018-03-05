@@ -4,29 +4,29 @@ WIDTH=180 # Characters
 HEIGHT=45 # Lines
 
 # Priority of terminal emulators:
-if [ $(which pterm) ]; then
-    # To lookup fonts: xlsfonts
-    EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn -misc-fixed-medium-r-normal--13-120-75-75-c-70-iso8859-1"
-elif [ $(which rxvt) ]; then
-    EMULATOR="rxvt -geometry ${WIDTH}x${HEIGHT}"
-elif [ $(which lxterminal) ]; then
-    EMULATOR="lxterminal --geometry=${WIDTH}x${HEIGHT}"
+if which pterm &>/dev/null; then
+  # To lookup fonts: xlsfonts
+  EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn -misc-fixed-medium-r-normal--13-120-75-75-c-70-iso8859-1"
+elif which rxvt &>/dev/null; then
+  EMULATOR="rxvt -geometry ${WIDTH}x${HEIGHT}"
+elif which lxterminal &>/dev/null; then
+  EMULATOR="lxterminal --geometry=${WIDTH}x${HEIGHT}"
 else
-    # Well this is unpleasant...
-    EMULATOR="gnome-terminal --geometry=${WIDTH}x${HEIGHT}"
+  # Well this is unpleasant...
+  EMULATOR="gnome-terminal --geometry=${WIDTH}x${HEIGHT}"
 fi
 
 cd ~/
 
 if [ $# -ge 1 ]; then
-    RUN="-e $@"
-elif [ $(which tmux) ]; then
-    RUN="-e tmux"
-elif [ $(which screen) ]; then
-    RUN="-e screen zsh"
+  RUN="-e $@"
+elif which tmux &>/dev/null; then
+  RUN="-e tmux"
+elif which screen &>/dev/null; then
+  RUN="-e screen zsh"
 else
-    # Curses...
-    RUN=
+  # Curses...
+  RUN=
 fi
 
-${EMULATOR} ${RUN}
+exec ${EMULATOR} ${RUN}
