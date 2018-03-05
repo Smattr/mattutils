@@ -7,18 +7,18 @@
 PDFVIEWER=evince
 
 if [ -z "$1" ]; then
-    echo "Usage: $0 pdffile" 1>&2
-    exit 1
+  printf "Usage: %s pdffile\n" "$0" >&2
+  exit 1
 fi
 
 for i in pdfcrop ${PDFVIEWER}; do
-    which $i &>/dev/null || {
-        echo "$i not found" >&2;
-        exit 1;
-    }
+  if ! which $i &>/dev/null; then
+    printf "%s not found\n" "$i" >&2;
+    exit 1;
+  fi
 done
 
-PDF_OUTPUT=`mktemp`
+PDF_OUTPUT=$(mktemp)
 pdfcrop "$1" "${PDF_OUTPUT}" && \
  ${PDFVIEWER} "${PDF_OUTPUT}" && \
  rm -rf "${PDF_OUTPUT}"
