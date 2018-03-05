@@ -12,7 +12,7 @@ function readlinkf() {
     TARGET=$(basename "${TARGET}")
   done
 
-  echo "$(pwd -P)/${TARGET}"
+  printf "$(pwd -P)/${TARGET}\n"
 }
 
 ME=$(readlinkf "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/cmake")
@@ -25,12 +25,11 @@ for candidate in $(which -a $(basename "$0")); do
 done
 
 if [ -z "${REAL}" ]; then
-  echo "$(basename "$0") not found" >&2
+  printf "%s not found\n" "$(basename "$0")" >&2
   exit 1
 fi
 
-which ninja &>/dev/null
-if [ $? -eq 0 ]; then
+if which ninja &>/dev/null; then
   exec "${REAL}" -G Ninja "$@"
 else
   exec "${REAL}" "$@"
