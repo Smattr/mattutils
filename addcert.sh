@@ -11,6 +11,11 @@ fi
 CERT=$1
 CERT_BASENAME=`basename "${CERT}"`
 
+if [ "$(uname -s)" != "Linux" ]; then
+  printf 'This tool is only designed for use on Linux\n' >&2
+  exit 1
+fi
+
 # Add certificate to the system store.
 which openssl &>/dev/null
 if [ $? -eq 0 ]; then
