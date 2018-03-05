@@ -5,24 +5,20 @@
 # and run it.
 
 # Preference 1: Ripgrep
-which rg &>/dev/null
-if [ $? -eq 0 ]; then
+if which rg &>/dev/null; then
   exec rg "$@"
 fi
 
 
 # Preference 2: The Silver Searcher
-which ag &>/dev/null
-if [ $? -eq 0 ]; then
-  ag --version &>/dev/null
-  if [ $? -eq 0 ]; then
+if which ag &>/dev/null; then
+  if ag --version &>/dev/null; then
     exec ag "$@"
   fi
 fi
 
 # Preference 3: Ack
-which ack &>/dev/null
-if [ $? -eq 0 ]; then
+if which ack &>/dev/null; then
   exec ack "$@"
 fi
 
