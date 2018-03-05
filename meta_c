@@ -3,13 +3,11 @@
 # Restart Thunderbird if it's already running to cope with its shitty
 # inability to roam across networks.
 
-which thunderbird &>/dev/null
-if [ $? -ne 0 ]; then
-  which notify-send &>/dev/null
-  if [ $? -eq 0 ]; then
+if ! which thunderbird &>/dev/null; then
+  if which notify-send &>/dev/null; then
     notify-send --urgency=critical "$0" "thunderbird not available"
   else
-    echo "thunderbird not available" >&2
+    printf "thunderbird not available\n" >&2
   fi
   exit 1
 fi
