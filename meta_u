@@ -4,24 +4,21 @@
 
 ret=0
 for i in /media/${USER}/*; do
-  mountpoint "$i" &>/dev/null
-  if [ $? -ne 0 ]; then
+  if ! mountpoint "$i" &>/dev/null; then
     continue
   fi
   umount "$i"
   if [ $? -eq 0 ]; then
-    which notify-send &>/dev/null
-    if [ $? -eq 0 ]; then
+    if which notify-send &>/dev/null; then
       notify-send "$0" "unmounted $i"
     else
-      echo "unmounted $i"
+      printf "unmounted %s\n" "$i"
     fi
   else
-    which notify-send &>/dev/null
-    if [ $? -eq 0 ]; then
+    if which notify-send &>/dev/null; then
       notify-send --urgency=critical "$0" "failed to unmount $i"
     else
-      echo "failed to unmount $i" >&2
+      printf "failed to unmount %s\n" "$i" >&2
     fi
     ret=1
   fi
