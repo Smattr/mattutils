@@ -68,6 +68,5 @@ notify-send-wrapper.sh - A way to call notify-send from a crontab or other
 prefix - Preface each output line from a command with some given text.
 search - Bash script for doing a souped up `which`.
 timestamp - Timestamp console stdout.
-toggle-screensaver - A script for enabling and disabling the Gnome screensaver.
 ubiquity -  A script for automatically syncing a git repository across
     machines.

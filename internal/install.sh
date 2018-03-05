@@ -27,7 +27,6 @@ for i in \
          ifind \
          kage \
          timestamp \
-         toggle-screensaver \
          term \
          meta_c \
          meta_h \
