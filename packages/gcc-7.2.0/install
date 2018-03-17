@@ -46,24 +46,15 @@ sha512 --check justxz.sum
 printf "Extracting...\n"
 tar xvf gcc-7.2.0.tar.xz
 
-printf "Configuring...\n"
+printf "Downloading dependencies...\n"
 cd gcc-7.2.0
-./configure --with-gmp=${KAGE_ROOT}/libgmp-6.1.2 --with-mpfr=${KAGE_ROOT}/libmpfr-3.1.6 --with-mpc=${KAGE_ROOT}/libmpc-1.0.3 --prefix=${KAGE_ROOT}/gcc-7.2.0
+./contrib/download_prerequisites
+
+printf "Configuring...\n"
+./configure --prefix=${KAGE_ROOT}/gcc-7.2.0
 
 printf "Compiling...\n"
 make --jobs=${JOBS}
 
 printf "Installing...\n"
 make install
-
-printf "Setting up wrappers...\n"
-mkdir -p "${KAGE_ROOT}/gcc-7.2.0/wrapper"
-for f in $(ls ${KAGE_ROOT}/gcc-7.2.0/bin); do
-  cat - >${KAGE_ROOT}/gcc-7.2.0/wrapper/$f <<EOT
-#!/usr/bin/env bash
-
-export LD_LIBRARY_PATH=${KAGE_ROOT}/libgmp-6.1.2/lib:${KAGE_ROOT}/libmpfr-3.1.6/lib:${KAGE_ROOT}/libmpc-1.0.3/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-exec ${KAGE_ROOT}/gcc-7.2.0/bin/$f "\$@"
-EOT
-  chmod +x ${KAGE_ROOT}/gcc-7.2.0/wrapper/$f
-done
