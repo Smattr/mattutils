@@ -8,7 +8,7 @@ CC ?= cc
 CFLAGS ?= -std=c11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings
 
 CXX ?= c++
-CFLAGS ?= -std=c++11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings -Wmissing-declarations
+CXXFLAGS ?= -std=c++11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings -Wmissing-declarations
 
 # Serenity now
 SHELL := $(shell which bash)

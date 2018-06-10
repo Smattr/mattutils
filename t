@@ -7,6 +7,12 @@ if ! which tmux &>/dev/null; then
   exit 1
 fi
 
+# Force Zsh if it's available. Useful in environments that don't let us change
+# our default shell.
+if which zsh &>/dev/null; then
+  export SHELL=$(which zsh)
+fi
+
 if tmux list-sessions &>/dev/null; then
   exec ssh-agent tmux attach
 else
