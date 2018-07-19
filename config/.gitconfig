@@ -36,6 +36,10 @@
     # Everywhere for something else if desired.
     issue = "!f() { be \"$@\"; }; f"
 
+    # C'mon, Git, you know what I meant.
+    bad = "!git bi bad"
+    good = "!git bi good"
+
 [merge]
     conflictstyle = diff3
 
