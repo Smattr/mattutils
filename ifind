@@ -9,7 +9,8 @@ import curses, grp, os, pwd, random, shutil, stat, subprocess, sys, tempfile, ti
 EDITOR = os.environ.get('EDITOR', 'vim')
 PDF_VIEWER = 'evince'
 VIEWER = os.environ.get('VIEWER', 'view')
-MPLAYABLE = ['.mp3', '.ogg', '.ogv', '.mp4', '.avi', '.flv', '.flac', '.wav', '.m4a']
+MPLAYABLE = ['.mp3', '.ogg', '.ogv', '.mp4', '.avi', '.flv', '.flac', '.wav',
+    '.m4a', '.wma']
 
 class Item(object):
     def __init__(self, path):
