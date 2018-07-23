@@ -94,9 +94,6 @@ set mouse=vn
 " Standard trick for saving edits to a file that you forgot to open with sudo.
 cmap w!! w !sudo tee >/dev/null %
 
-" Enable Pathogen
-execute pathogen#infect()
-
 " YouCompleteMe tweaks
 let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_register_as_syntastic_checker = 0
