@@ -61,6 +61,7 @@ default: \
   ${HOME}/bin/pdfcrop.sh \
   ${HOME}/bin/prefix \
   ${HOME}/bin/pyman \
+  ${HOME}/bin/rerebase \
   ${HOME}/bin/search \
   ${HOME}/bin/ssh-proxy \
   ${HOME}/bin/t \
