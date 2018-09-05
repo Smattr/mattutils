@@ -265,7 +265,7 @@ Child::~Child() {
 
 static Child *run_diff(int argc, char **argv) {
   static const char *argv_prefix[] = {
-    "diff", "--show-c-function", "--unified", "--recursive", "--new-file" };
+    "diff", "--show-c-function", "--unified", "--recursive", "--new-file", "--minimal" };
   static const size_t argv_prefix_len = sizeof argv_prefix / sizeof argv_prefix[0];
 
   const char **args = new (nothrow) const char*[argc + argv_prefix_len + 1];
