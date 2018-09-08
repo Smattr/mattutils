@@ -132,3 +132,17 @@ let g:lex_uses_cpp=1
 " Enable some extra languages for highlighting within RST code blocks.
 let g:rst_syntax_code_list = ['vim', 'java', 'cpp', 'lisp', 'php', 'python',
   \ 'perl', 'sh']
+
+" Support pasting without messing up indentation, clagged from Stack Overflow
+let &t_ti = &t_ti . "\e[?2004h"
+let &t_te = "\e[?2004l" . &t_te
+function! XTermPasteBegin(ret)
+set pastetoggle=<Esc>[201~
+set paste
+return a:ret
+endfunction
+map <expr> <Esc>[200~ XTermPasteBegin("i")
+imap <expr> <Esc>[200~ XTermPasteBegin("")
+vmap <expr> <Esc>[200~ XTermPasteBegin("c")
+cmap <Esc>[200~ <nop>
+cmap <Esc>[201~ <nop>
