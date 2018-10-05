@@ -74,9 +74,42 @@ def main(args: [str]):
         # removing this line affected the result; must stay
         lineno += 1
 
-    print('removed {} lines'.format(removed))
+    if removed > 0:
+      print('removed {} lines'.format(removed))
 
-  # second try to knock out words
+  # Next try to knock out pairs of lines. This is sometimes productive because
+  # the line pass has left adjacent lines that form matching sequences. E.g.
+  # "struct {" and "};".
+  removed = None
+  while removed is None or removed > 0:
+    lineno = 0
+    removed = 0
+
+    while lineno + 1 < len(lines):
+
+      candidate = lines[:lineno] + lines[lineno+2:]
+
+      writelines(opts.input.name, candidate)
+
+      outcome = run(opts.command)
+
+      if outcome.returncode == reference.returncode:
+        # successfully removed a two lines without changing the result
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        lines = candidate
+        removed += 1
+        if lineno != 0:
+          # jump back to give a chance to try two lines that are newly adjacent
+          lineno -= 1
+      else:
+        # removing these lines affected the result; must stay
+        lineno += 1
+
+    if removed > 0:
+      print('removed {} line pairs'.format(removed))
+
+  # next try to knock out words
   removed = None
   while removed is None or removed > 0:
     lineno = 0
@@ -113,9 +146,10 @@ def main(args: [str]):
 
       lineno += 1
 
-    print('removed {} words'.format(removed))
+    if removed > 0:
+      print('removed {} words'.format(removed))
 
-  # finally character-by-character
+  # try character-by-character
   removed = None
   while removed is None or removed > 0:
     lineno = 0
@@ -147,7 +181,48 @@ def main(args: [str]):
 
       lineno += 1
 
-    print('removed {} characters'.format(removed))
+    if removed > 0:
+      print('removed {} characters'.format(removed))
+
+  # Try character pairs. The previous pass can leave things like "" that would
+  # be OK if we removed both characters at once, but not individually. This pass
+  # is also helpful for dropping comment leaders that are two characters (e.g.
+  # "//").
+  removed = None
+  while removed is None or removed > 0:
+    lineno = 0
+    removed = 0
+
+    while lineno < len(lines):
+      colno = 0
+
+      while colno + 1 < len(lines[lineno]):
+
+        line = lines[lineno]
+
+        candidate = lines[:lineno] + \
+          [line[:colno] + line[colno+2:]] + lines[lineno+1:]
+
+        writelines(opts.input.name, candidate)
+
+        outcome = run(opts.command)
+
+        if outcome.returncode == reference.returncode:
+          # successfully removed a character pair without changing the result
+          sys.stdout.write('.')
+          sys.stdout.flush()
+          lines = candidate
+          removed += 1
+          if colno != 0:
+            colno -= 1
+        else:
+          # removing this character pair affected the result; must stay
+          colno += 1
+
+      lineno += 1
+
+    if removed > 0:
+      print('removed {} character pairs'.format(removed))
 
 
   # save the final result
