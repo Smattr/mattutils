@@ -35,7 +35,6 @@ default: \
   ${HOME}/.vim \
   ${HOME}/.wgetrc \
   ${HOME}/.Xdefaults \
-  ${HOME}/.zsh \
   ${HOME}/.zshrc \
   ${HOME}/bin/addcert.sh \
   ${HOME}/bin/after \
