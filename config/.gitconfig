@@ -40,6 +40,9 @@
     bad = "!git bi bad"
     good = "!git bi good"
 
+    # Create a new temporary branch and check it out.
+    tmp = "!git checkout -b $(uuidgen)"
+
 [merge]
     conflictstyle = diff3
 
