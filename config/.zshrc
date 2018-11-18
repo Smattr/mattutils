@@ -142,7 +142,7 @@ function vcs_prompt {
     if [ $? -eq 0 ]; then
       git branch &>/dev/null
       if [ $? -eq 0 ]; then
-        echo -n '-±-'
+        echo -n ' ± '
         if [ -z "`git status --short 2>/dev/null`" ]; then
           # Working directory is clean.
           echo -n "%{${fg_bold[green]}%}"
@@ -161,9 +161,9 @@ function vcs_prompt {
         if [ $? -eq 0 ]; then
           REMAINING=$(git bisect visualize 2>/dev/null | grep '^commit' | wc -l | sed 's/^[ \t]*//')
           if [ ${REMAINING} -le 1 ]; then
-            echo -n "-%{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
+            echo -n " %{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
           else
-            echo -n "-%{${fg_bold[magenta]}%}⥷ ${REMAINING}%{${fg_no_bold[default]}%}"
+            echo -n " %{${fg_bold[magenta]}%}⥷ ${REMAINING}%{${fg_no_bold[default]}%}"
           fi
         fi
       fi
@@ -172,7 +172,7 @@ function vcs_prompt {
     if [ $? -eq 0 ]; then
       hg root &>/dev/null
       if [ $? -eq 0 ]; then
-        echo -n '-☿-'
+        echo -n ' ☿ '
         if [ -z "`hg status 2>/dev/null`" ]; then
           # Working directory is clean.
           echo -n "%{${fg_bold[green]}%}"
