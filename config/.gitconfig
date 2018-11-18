@@ -43,6 +43,9 @@
     # Create a new temporary branch and check it out.
     tmp = "!git checkout -b $(uuidgen)"
 
+    # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
+    git = "!exec git"
+
 [merge]
     conflictstyle = diff3
 
