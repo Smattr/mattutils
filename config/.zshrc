@@ -138,10 +138,6 @@ autoload -U ~/.zsh/*(:t)
 # Version control status.
 setopt PROMPT_SUBST
 function vcs_prompt {
-    if [ -n "${DISABLE_VCS_PROMPT+x}" ]; then
-        echo "-%{${fg_bold[magenta]}%}DISABLED%{${fg_no_bold[default]}%}"
-        exit 0
-    fi
     which git &>/dev/null
     if [ $? -eq 0 ]; then
       git branch &>/dev/null
