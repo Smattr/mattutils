@@ -136,3 +136,9 @@ syn keyword cConstant _SC_ARG_MAX _SC_CHILD_MAX _SC_HOST_NAME_MAX _SC_LOGIN_NAME
 
 " Apple semaphore interface
 syn keyword cConstant DISPATCH_TIME_FOREVER DISPATCH_TIME_NOW
+
+" Linux Seccomp constants
+syn keyword cConstant PR_GET_NO_NEW_PRIVS PR_GET_SECCOMP PR_SET_NO_NEW_PRIVS PR_SET_SECCOMP
+
+" Linux Seccomp modes
+syn keyword cConstant SECCOMP_MODE_STRICT SECCOMP_MODE_FILTER
