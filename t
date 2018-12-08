@@ -2,7 +2,9 @@
 
 # Rejoin a Tmux session, or start a new one if there is no current one.
 
-if ! which tmux &>/dev/null; then
+TMUX_BIN="${TMUX_BIN:-tmux}"
+
+if ! which "${TMUX_BIN}" &>/dev/null; then
   printf 'tmux not found\n' >&2
   exit 1
 fi
@@ -13,8 +15,8 @@ if which zsh &>/dev/null; then
   export SHELL=$(which zsh)
 fi
 
-if tmux list-sessions &>/dev/null; then
-  exec ssh-agent tmux attach
+if "${TMUX_BIN}" list-sessions &>/dev/null; then
+  exec ssh-agent "${TMUX_BIN}" attach
 else
-  exec ssh-agent tmux
+  exec ssh-agent "${TMUX_BIN}"
 fi

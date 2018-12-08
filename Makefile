@@ -30,11 +30,11 @@ default: \
   ${HOME}/.tmux-old-pane_current_path.conf \
   ${HOME}/.tmux-old-vi-copy.conf \
   ${HOME}/.tmux-tpm.conf \
+  ${HOME}/.typist.json \
   ${HOME}/.vimrc \
   ${HOME}/.vim \
   ${HOME}/.wgetrc \
   ${HOME}/.Xdefaults \
-  ${HOME}/.zsh \
   ${HOME}/.zshrc \
   ${HOME}/bin/addcert.sh \
   ${HOME}/bin/after \
@@ -61,7 +61,9 @@ default: \
   ${HOME}/bin/pdfcrop.sh \
   ${HOME}/bin/prefix \
   ${HOME}/bin/pyman \
+  ${HOME}/bin/rerebase \
   ${HOME}/bin/search \
+  ${HOME}/bin/shrink \
   ${HOME}/bin/ssh-proxy \
   ${HOME}/bin/t \
   ${HOME}/bin/term \
