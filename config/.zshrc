@@ -316,3 +316,7 @@ function man() {
         LESS_TERMCAP_us=$'\e[1;32m' \
         man "$@"
 }
+
+# For Debian packaging tools
+export DEBEMAIL="matthew.fernandez@gmail.com"
+export DEBFULLNAME="Matthew Fernandez"
