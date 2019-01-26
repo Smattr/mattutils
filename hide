@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Output data from stdin invisibly. This is useful for when a tool you're
+# running is going to echo something sensitive and you're not sure who's
+# shoulder surfing you.
+
+sed 's/\(.*\)/[30;40m\1[0m/g'

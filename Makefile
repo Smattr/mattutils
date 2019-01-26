@@ -50,6 +50,7 @@ default: \
   ${HOME}/bin/fwdmail.py \
   ${HOME}/bin/generate-passwd \
   ${HOME}/bin/g \
+  ${HOME}/bin/hide \
   ${HOME}/bin/ifind \
   ${HOME}/bin/kage \
   ${HOME}/bin/meta_c \
