@@ -2,7 +2,7 @@
 
 # Rejoin a Tmux session, or start a new one if there is no current one.
 
-TMUX_BIN="${TMUX_BIN:-tmux}"
+export TMUX_BIN="${TMUX_BIN:-tmux}"
 
 if ! which "${TMUX_BIN}" &>/dev/null; then
   printf 'tmux not found\n' >&2
