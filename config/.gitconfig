@@ -46,6 +46,9 @@
     # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
     git = "!exec git"
 
+    # glog back to the most recent common ancestor of several refs
+    relate = "!f() { git glog $(for i in \"$@\"; do printf '%s~1..%s ' \"$(git merge-base \"$@\")\" \"${i}\"; done); }; f"
+
 [merge]
     conflictstyle = diff3
 
