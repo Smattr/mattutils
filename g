@@ -23,4 +23,4 @@ if which ack &>/dev/null; then
 fi
 
 # Fallback: grep
-exec find . 2>/dev/null -type f -exec grep --color=always -HI "$@" "{}" \; | less -iRnSFX
+exec find . 2>/dev/null -type f -print0 | xargs -0 -P $(getconf _NPROCESSORS_ONLN) grep --color=always -HI "$@" | less -iRnSFX
