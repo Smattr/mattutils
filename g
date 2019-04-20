@@ -22,5 +22,13 @@ if which ack &>/dev/null; then
   exec ack "$@"
 fi
 
-# Fallback: grep
-exec find . 2>/dev/null -type f -print0 | xargs -0 -P $(getconf _NPROCESSORS_ONLN) grep --color=always -HI "$@" | less -iRnSFX
+# Fallback: egrep or grep
+for GREP in egrep grep; do
+  if which ${GREP} &>/dev/null; then
+    find . 2>/dev/null -type f -print0 | xargs -0 -P $(getconf _NPROCESSORS_ONLN) ${GREP} --color=always -HI "$@" | less -iRnSFX
+    exit 0
+  fi
+done
+
+printf 'no suitable tool found\n' >&2
+exit 1
