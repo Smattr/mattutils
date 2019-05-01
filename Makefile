@@ -52,7 +52,6 @@ default: \
   ${HOME}/bin/g \
   ${HOME}/bin/hide \
   ${HOME}/bin/ifind \
-  ${HOME}/bin/kage \
   ${HOME}/bin/meta_c \
   ${HOME}/bin/meta_h \
   ${HOME}/bin/meta_l \
