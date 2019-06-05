@@ -23,6 +23,14 @@ syn keyword cOperator __builtin_alloca __builtin_alloca_with_align __builtin_app
     \ __builtin_popcountll __builtin_powi __builtin_powif __builtin_powil __builtin_prefetch
     \ __builtin_return __builtin_return_address __builtin_trap __builtin_types_compatible_p
     \ __builtin_unreachable __builtin_va_arg_pack __builtin_va_arg_pack_len __clear_cache
+    \ _builtin_add_overflow __builtin_sadd_overflow __builtin_saddl_overflow
+    \ __builtin_saddll_overflow __builtin_uadd_overflow __builtin_uaddl_overflow
+    \ __builtin_uaddll_overflow __builtin_sub_overflow __builtin_ssub_overflow
+    \ __builtin_ssubl_overflow __builtin_ssubll_overflow __builtin_usub_overflow
+    \ __builtin_usubl_overflow __builtin_usubll_overflow __builtin_mul_overflow
+    \ __builtin_smul_overflow __builtin_smull_overflow __builtin_smulll_overflow
+    \ __builtin_umul_overflow __builtin_umull_overflow __builtin_umulll_overflow
+    \ __builtin_add_overflow_p __builtin_sub_overflow_p __builtin_mul_overflow_p
 
 " GCC x86 CPUID builtins
 syn keyword cOperator __builtin_cpu_init __builtin_cpu_is __builtin_cpu_supports
