@@ -146,3 +146,6 @@ imap <expr> <Esc>[200~ XTermPasteBegin("")
 vmap <expr> <Esc>[200~ XTermPasteBegin("c")
 cmap <Esc>[200~ <nop>
 cmap <Esc>[201~ <nop>
+
+" Disable modelines (https://github.com/numirias/security/blob/master/doc/2019-06-04_ace-vim-neovim.md).
+set nomodeline
