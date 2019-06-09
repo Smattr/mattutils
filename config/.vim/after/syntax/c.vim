@@ -37,7 +37,7 @@ syn keyword cOperator __builtin_cpu_init __builtin_cpu_is __builtin_cpu_supports
 
 " GCC extensions
 syn keyword cType __label__ __auto_type __int128 __thread
-syn keyword cOperator __alignof__ typeof __typeof __typeof__
+syn keyword cOperator __alignof__ __asm__ typeof __typeof __typeof__
 syn keyword cConstant __FUNCTION__ __PRETTY_FUNCTION__
 
 " Clang builtins
