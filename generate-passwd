@@ -15,7 +15,7 @@ printf '%s\n' "${PASSWORD}"
 # find SHA1 hash of the password
 function sha1() {
   if which shasum &>/dev/null; then
-    printf "$1" | shasum | cut -d " " -f 1
+    printf '%s' "$1" | shasum | cut -d " " -f 1
   else
     printf 'no SHA command available\n' >&2
     exit 1
