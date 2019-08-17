@@ -57,6 +57,7 @@ default: \
   ${HOME}/bin/meta_l \
   ${HOME}/bin/meta_u \
   ${HOME}/bin/meta_z \
+  ${HOME}/bin/no \
   ${HOME}/bin/notate.py \
   ${HOME}/bin/pdfcrop.sh \
   ${HOME}/bin/prefix \
