@@ -7,7 +7,9 @@ Sandboxing wrapper script
 import argparse
 import os
 import platform
+import subprocess
 import sys
+import tempfile
 
 def main(args):
 
@@ -41,8 +43,28 @@ def main(args):
       os.execvp('sandbox-exec', ['sandbox-exec', '-n', 'no-write']
         + options.command)
 
-    sys.stderr.write('functionality not implemented\n')
-    return -1
+    # otherwise we need to create a custom profile
+
+    # create a suitable sandbox profile
+    _, tmp = tempfile.mkstemp()
+    with open(tmp, 'wt') as f:
+      f.write('(version 1)\n'
+              '(allow default)\n')
+
+      if options.no_network:
+        f.write('(deny network*)\n')
+      if options.no_reads:
+        f.write('(deny file-read*)\n')
+      if options.no_writes:
+        f.write('(deny file-write*)\n')
+
+    # run the command
+    ret = subprocess.call(['sandbox-exec', '-f', tmp] + options.command)
+
+    # clean up
+    os.remove(tmp)
+
+    return ret
 
   else:
     sys.stderr.write('no sandboxing mechanism available\n')
