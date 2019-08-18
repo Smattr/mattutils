@@ -6,7 +6,7 @@
 
 # Preference 1: Ripgrep
 if which rg &>/dev/null; then
-  exec rg "$@"
+  exec rg --no-ignore --color always --line-number --search-zip "$@" | less -iRnSFX
 fi
 
 
