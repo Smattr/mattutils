@@ -1,0 +1,10 @@
+#compdef no
+
+# completion script for ../../no
+
+_arguments \
+  '--help[display help information]' \
+  '--no-network[disallow networking]' \
+  '--no-reads[disallow file reading]' \
+  '--no-writes[disallow file writing]' \
+  '*::command'
