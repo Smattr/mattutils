@@ -54,7 +54,11 @@ def main(args):
       if options.no_network:
         f.write('(deny network*)\n')
       if options.no_reads:
-        f.write('(deny file-read*)\n')
+        f.write('(deny file-read*)\n'
+                '(allow file-read* (regex "^/bin/.*"))\n'
+                '(allow file-read* (regex "^/sbin/.*"))\n'
+                '(allow file-read* (regex "^/System/.*"))\n'
+                '(allow file-read* (regex "^/usr/.*"))\n')
       if options.no_writes:
         f.write('(deny file-write*)\n')
 
