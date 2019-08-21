@@ -6,7 +6,8 @@
 
 # Preference 1: Ripgrep
 if which rg &>/dev/null; then
-  exec rg --no-ignore --color always --line-number --search-zip "$@" | less -iRnSFX
+  rg --no-ignore --color always --line-number --search-zip "$@" | less -iRnSFX
+  exit ${PIPESTATUS[0]}
 fi
 
 
