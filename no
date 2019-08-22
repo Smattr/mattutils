@@ -17,8 +17,8 @@ def main(args):
   parser = argparse.ArgumentParser(description='process sandboxing utility')
   parser.add_argument('--no-network', action='store_true',
     help='disallow using networking')
-  parser.add_argument('--no-reads', action='store_true',
-    help='disallow file reading')
+  parser.add_argument('--no-home', action='store_true',
+    help='disallow access to home directory')
   parser.add_argument('--no-writes', action='store_true',
     help='disallow file writing')
   parser.add_argument('command', nargs=argparse.REMAINDER,
@@ -30,16 +30,16 @@ def main(args):
     return -1
 
   # if no sandboxing was requested, just run the command
-  if not any((options.no_network, options.no_reads, options.no_writes)):
+  if not any((options.no_network, options.no_home, options.no_writes)):
     os.execvp(options.command[0], options.command)
 
   if platform.system() == 'Darwin': # Macos
 
-    if options.no_network and not options.no_reads and not options.no_writes:
+    if options.no_network and not options.no_home and not options.no_writes:
       os.execvp('sandbox-exec', ['sandbox-exec', '-n', 'no-network']
         + options.command)
 
-    if not options.no_network and not options.no_reads and options.no_writes:
+    if not options.no_network and not options.no_home and options.no_writes:
       os.execvp('sandbox-exec', ['sandbox-exec', '-n', 'no-write']
         + options.command)
 
@@ -53,12 +53,12 @@ def main(args):
 
       if options.no_network:
         f.write('(deny network*)\n')
-      if options.no_reads:
-        f.write('(deny file-read*)\n'
-                '(allow file-read* (regex "^/bin/.*"))\n'
-                '(allow file-read* (regex "^/sbin/.*"))\n'
-                '(allow file-read* (regex "^/System/.*"))\n'
-                '(allow file-read* (regex "^/usr/.*"))\n')
+      if options.no_home:
+        f.write('(deny file* (regex "^/home/.*"))\n'
+                '(deny file* (regex "^/Users/.*"))\n')
+        # also block $HOME in case our home is something else like /root
+        if 'HOME' in os.environ:
+          f.write('(deny file* (regex "^{}/.*"))\n'.format(os.environ['HOME']))
       if options.no_writes:
         f.write('(deny file-write*)\n')
 

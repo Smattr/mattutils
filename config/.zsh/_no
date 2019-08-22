@@ -5,6 +5,6 @@
 _arguments \
   '--help[display help information]' \
   '--no-network[disallow networking]' \
-  '--no-reads[disallow file reading]' \
+  '--no-home[disallow access to home directory]' \
   '--no-writes[disallow file writing]' \
   '*::command'
