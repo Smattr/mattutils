@@ -62,6 +62,7 @@ default: \
   ${HOME}/bin/notate.py \
   ${HOME}/bin/pdfcrop.sh \
   ${HOME}/bin/prefix \
+  ${HOME}/bin/pye \
   ${HOME}/bin/pyman \
   ${HOME}/bin/rerebase \
   ${HOME}/bin/search \
