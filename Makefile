@@ -52,6 +52,7 @@ default: \
   ${HOME}/bin/g \
   ${HOME}/bin/hide \
   ${HOME}/bin/ifind \
+  ${HOME}/bin/loc \
   ${HOME}/bin/meta_c \
   ${HOME}/bin/meta_h \
   ${HOME}/bin/meta_l \

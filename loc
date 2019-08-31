@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+
+'''
+a simple and stupid alternative to sloccount/cloc
+'''
+
+import argparse
+import collections
+import multiprocessing
+import os
+import sys
+
+def count(path):
+  try:
+    # read the file in binary to avoid thinking about unicode
+    with open(path, 'rb') as f:
+      return sum(1 for c in f.read() if c == b'\n')
+  except IOError:
+    return 0
+
+def counter(q1, q2):
+
+  totals = collections.defaultdict(int)
+
+  while True:
+
+    # grab the next file to examine
+    path = q1.get()
+    if path is None:
+      break
+
+    # figure out a category to put it in
+    group = os.path.splitext(path)[-1]
+    if group == '':
+      group = os.path.basename(path)
+
+    # add its lines to our local total
+    totals[group] += count(path)
+
+  # return our accrued totals
+  q2.put(totals)
+
+def main(args):
+
+  # parse command line arguments
+  parser = argparse.ArgumentParser(description='simple line counter')
+  parser.add_argument('input', help='file or directory to examine')
+  options = parser.parse_args(args[1:])
+
+  if os.path.isfile(options.input):
+    # simply count this file
+    print('{}: {}'.format(options.input, count(options.input)))
+
+  elif os.path.isdir(options.input):
+
+    CPUS = multiprocessing.cpu_count()
+
+    # setup two communication pipes
+    q1 = multiprocessing.Queue() # leader -> followers
+    q2 = multiprocessing.Queue() # followers -> leader
+
+    # start threads reading from q1
+    pool = []
+    for _ in range(CPUS - 1):
+      p = multiprocessing.Process(target=counter, args=(q1, q2))
+      p.start()
+      pool.append(p)
+
+    # push all files under the directory into q1
+    for root, _, files in os.walk(options.input):
+      for f in files:
+        path = os.path.join(root, f)
+        q1.put(path)
+
+    # push terminating markers into q1 for each thread
+    for _ in range(len(pool)):
+      q1.put(None)
+
+    totals = collections.defaultdict(int)
+
+    # collect and accumulate totals from each follower
+    for p in pool:
+      p.join()
+      received = q2.get()
+      for k, v in received.items():
+        totals[k] += v
+
+    # summarise
+    for k, v in received.items():
+      print('{}: {}'.format(k, v))
+
+  else:
+    sys.stderr.write('{} not found\n'.format(options.input))
+    return -1
+
+  return 0
+
+if __name__ == '__main__':
+  sys.exit(main(sys.argv))
