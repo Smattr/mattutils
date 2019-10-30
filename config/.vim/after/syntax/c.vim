@@ -150,3 +150,6 @@ syn keyword cConstant PR_GET_NO_NEW_PRIVS PR_GET_SECCOMP PR_SET_NO_NEW_PRIVS PR_
 
 " Linux Seccomp modes
 syn keyword cConstant SECCOMP_MODE_STRICT SECCOMP_MODE_FILTER
+
+" Clang Block syntax
+syn keyword cType __block
