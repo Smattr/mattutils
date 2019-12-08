@@ -58,6 +58,9 @@ def main(args):
         os.remove(winner)
       winner = candidate
       winner_size = size
+    else:
+      # remove this one, that failed to win
+      os.remove(candidate)
 
   sys.stdout.write(f'winner is {winner}\n')
 
