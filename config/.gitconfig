@@ -18,7 +18,7 @@
     root = rev-parse --show-toplevel
     cp = cherry-pick
 
-    # Fix Git's shitty inability to bisect when not at the top level
+    # fix Git’s inability to bisect when not at the top level
     bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect \"$@\"; }; f"
 
     # More advanced rebasing tool. See rerebase.c.
