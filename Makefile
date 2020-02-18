@@ -42,7 +42,6 @@ default: \
   ${HOME}/bin/bashd.sh \
   ${HOME}/bin/check_tmux_version.sh \
   ${HOME}/bin/compress.py \
-  ${HOME}/bin/compresspdf.sh \
   ${HOME}/bin/cub \
   ${HOME}/bin/dif \
   ${HOME}/bin/fifi.sh \
