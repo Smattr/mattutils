@@ -53,11 +53,7 @@ default: \
   ${HOME}/bin/hide \
   ${HOME}/bin/ifind \
   ${HOME}/bin/loc \
-  ${HOME}/bin/meta_c \
-  ${HOME}/bin/meta_h \
-  ${HOME}/bin/meta_l \
   ${HOME}/bin/meta_u \
-  ${HOME}/bin/meta_z \
   ${HOME}/bin/no \
   ${HOME}/bin/notate.py \
   ${HOME}/bin/pdfcrop.sh \
