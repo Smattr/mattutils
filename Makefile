@@ -56,7 +56,6 @@ default: \
   ${HOME}/bin/meta_u \
   ${HOME}/bin/no \
   ${HOME}/bin/notate.py \
-  ${HOME}/bin/pdfcrop.sh \
   ${HOME}/bin/prefix \
   ${HOME}/bin/pye \
   ${HOME}/bin/pyman \
