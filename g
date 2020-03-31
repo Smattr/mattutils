@@ -4,6 +4,11 @@
 # want a smarter, faster alternative. This script tries to find you such a thing
 # and run it.
 
+if [ $# -eq 0 ]; then
+  printf 'usage: %s <term>\n' "$0" >&2
+  exit 1
+fi
+
 # Preference 1: Ripgrep
 if which rg &>/dev/null; then
   rg --no-ignore --color always --line-number --search-zip "$@" | less -iRnSFX
