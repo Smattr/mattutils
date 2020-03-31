@@ -31,8 +31,8 @@ fi
 # Fallback: egrep or grep
 for GREP in egrep grep; do
   if which ${GREP} &>/dev/null; then
-    find . 2>/dev/null -type f -print0 | xargs -0 -P $(getconf _NPROCESSORS_ONLN) ${GREP} --color=always -HI "$@" | less -iRnSFX
-    exit 0
+    find . 2>/dev/null -type f -print0 | xargs -0 -P $(getconf _NPROCESSORS_ONLN) ${GREP} --color=always -HI "$@" | ${GREP} . | less -iRnSFX
+    exit ${PIPESTATUS[2]}
   fi
 done
 
