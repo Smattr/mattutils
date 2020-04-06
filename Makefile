@@ -40,6 +40,7 @@ default: \
   ${HOME}/bin/after \
   ${HOME}/bin/ag \
   ${HOME}/bin/bashd.sh \
+  ${HOME}/bin/c \
   ${HOME}/bin/check_tmux_version.sh \
   ${HOME}/bin/compress.py \
   ${HOME}/bin/cub \
