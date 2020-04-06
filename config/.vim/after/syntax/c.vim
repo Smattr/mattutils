@@ -154,3 +154,6 @@ syn keyword cConstant SECCOMP_MODE_STRICT SECCOMP_MODE_FILTER
 
 " Clang Block syntax
 syn keyword cType __block
+
+" file descriptors
+syn keyword cConstant STDIN_FILENO STDOUT_FILENO STDERR_FILENO
