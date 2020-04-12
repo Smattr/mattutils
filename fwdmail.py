@@ -82,7 +82,7 @@ def main(argv, stdout, stderr):
             # Connect to the SMTP server.
             try:
                 try:
-                    smtp = smtplib.SMTP()
+                    smtp = smtplib.SMTP(p.server, p.port)
                     smtp.connect(p.server, p.port)
                 except Exception as inst:
                     if p.check_connection:
