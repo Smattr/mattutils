@@ -82,6 +82,12 @@ def scan_file(filepath):
                     sys.stderr.write(' result of mmap incorrectly compared to NULL\n')
                 mmap_var = None
 
+            # common misspelling of __cplusplus
+            m = re.search(r'\b__cpluscplus\b', line)
+            if m is not None:
+                write_line(lineno, line)
+                sys.stderr.write(' incorrect spelling of __cplusplus\n')
+
 def main(argv):
     parser = argparse.ArgumentParser(
         description='C undefined behaviour linter')
