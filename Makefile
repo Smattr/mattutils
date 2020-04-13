@@ -43,7 +43,7 @@ default: \
   ${HOME}/bin/c \
   ${HOME}/bin/check_tmux_version.sh \
   ${HOME}/bin/compress.py \
-  ${HOME}/bin/cub \
+  ${HOME}/bin/cub.py \
   ${HOME}/bin/dif \
   ${HOME}/bin/fifi.sh \
   ${HOME}/bin/find-broken.sh \
@@ -75,11 +75,6 @@ ${HOME}/.ssh/config_mattutils: config/.ssh/config Makefile
 	@printf ' [LN] %s\n' "$(notdir $@)"
 	${V}if [ ! -e "$@" ]; then ln -s $$(pwd)/$< $@; elif [ ! -L "$@" ]; then printf 'Warning: Skipping %s that already exists\n' "$@" >&2; fi
 
-
-${HOME}/bin/cub: cub.c Makefile
-	@printf ' [CC] %s\n' "$(notdir $@)"
-	${V}mkdir -p "$(dir $@)"
-	${V}${CC} ${CFLAGS} -o $@ $<
 
 ${HOME}/bin/dif: dif.cpp
 	@printf ' [CXX] %s\n' "$(notdir $@)"
