@@ -76,7 +76,7 @@ def main(argv, stdout, stderr):
     try:
         box = mailbox.mbox(p.mbox)
     except Exception as inst:
-        stderr('Failed to open %s: %s' % (p.mbox, inst))
+        stderr(f'Failed to open {p.mbox}: {inst}')
         return 1
 
     smtp = None
@@ -85,7 +85,7 @@ def main(argv, stdout, stderr):
     try:
         box.lock()
     except Exception as inst:
-        stderr('Failed to lock mailbox file: %s' % inst)
+        stderr(f'Failed to lock mailbox file: {inst}')
         return -1
     for i in itertools.count():
 
@@ -112,27 +112,21 @@ def main(argv, stdout, stderr):
                 if p.login:
                     smtp.login(p.login, p.password)
             except Exception as inst:
-                stderr('Failed to connect to %s: %s' % (p.server, inst))
+                stderr(f'Failed to connect to {p.server}: {inst}')
                 box.unlock()
                 return 1
         try:
             smtp.sendmail(p.from_address, p.to, \
-"""From: %(from)s
-To: %(to)s
-Subject: %(hostname)s: %(subject)s
+f"""From: {p.from_address}
+To: {p.to}
+Subject: {hostname}: {msg['Subject'] or ''}
 
-Forwarded email from %(hostname)s:%(mailbox)s:
+Forwarded email from {hostname}:{p.mbox}:
 
-%(message)s""" % {\
-                'from':p.from_address, \
-                'to':p.to, \
-                'hostname':hostname, \
-                'subject':msg['Subject'] or '', \
-                'mailbox':p.mbox, \
-                'message':str(msg) or ''})
+{msg or ''}""")
             box.flush()
         except Exception as inst:
-            stderr('Failed to send/delete message %d: %s' % (key, inst))
+            stderr(f'Failed to send/delete message {key}: {inst}')
             try:
                 smtp.quit()
             except:
@@ -150,9 +144,9 @@ Forwarded email from %(hostname)s:%(mailbox)s:
 if __name__ == '__main__':
     if sys.stdout.isatty():
         def stdout(msg):
-            sys.stdout.write('%s\n' % msg)
+            sys.stdout.write(f'{msg}\n')
         def stderr(msg):
-            sys.stderr.write('%s\n' % msg)
+            sys.stderr.write(f'{msg}\n')
     else:
         # We seem to be running from a crontab.
         syslog.openlog('fwdmail', syslog.LOG_PID, syslog.LOG_MAIL)
