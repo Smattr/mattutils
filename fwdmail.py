@@ -24,8 +24,18 @@ probably do it.
 Matthew Fernandez <matthew.fernandez@gmail.com>
 """
 
-import argparse, functools, getpass, grp, mailbox, os, smtplib, socket, sys, \
-    syslog, time
+import argparse
+import functools
+import getpass
+import grp
+import itertools
+import mailbox
+import os
+import smtplib
+import socket
+import sys
+import syslog
+import time
 
 def main(argv, stdout, stderr):
     # Parse command line arguments.
@@ -77,7 +87,14 @@ def main(argv, stdout, stderr):
     except Exception as inst:
         stderr('Failed to lock mailbox file: %s' % inst)
         return -1
-    for i, msg in enumerate(box.items()):
+    for i in itertools.count():
+
+        try:
+            key, msg = box.popitem()
+        except KeyError:
+            # mailbox empty
+            break
+
         if not smtp:
             # Connect to the SMTP server.
             try:
@@ -110,13 +127,12 @@ Forwarded email from %(hostname)s:%(mailbox)s:
                 'from':p.from_address, \
                 'to':p.to, \
                 'hostname':hostname, \
-                'subject':msg[1]['Subject'] or '', \
+                'subject':msg['Subject'] or '', \
                 'mailbox':p.mbox, \
-                'message':str(msg[1]) or ''})
-            box.remove(msg[0])
+                'message':str(msg) or ''})
             box.flush()
         except Exception as inst:
-            stderr('Failed to send/delete message %d: %s' % (msg[0], inst))
+            stderr('Failed to send/delete message %d: %s' % (key, inst))
             try:
                 smtp.quit()
             except:
