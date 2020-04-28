@@ -86,7 +86,6 @@ def main(argv, stdout, stderr):
                     smtp.connect(p.server, p.port)
                 except Exception as inst:
                     if p.check_connection:
-                        box.flush()
                         box.unlock()
                         return 0
                     else:
@@ -97,7 +96,6 @@ def main(argv, stdout, stderr):
                     smtp.login(p.login, p.password)
             except Exception as inst:
                 stderr('Failed to connect to %s: %s' % (p.server, inst))
-                box.flush()
                 box.unlock()
                 return 1
         try:
@@ -116,20 +114,19 @@ Forwarded email from %(hostname)s:%(mailbox)s:
                 'mailbox':p.mbox, \
                 'message':str(msg[1]) or ''})
             box.remove(msg[0])
+            box.flush()
         except Exception as inst:
             stderr('Failed to send/delete message %d: %s' % (msg[0], inst))
             try:
                 smtp.quit()
             except:
                 pass # Ignore.
-            box.flush()
             box.unlock()
             return -1
         # pause every 10 emails to avoid flooding the SMTP server
         if i % 10 == 9:
             time.sleep(0.5)
     if smtp: smtp.quit()
-    box.flush()
     box.unlock()
 
     return 0
