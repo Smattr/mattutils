@@ -25,7 +25,7 @@ Matthew Fernandez <matthew.fernandez@gmail.com>
 """
 
 import argparse, functools, getpass, grp, mailbox, os, smtplib, socket, sys, \
-    syslog
+    syslog, time
 
 def main(argv, stdout, stderr):
     # Parse command line arguments.
@@ -77,7 +77,7 @@ def main(argv, stdout, stderr):
     except Exception as inst:
         stderr('Failed to lock mailbox file: %s' % inst)
         return -1
-    for msg in box.items():
+    for i, msg in enumerate(box.items()):
         if not smtp:
             # Connect to the SMTP server.
             try:
@@ -125,6 +125,9 @@ Forwarded email from %(hostname)s:%(mailbox)s:
             box.flush()
             box.unlock()
             return -1
+        # pause every 10 emails to avoid flooding the SMTP server
+        if i % 10 == 9:
+            time.sleep(0.5)
     if smtp: smtp.quit()
     box.flush()
     box.unlock()
