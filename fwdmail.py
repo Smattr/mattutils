@@ -123,14 +123,10 @@ def main(argv, stdout, stderr):
           stderr(f'Failed to connect to {p.server}: {inst}')
           return 1
       try:
-        smtp.sendmail(p.from_address, p.to, \
-  f"""From: {p.from_address}
-  To: {p.to}
-  Subject: {hostname}: {msg['Subject'] or ''}
-
-  Forwarded email from {hostname}:{p.mbox}:
-
-  {msg or ''}""".encode('utf-8', 'replace'))
+        smtp.sendmail(p.from_address, p.to,
+          (f'From: {p.from_address}\r\nTo: {p.to}\r\nSubject: {hostname}: '
+           f'{msg["Subject"] or ""}\r\n\r\nForwarded email from {hostname}:'
+           f'{p.mbox}:\r\n\r\n{msg or ""}').encode('utf-8', 'replace'))
         b.flush()
       except Exception as inst:
         stderr(f'Failed to send/delete message {key}: {inst}')
