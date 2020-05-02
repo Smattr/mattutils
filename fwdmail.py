@@ -123,7 +123,7 @@ Subject: {hostname}: {msg['Subject'] or ''}
 
 Forwarded email from {hostname}:{p.mbox}:
 
-{msg or ''}""")
+{msg or ''}""".encode('utf-8', 'replace'))
       box.flush()
     except Exception as inst:
       stderr(f'Failed to send/delete message {key}: {inst}')
