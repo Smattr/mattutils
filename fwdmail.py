@@ -25,6 +25,7 @@ Matthew Fernandez <matthew.fernandez@gmail.com>
 """
 
 import argparse
+import contextlib
 import functools
 import getpass
 import grp
@@ -36,6 +37,13 @@ import socket
 import sys
 import syslog
 import time
+
+@contextlib.contextmanager
+def locked(mailbox):
+  try:
+    yield mailbox
+  finally:
+    mailbox.unlock()
 
 def main(argv, stdout, stderr):
   # Parse command line arguments.
@@ -87,57 +95,54 @@ def main(argv, stdout, stderr):
   except Exception as inst:
     stderr(f'Failed to lock mailbox file: {inst}')
     return -1
-  for i in itertools.count():
+  with locked(box) as b:
+    for i in itertools.count():
 
-    try:
-      key, msg = box.popitem()
-    except KeyError:
-      # mailbox empty
-      break
-
-    if not smtp:
-      # Connect to the SMTP server.
       try:
+        key, msg = b.popitem()
+      except KeyError:
+        # mailbox empty
+        break
+
+      if not smtp:
+        # Connect to the SMTP server.
         try:
-          smtp = smtplib.SMTP(p.server, p.port)
-          smtp.connect(p.server, p.port)
+          try:
+            smtp = smtplib.SMTP(p.server, p.port)
+            smtp.connect(p.server, p.port)
+          except Exception as inst:
+            if p.check_connection:
+              return 0
+            else:
+              raise inst
+          if p.tls:
+            smtp.starttls()
+          if p.login:
+            smtp.login(p.login, p.password)
         except Exception as inst:
-          if p.check_connection:
-            box.unlock()
-            return 0
-          else:
-            raise inst
-        if p.tls:
-          smtp.starttls()
-        if p.login:
-          smtp.login(p.login, p.password)
-      except Exception as inst:
-        stderr(f'Failed to connect to {p.server}: {inst}')
-        box.unlock()
-        return 1
-    try:
-      smtp.sendmail(p.from_address, p.to, \
-f"""From: {p.from_address}
-To: {p.to}
-Subject: {hostname}: {msg['Subject'] or ''}
-
-Forwarded email from {hostname}:{p.mbox}:
-
-{msg or ''}""".encode('utf-8', 'replace'))
-      box.flush()
-    except Exception as inst:
-      stderr(f'Failed to send/delete message {key}: {inst}')
+          stderr(f'Failed to connect to {p.server}: {inst}')
+          return 1
       try:
-        smtp.quit()
-      except:
-        pass # Ignore.
-      box.unlock()
-      return -1
-    # pause every 10 emails to avoid flooding the SMTP server
-    if i % 10 == 9:
-      time.sleep(0.5)
+        smtp.sendmail(p.from_address, p.to, \
+  f"""From: {p.from_address}
+  To: {p.to}
+  Subject: {hostname}: {msg['Subject'] or ''}
+
+  Forwarded email from {hostname}:{p.mbox}:
+
+  {msg or ''}""".encode('utf-8', 'replace'))
+        b.flush()
+      except Exception as inst:
+        stderr(f'Failed to send/delete message {key}: {inst}')
+        try:
+          smtp.quit()
+        except:
+          pass # Ignore.
+        return -1
+      # pause every 10 emails to avoid flooding the SMTP server
+      if i % 10 == 9:
+        time.sleep(0.5)
   if smtp: smtp.quit()
-  box.unlock()
 
   return 0
 
