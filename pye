@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-python -m pylint --errors-only "$@"
+python3 -m pylint --errors-only "$@"
