@@ -30,21 +30,23 @@ def scan_file(filepath):
         for lineno, line in enumerate(f, 1):
 
             # Undefined left shifts into the sign bit.
-            m = UNDEF_SHIFT.search(line)
-            if m is not None:
-                operand = int(m.group(1))
-                if operand >= 31:
-                    write_line(lineno, line)
-                    sys.stderr.write(' potential undefined left shift\n')
+            if '<<' in line:
+                m = UNDEF_SHIFT.search(line)
+                if m is not None:
+                    operand = int(m.group(1))
+                    if operand >= 31:
+                        write_line(lineno, line)
+                        sys.stderr.write(' potential undefined left shift\n')
 
             # A common mistake that leads to negating INT_MIN and cousins.
-            m = NEGATE_SELF.search(line)
-            if m is not None:
-                id1 = m.group(1)
-                id2 = m.group(2)
-                if id1 == id2:
-                    write_line(lineno, line)
-                    sys.stderr.write(' potential negation of INT_MIN\n')
+            if '-' in line and '=' in line:
+                m = NEGATE_SELF.search(line)
+                if m is not None:
+                    id1 = m.group(1)
+                    id2 = m.group(2)
+                    if id1 == id2:
+                        write_line(lineno, line)
+                        sys.stderr.write(' potential negation of INT_MIN\n')
 
             # Modification of a variable twice without an intervening sequence point.
             m = MODIFY_TWICE.search(line)
@@ -60,22 +62,24 @@ def scan_file(filepath):
                         write_line(lineno, line)
                         sys.stderr.write(' guard define does not match preceding #ifndef\n')
                 ifndef_guard = None
-            m = GUARD_IFNDEF.match(line)
-            if m is not None:
-                ifndef_guard = m.group('guard')
+            if '#' in line and 'define' in line:
+                m = GUARD_IFNDEF.match(line)
+                if m is not None:
+                    ifndef_guard = m.group('guard')
 
             # Find bad memset calls
-            m = re.search(r'memset\s*\(.*,\s*0\s*\)', line);
-            if m is not None:
-                write_line(lineno, line)
-                sys.stderr.write(' incorrect argument order to memset?\n')
+            if 'memset' in line:
+                m = re.search(r'memset\s*\(.*,\s*0\s*\)', line);
+                if m is not None:
+                    write_line(lineno, line)
+                    sys.stderr.write(' incorrect argument order to memset?\n')
 
             # Catch mmaps that don't compare to MAP_FAILED
-            if mmap_var is None:
+            if mmap_var is None and 'mmap' in line:
                 m = re.search(r'([a-zA-Z_]\w*)\s*=\s*mmap\s*\(', line)
                 if m is not None:
                     mmap_var = m.group(1)
-            else:
+            elif mmap_var is not None:
                 m = re.search(r'([a-zA-Z_]\w*)\s*==\s*(NULL|0)', line)
                 if m is not None and m.group(1) == mmap_var:
                     write_line(lineno, line)
@@ -83,10 +87,11 @@ def scan_file(filepath):
                 mmap_var = None
 
             # common misspelling of __cplusplus
-            m = re.search(r'\b__cpluscplus\b', line)
-            if m is not None:
-                write_line(lineno, line)
-                sys.stderr.write(' incorrect spelling of __cplusplus\n')
+            if '__cpluscplus' in line:
+                m = re.search(r'\b__cpluscplus\b', line)
+                if m is not None:
+                    write_line(lineno, line)
+                    sys.stderr.write(' incorrect spelling of __cplusplus\n')
 
 def main(argv):
     parser = argparse.ArgumentParser(
