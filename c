@@ -2,6 +2,17 @@
 
 # if Clink is installed, run that
 if which clink &>/dev/null; then
+
+  # on macOS, assume Clink may be dynamically linked against a
+  # Macports-installed libclang that it will need some help locating
+  if [ "$(uname -s)" = "Darwin" ]; then
+    for v in 10 9 8 7 6; do
+      if [ -e "/opt/local/libexec/llvm-${v}.0" ]; then
+        export LD_LIBRARY_PATH=${LD_LIRBRARY_PATH:-${LD_LIBRARY_PATH}:}/opt/local/libexec/llvm-${v}.0/lib
+      fi
+    done
+  fi
+
   exec clink "$@"
 fi
 
