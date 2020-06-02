@@ -38,7 +38,7 @@ def writelines(path: str, lines: [str]) -> None:
 def main(args: [str]):
 
   parser = argparse.ArgumentParser(description='test case minimiser')
-  parser.add_argument('--input', '-i', type=argparse.FileType('r+'),
+  parser.add_argument('--input', '-i', type=argparse.FileType('rb+'),
     help='test case', required=True)
   parser.add_argument('--command', '-c', help='command to run', required=True)
   opts = parser.parse_args(args[1:])
