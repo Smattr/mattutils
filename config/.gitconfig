@@ -37,7 +37,7 @@
     good = "!git bi good"
 
     # Create a new temporary branch and check it out.
-    tmp = "!git checkout -b $(uuidgen)"
+    tmp = "!f() { { which uuidgen >/dev/null 2>/dev/null || { echo \"uuidgen not found\" >&2; exit 1; }; } && git checkout -b $(uuidgen); }; f"
 
     # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
     git = "!exec git"
