@@ -157,3 +157,10 @@ syn keyword cType __block
 
 " file descriptors
 syn keyword cConstant STDIN_FILENO STDOUT_FILENO STDERR_FILENO
+
+" x86 HLE
+syn keyword cConstant __ATOMIC_HLE_ACQUIRE __ATOMIC_HLE_RELEASE
+
+" x86 RTM
+syn keyword cConstant _XABORT_EXPLICIT _XABORT_RETRY _XABORT_CONFLICT
+  \ _XABORT_CAPACITY _XABORT_DEBUG _XABORT_NESTED _XBEGIN_STARTED
