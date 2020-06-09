@@ -17,7 +17,7 @@ import subprocess
 import sys
 
 class Result(object):
-  def __init__(self, returncode: int, stdout: str, stderr: str):
+  def __init__(self, returncode: int, stdout: bytes, stderr: bytes):
     self.returncode = returncode
     self.stdout = stdout
     self.stderr = stderr
@@ -26,13 +26,13 @@ def run(cmd: str):
   p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
     stderr=subprocess.PIPE)
   stdout, stderr = p.communicate()
-  return Result(p.returncode, stdout.decode('utf-8', 'replace'),
-    stderr.decode('utf-8', 'replace'))
+  return Result(p.returncode, stdout, stderr)
 
-def writelines(path: str, lines: [str]) -> None:
-  with open(path, 'wt') as f:
+def writelines(path: str, lines: [bytes]) -> None:
+  with open(path, 'wb') as f:
     for line in lines:
-      f.write('{}\n'.format(line))
+      f.write(line)
+      f.write(b'\n')
     f.flush()
 
 def main(args: [str]):
@@ -50,7 +50,7 @@ def main(args: [str]):
   input = opts.input.read()
 
   # first try to knock out lines
-  lines = input.splitlines()
+  lines = input.split(b'\n')
   removed = None
   while removed is None or removed > 0:
     lineno = 0
@@ -123,7 +123,7 @@ def main(args: [str]):
         line = lines[lineno]
 
         # find the next word
-        m = re.search(r'\b.+?\b', line[colno:])
+        m = re.search(b'\\b.+?\\b', line[colno:])
         if m is None:
           break
 
