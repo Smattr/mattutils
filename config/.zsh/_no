@@ -1,10 +1,11 @@
 #compdef no
 
-# completion script for ../../no
+# Zsh completion for no
 
 _arguments \
-  '--help[display help information]' \
-  '--no-network[disallow networking]' \
-  '--no-home[disallow access to home directory]' \
-  '--no-writes[disallow file writing]' \
-  '*::command'
+  '--allow-network[allow network access]' \
+  '--allow-tmp-writes[allow writes to TMPDIR]' \
+  '--allow-writes[allow file system writes]' \
+  '--disallow-network[disallow network access]' \
+  '--disallow-writes[disallow file system writes]' \
+  '--help[show man page]'

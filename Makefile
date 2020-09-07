@@ -54,7 +54,6 @@ default: \
   ${HOME}/bin/ifind \
   ${HOME}/bin/loc \
   ${HOME}/bin/meta_u \
-  ${HOME}/bin/no \
   ${HOME}/bin/notate.py \
   ${HOME}/bin/prefix \
   ${HOME}/bin/pye \
