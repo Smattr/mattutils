@@ -58,7 +58,6 @@ default: \
   ${HOME}/bin/pye \
   ${HOME}/bin/pyman \
   ${HOME}/bin/rerebase \
-  ${HOME}/bin/search \
   ${HOME}/bin/shrink \
   ${HOME}/bin/ssh-proxy \
   ${HOME}/bin/t \
