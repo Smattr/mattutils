@@ -1,5 +1,0 @@
---- /dev/null	2012-05-13 12:38:57.705745006 +1000
-+++ /home/matthew/.Xmodmap	2012-05-13 12:40:27.133086785 +1000
-@@ -0,0 +1,2 @@
-+! Map function-F4 on my laptop to monitor toggle.
-+keycode 235 = XF86Display
