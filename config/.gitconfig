@@ -69,3 +69,6 @@
     # Limit the amount of RAM used in a repack. Without this, an aggressive GC
     # on a large repo often runs out of memory.
     windowMemory = 1g
+
+[core]
+    commentChar = ";"
