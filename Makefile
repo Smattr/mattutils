@@ -5,7 +5,7 @@ else
 endif
 
 CC ?= cc
-CFLAGS ?= -std=c11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings
+CFLAGS ?= -std=c11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings -Wmissing-prototypes
 
 CXX ?= c++
 CXXFLAGS ?= -std=c++11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings -Wmissing-declarations
