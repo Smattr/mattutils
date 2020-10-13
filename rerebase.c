@@ -104,6 +104,39 @@ static int move(const char *oldpath, const char *newpath) {
     return 0;
 }
 
+// lookup the character Git uses to prefix comments
+static char comment_char(void) {
+
+    static char commentChar;
+
+    // if we have not previously cached the value, look it up now
+    if (commentChar == 0) {
+
+        // if any of the logic below fails, fallback to the default comment
+        // character
+        commentChar = '#';
+
+        // ask Git what its commentChar is
+        FILE *p = popen("git config core.commentChar 2>/dev/null", "r");
+        if (p == NULL)
+            return commentChar;
+        int c;
+        do {
+            c = getc(p);
+            if (c != EOF && c != '\n')
+                commentChar = (char)c;
+        } while (c != EOF);
+
+        // if Git returns failure, assume it did not give us a valid comment
+        // character
+        int r = pclose(p);
+        if (r != 0)
+            commentChar = '#';
+    }
+
+    return commentChar;
+}
+
 // Insert diffs in-between lines in a rebase picklist
 static int insert_diffs(FILE *in, FILE *out) {
     regex_t pick;
@@ -174,7 +207,7 @@ static int insert_diffs(FILE *in, FILE *out) {
                     goto end;
                 }
 
-                if (fprintf(out, " # %s", l) < 0) {
+                if (fprintf(out, " %c %s", comment_char(), l) < 0) {
                     ret = -1;
                     free(l);
                     pclose(pipe);
@@ -193,7 +226,7 @@ static int insert_diffs(FILE *in, FILE *out) {
             }
 
             // write a fold close marker
-            if (fputs(" # }}}\n", out) < 0) {
+            if (fprintf(out, " %c }}}\n", comment_char()) < 0) {
                 ret = -1;
                 goto end;
             }
@@ -220,6 +253,8 @@ static int strip_comments(FILE *in, FILE *out) {
     size_t line_sz;
     int ret = 0;
 
+    const char comment_starter[2] = { ' ', comment_char() };
+
     for (;;) {
 
         errno = 0;
@@ -232,7 +267,7 @@ static int strip_comments(FILE *in, FILE *out) {
         }
 
         // Is this a comment we inserted?
-        if (!strncmp(line, " #", sizeof " #" - 1))
+        if (!strncmp(line, comment_starter, sizeof(comment_starter)))
             continue;
 
         size_t w = fwrite(line, 1, r, out);
