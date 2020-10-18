@@ -70,7 +70,7 @@ default: \
 
 ${HOME}/.ssh/config_mattutils: config/.ssh/config Makefile
 	@printf ' [LN] %s\n' "$(notdir $@)"
-	${V}if [ ! -e "$@" ]; then ln -s $$(pwd)/$< $@; elif [ ! -L "$@" ]; then printf 'Warning: Skipping %s that already exists\n' "$@" >&2; fi
+	${V}if [ ! -e "$@" ]; then mkdir -p ${HOME}/.ssh && ln -s $$(pwd)/$< $@; elif [ ! -L "$@" ]; then printf 'Warning: Skipping %s that already exists\n' "$@" >&2; fi
 
 
 ${HOME}/bin/dif: dif.cpp
