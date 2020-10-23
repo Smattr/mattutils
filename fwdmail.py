@@ -48,7 +48,8 @@ def locked(mailbox):
 def main(argv, stdout, stderr):
   # Parse command line arguments.
   parser = argparse.ArgumentParser(prog='fwdmail.py',
-    description='Forward local mail to another address')
+    description='Forward local mail to another address',
+    fromfile_prefix_chars='@')
   parser.add_argument('--check_connection', action='store_true',
     help='Exit with success if offline')
   parser.add_argument('--from_address', '-f', required=True,
