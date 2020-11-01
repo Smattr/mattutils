@@ -14,7 +14,14 @@ def count(path: str) -> int:
   try:
     # read the file in binary to avoid thinking about unicode
     with open(path, 'rb') as f:
-      return sum(1 for c in f.read() if bytes([c]) == b'\n')
+      total = 0
+      while True:
+        c = f.read(1)
+        if c == b'':
+          break
+        if c == b'\n':
+          total += 1
+      return total
   except IOError:
     return 0
 
