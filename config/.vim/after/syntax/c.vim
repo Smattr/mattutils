@@ -169,3 +169,6 @@ syn keyword cConstant _XABORT_EXPLICIT _XABORT_RETRY _XABORT_CONFLICT
 syn keyword cConstant kSBXProfileNoInternet kSBXProfileNoNetwork
   \ kSBXProfileNoWrite kSBXProfileNoWriteExceptTemporary
   \ kSBXProfilePureComputation
+
+" flock()
+syn keyword cConstant LOCK_EX LOCK_NB LOCK_SH LOCK_UN
