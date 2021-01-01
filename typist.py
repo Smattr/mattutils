@@ -46,6 +46,27 @@ if platform.system() == 'Darwin':
       .format(''.join(escape(c) for c in s)),
       check=True, encoding='utf-8')
 
+elif platform.system() == 'Linux':
+  def get_input() -> str:
+    try:
+      p = subprocess.run(['zenity', '--entry', '--title', 'typist', '--text',
+        'ascii text?'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        check=True, encoding='utf-8')
+    except subprocess.CalledProcessError:
+      return None
+
+    return p.stdout.strip()
+
+  def show_error(s: str):
+    subprocess.run(['zenity', '--error', '--title', 'typist', '--text', s],
+      check=True, encoding='utf-8')
+
+  def send_text(s: str):
+    for c in s:
+      key = 'U{}'.format(hex(ord(c))[2:])
+      subprocess.run(['xdotool', 'key', key], check=True, encoding='utf-8')
+
+
 def main() -> int:
 
   config_path = os.path.expanduser('~/.typist.json')
