@@ -15,10 +15,10 @@ def run(cmd, **kwargs):
     with open(os.devnull, 'wt') as null:
         try:
             subprocess.check_call(cmd, stdout=null, stderr=null, **kwargs)
-            sys.stdout.write('\033[32mok (%s)\033[0m\n' % ' '.join(cmd))
+            sys.stdout.write(f'\033[32mok ({" ".join(cmd)})\033[0m\n')
             return OK
         except subprocess.CalledProcessError:
-            sys.stdout.write('\033[31mFAILED (%s)\033[0m\n' % ' '.join(cmd))
+            sys.stdout.write(f'\033[31mFAILED ({" ".join(cmd)})\033[0m\n')
             return FAILED
 
 def main():
@@ -44,7 +44,7 @@ def main():
 
     while len(queue) > 0:
         item = os.path.abspath(queue.pop())
-        sys.stdout.write(' %s ...' % item)
+        sys.stdout.write(f' {item} ...')
         if not os.path.exists(item):
             results[item] = NOT_FOUND
             sys.stdout.write('\033[31mFAILED (does not exist)\033[0m\n')
@@ -85,7 +85,7 @@ def main():
                 # Many media container formats are misidentified by magic.
                 results[item] = run(['ffmpeg', '-i', item, '-f', 'null', os.devnull])
             else:
-                sys.stdout.write('\033[31mno checker found for \'%s\'\033[0m\n' % filetype)
+                sys.stdout.write(f'\033[31mno checker found for \'{filetype}\'\033[0m\n')
                 results[item] = NO_CHECKER
 
     if opts.db is None:
