@@ -21,7 +21,7 @@ GUARD_DEF = re.compile(r'\s*#\s*define\s+(?P<guard>\w+)\s*$')
 def scan_file(filepath):
 
     def write_line(lineno, line):
-        sys.stderr.write('%s:%d: %s' % (filepath, lineno, line))
+        sys.stderr.write(f'{filepath}:{lineno}: {line}')
 
     with open(filepath) as f:
         ifndef_guard = None
@@ -52,7 +52,7 @@ def scan_file(filepath):
             m = MODIFY_TWICE.search(line)
             if m is not None and m.group('id1') == m.group('id2') and (m.group('pre1') is not None or m.group('pre2') is not None or m.group('post1') is not None or m.group('post2') is not None):
                 write_line(lineno, line)
-                sys.stderr.write(' potential duplicate modification of %s within a sequence point\n' % m.group('id1'))
+                sys.stderr.write(f' potential duplicate modification of {m.group("id1")} within a sequence point\n')
 
             # Find mismatched header guards.
             if ifndef_guard is not None:
@@ -107,14 +107,14 @@ def main(argv):
                 try:
                     scan_file(path)
                 except UnicodeDecodeError:
-                    sys.stderr.write(' unicode decoding error when reading %s\n' % path)
+                    sys.stderr.write(f' unicode decoding error when reading {path}\n')
     elif os.path.isfile(opts.path):
         try:
             scan_file(opts.path)
         except UnicodeDecodeError:
-            sys.stderr.write(' unicode decoding error when reading %s\n' % opts.path)
+            sys.stderr.write(f' unicode decoding error when reading {opts.path}\n')
     else:
-        sys.stderr.write('%s does not exist\n' % opts.path)
+        sys.stderr.write(f'{opts.path} does not exist\n')
         return -1
 
     return 0
