@@ -94,14 +94,6 @@ set mouse=vn
 " Standard trick for saving edits to a file that you forgot to open with sudo.
 cmap w!! w !sudo tee >/dev/null %
 
-" YouCompleteMe tweaks
-let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_register_as_syntastic_checker = 0
-let g:ycm_semantic_triggers = {
-  \  'mkd':['@'],
-  \ }
-let g:ycm_filetype_blacklist = {}
-
 set foldmethod=syntax
 set foldlevelstart=20
 
