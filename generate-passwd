@@ -9,7 +9,7 @@ else
 fi
 
 # generate and print password
-PASSWORD=$(LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${PWD_LEN})
+PASSWORD=$(LC_CTYPE=C < /dev/urandom tr -dc '_[:alnum:]' | head -c${PWD_LEN})
 printf '%s\n' "${PASSWORD}"
 
 # find SHA1 hash of the password
