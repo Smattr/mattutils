@@ -51,14 +51,16 @@ def main(args: [str]) -> int:
 
   # parse command line arguments
   parser = argparse.ArgumentParser(description='simple line counter')
-  parser.add_argument('input', help='file or directory to examine')
+  parser.add_argument('input', nargs='+', help='file or directory to examine')
   options = parser.parse_args(args[1:])
 
-  if os.path.isfile(options.input):
-    # simply count this file
-    print(f'{options.input}: {count(options.input)}')
+  ret = 0
 
-  elif os.path.isdir(options.input):
+  if len(options.input) == 1 and os.path.isfile(options.input[0]):
+    # simply count this file
+    print(f'{options.input[0]}: {count(options.input[0])}')
+
+  else:
 
     CPUS = multiprocessing.cpu_count()
 
@@ -74,10 +76,17 @@ def main(args: [str]) -> int:
       pool.append(p)
 
     # push all files under the directory into q1
-    for root, _, files in os.walk(options.input):
-      for f in files:
-        path = os.path.join(root, f)
-        q1.put(path)
+    for input in options.input:
+      if os.path.isfile(input):
+        q1.put(input)
+      elif os.path.isdir(input):
+        for root, _, files in os.walk(input):
+          for f in files:
+            path = os.path.join(root, f)
+            q1.put(path)
+      else:
+        sys.stderr.write(f'{input} not found\n')
+        ret = -1
 
     # push terminating markers into q1 for each thread
     for _ in range(len(pool)):
@@ -96,11 +105,7 @@ def main(args: [str]) -> int:
     for k, v in sorted(received.items()):
       print(f'{k}: {v}')
 
-  else:
-    sys.stderr.write(f'{options.input} not found\n')
-    return -1
-
-  return 0
+  return ret
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv))
