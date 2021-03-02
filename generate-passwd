@@ -25,7 +25,9 @@ HASH=$(sha1 "${PASSWORD}")
 
 # ask Have I Been Pwned if it appears in a password breach
 function download() {
-  if which curl &>/dev/null; then
+  if which wget &>/dev/null; then
+    wget --quiet --output-document=- --user-agent 'generate-passwd <https://github.com/Smattr/mattutils/blob/master/generate-passwd>' "$1"
+  elif which dcurl &>/dev/null; then
     curl --silent --show-error --user-agent 'generate-passwd <https://github.com/Smattr/mattutils/blob/master/generate-passwd>' "$1"
   else
     printf 'no download command available\n' >&2
