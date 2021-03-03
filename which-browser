@@ -43,7 +43,7 @@ else:
     args += ['TRUE' if i == 0 else 'FALSE', ' '.join(b)]
 
   try:
-    browser = subprocess.check_output(args, universal_newlines=True)
+    browser = subprocess.check_output(args, universal_newlines=True).strip()
   except subprocess.CalledProcessError:
     sys.exit(0)
 
