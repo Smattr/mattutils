@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+'''
+experiment in a browser picker for handling URLs
+'''
+
+import os
+import shutil
+import subprocess
+import sys
+
+options = []
+
+if shutil.which('xdg-open') is not None:
+  options.append(['xdg-open'])
+
+if shutil.which('chromium-browser') is not None:
+  options.append(['chromium-browser'])
+  options.append(['chromium-browser', '--new-window'])
+  options.append(['chromium-browser', '--incognito'])
+
+if shutil.which('google-chrome') is not None:
+  options.append(['google-chrome'])
+  options.append(['google-chrome', '--new-window'])
+  options.append(['google-chrome', '--incognito'])
+
+if shutil.which('firefox') is not None:
+  options.append(['firefox'])
+  options.append(['firefox', '--new-window'])
+  options.append(['firefox', '--private-window'])
+
+if len(options) == 0:
+  os.execvp('zenity', ['zenity', '--error', '--text=No available browsers.',
+    '--title=which-browser'])
+
+if len(options) == 1:
+  browser = options[0]
+
+else:
+  args = ['zenity', '--list', '--radiolist', '--text=Select browser',
+    '--title=which-browser', '--column=', '--column=']
+  for i, b in enumerate(options):
+    args += ['TRUE' if i == 0 else 'FALSE', ' '.join(b)]
+
+  try:
+    browser = subprocess.check_output(args, universal_newlines=True)
+  except subprocess.CalledProcessError:
+    sys.exit(0)
+
+  browser = browser.split(' ')
+
+os.execvp(browser[0], browser + sys.argv[1:])
