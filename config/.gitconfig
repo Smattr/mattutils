@@ -37,13 +37,16 @@
     good = "!git bi good"
 
     # Create a new temporary branch and check it out.
-    tmp = "!f() { { which uuidgen >/dev/null 2>/dev/null || { echo \"uuidgen not found\" >&2; exit 1; }; } && git checkout -b $(uuidgen); }; f"
+    tmp = "!f() { { which uuidgen >/dev/null 2>/dev/null || { echo \"uuidgen not found\" >&2; exit 1; }; } && git checkout -b $(git config github.username)/$(uuidgen); }; f"
 
     # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
     git = "!exec git"
 
     # glog back to the most recent common ancestor of several refs
     relate = "!f() { git glog $(for i in \"$@\"; do printf '%s~1..%s ' \"$(git merge-base \"$@\")\" \"${i}\"; done); }; f"
+
+[github]
+    username = smattr
 
 [merge]
     conflictstyle = diff3
