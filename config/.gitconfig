@@ -68,6 +68,10 @@
 [include]
     path = .gitconfig_mattbin
 
+# local override settings that may or may not exist
+[include]
+    path = .gitconfig_local
+
 [pack]
     # Limit the amount of RAM used in a repack. Without this, an aggressive GC
     # on a large repo often runs out of memory.
