@@ -38,7 +38,8 @@ if len(options) == 1:
 
 else:
   args = ['zenity', '--list', '--radiolist', '--text=Select browser',
-    '--title=which-browser', '--column=', '--column=']
+    '--title=which-browser', '--column=', '--column=', '--width=400',
+    '--height=400', '--hide-header']
   for i, b in enumerate(options):
     args += ['TRUE' if i == 0 else 'FALSE', ' '.join(b)]
 
