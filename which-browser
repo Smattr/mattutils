@@ -2,6 +2,32 @@
 
 '''
 experiment in a browser picker for handling URLs
+
+To use this, put something like the following in
+~/.local/share/applications/which-browser.desktop:
+
+  [Desktop Entry]
+  Type=Application
+  Name=which-browser
+  Comment=Browser picker
+  Terminal=false
+  Exec=which-browser %U
+  Categories=Network;WebBrowser
+
+and then add something like this to ~/.local/share/applications/mimeapps.list:
+
+  [Default Applications]
+  x-scheme-handler/http=which-browser.desktop
+  x-scheme-handler/https=which-browser.desktop
+  x-scheme-handler/ftp=which-browser.desktop
+  x-scheme-handler/chrome=which-browser.desktop
+  text/html=which-browser.desktop
+  application/x-extension-htm=which-browser.desktop
+  application/x-extension-html=which-browser.desktop
+  application/x-extension-shtml=which-browser.desktop
+  application/xhtml+xml=which-browser.desktop
+  application/x-extension-xhtml=which-browser.desktop
+  application/x-extension-xht=which-browser.desktop
 '''
 
 import os
