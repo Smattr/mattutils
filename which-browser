@@ -11,9 +11,6 @@ import sys
 
 options = []
 
-if shutil.which('xdg-open') is not None:
-  options.append(['xdg-open'])
-
 if shutil.which('chromium-browser') is not None:
   options.append(['chromium-browser'])
   options.append(['chromium-browser', '--new-window'])
@@ -28,6 +25,9 @@ if shutil.which('firefox') is not None:
   options.append(['firefox'])
   options.append(['firefox', '--new-window'])
   options.append(['firefox', '--private-window'])
+
+if shutil.which('xdg-open') is not None:
+  options.append(['xdg-open'])
 
 if len(options) == 0:
   os.execvp('zenity', ['zenity', '--error', '--text=No available browsers.',
