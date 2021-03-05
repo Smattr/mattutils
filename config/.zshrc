@@ -254,6 +254,10 @@ case $TERM in
 		;;
 esac
 
+# For Debian packaging tools
+export DEBEMAIL="matthew.fernandez@gmail.com"
+export DEBFULLNAME="Matthew Fernandez"
+
 # Source any computer-local options
 
 if [ -e ~/.zshrc_local ]; then
@@ -316,7 +320,3 @@ function man() {
         LESS_TERMCAP_us=$'\e[1;32m' \
         man "$@"
 }
-
-# For Debian packaging tools
-export DEBEMAIL="matthew.fernandez@gmail.com"
-export DEBFULLNAME="Matthew Fernandez"
