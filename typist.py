@@ -5,11 +5,16 @@ Tool for typing characters that aren't easy to access on a standard keyboard.
 '''
 
 import codecs
-import json
+import logging
 import os
+from pathlib import Path
 import platform
+import re
 import subprocess
 import sys
+from typing import Dict, Generator, Tuple
+
+log = None
 
 if platform.system() == 'Darwin' and not sys.stdout.isatty():
   # Assume we're running under Automator and we need to return success to
@@ -66,21 +71,144 @@ elif platform.system() == 'Linux':
       key = 'U{}'.format(hex(ord(c))[2:])
       subprocess.run(['xdotool', 'key', key], check=True, encoding='utf-8')
 
+elif platform.system() == 'Windows':
+  import ctypes
+  import tkinter as tk
+  from tkinter import simpledialog
+
+  # suppress the TK default window
+  root = tk.Tk()
+  root.withdraw()
+
+  def get_input() -> str:
+    return simpledialog.askstring('typist', 'ascii text?')
+
+  def show_error(s: str):
+    MB_ICONERROR = 0x00000010
+    ctypes.windll.user32.MessageBoxW(None, s, 'typist', MB_ICONERROR)
+
+# keys that are named in Compose files
+KEYS = {
+  'apostrophe' :'\'',
+  'asciicircum':'^',
+  'asciitilde' :'~',
+  'asterisk'   :'*',
+  'backslash'  :'\\',
+  'bar'        :'|',
+  'braceleft'  :'{',
+  'braceright' :'}',
+  'colon'      :':',
+  'comma'      :',',
+  'equal'      :'=',
+  'exclam'     :'!',
+  'grave'      :'`',
+  'greater'    :'>',
+  'less'       :'<',
+  'minus'      :'-',
+  'numbersign' :'#',
+  'parenleft'  :'(',
+  'parenright' :')',
+  'percent'    :'%',
+  'period'     :'.',
+  'plus'       :'+',
+  'question'   :'?',
+  'quotedbl'   :'"',
+  'semicolon'  :';',
+  'slash'      :'/',
+  'space'      :' ',
+  'underscore' :'_',
+  # surprisingly @, $, &, [, ] all seem unused in en_US.UTF-8
+}
+
+def parse_compose(src: Path) -> Generator[Tuple[str, str], None, None]:
+  '''
+  parse an X Compose file
+  '''
+
+  # TODO: support include directives
+
+  # XXX: macOS Automator uses some non-UTF-8 locale which presents a problem
+  # when opening a UTF-8 file so we need to force it
+  with codecs.open(src, 'r', 'utf-8') as f:
+    for line in f:
+
+      # skip comments
+      if re.match(r'\s*#', line):
+        log.debug(f'discarding comment line {line}')
+        continue
+
+      # skip events that are not initiated with the Compose key
+      m = re.match(r'<Multi_key>\s+', line)
+      if m is None:
+        log.debug(f'discarding non-Multi_key line {line}')
+        continue
+      line = line[len(m.group(0)):]
+
+      # parse the remaining events
+      events = []
+      while True:
+        m = re.match(r'<([^>]+)>\s*', line)
+        if m is None:
+          break
+        events.append(KEYS.get(m.group(1), m.group(1)))
+        line = line[len(m.group(0)):]
+      if len(events) == 0:
+        log.debug(f'discarding event-free remainder {line}')
+        continue
+
+      for e in events:
+        if len(e) > 1:
+          # an unrecognised named character
+          log.debug(f'unrecognised character "{e}"')
+
+      # hope that this maps to a string
+      m = re.match(r':\s*"([^"]+)"', line)
+      if m is None:
+        log.debug(f'discarding non-string mapping {line}')
+        continue
+
+      log.debug(f'found mapping {events} -> {m.group(1)}')
+      yield ''.join(events), m.group(1)
 
 def main() -> int:
 
-  config_path = os.path.expanduser('~/.typist.json')
+  # setup logging
+  global log
+  log = logging.getLogger('deploy.py')
+  log.setLevel(logging.DEBUG)
+  # make it print to stderr if we are in a terminal
+  if sys.stdout.isatty():
+    ch = logging.StreamHandler()
+    log.addHandler(ch)
 
-  if not os.path.exists(config_path):
-    show_error('configuration file not found')
-    return FAIL
+  # mapping from key sequence to its replacement
+  db: Dict[str, str] = {}
 
-  # Load user's configuration. We deliberately don't bother checking errors here
-  # to let the user debug from the stack trace.
-  # XXX: macOS Automator uses some non-UTF-8 locale which presents a problem
-  # when opening a UTF-8 file so we need to force it.
-  with codecs.open(config_path, 'r', 'utf-8') as f:
-    db = json.load(f)
+  # follow the Compose spec and look for (1) $XCOMPOSEFILE…
+  if 'XCOMPOSEFILE' in os.environ:
+    log.info(f'reading $XCOMPOSEFILE ({os.environ["XCOMPOSEFILE"]}) ...')
+    db.update(parse_compose(Path(os.environ['XCOMPOSEFILE'])))
+
+  # …or (2) ~/.XCompose…
+  elif Path('~/.XCompose').expanduser().exists():
+    log.info('reading ~/.XCompose ...')
+    db.update(parse_compose(Path('~/.XCompose').expanduser()))
+
+  # …or (3) the locale Compose file
+  elif 'LANG' in os.environ:
+    d = Path('/usr/share/X11/locale/compose.dir')
+    if d.exists():
+      log.info('reading /usr/share/X11/locale/compose.dir ...')
+      c = None
+      with codecs.open(d, 'r', 'utf-8') as f:
+        for line in f:
+          w = line.split()
+          if len(w) == 2 and w[1] == os.environ['LANG']:
+            c = Path(f'/usr/share/X11/locale/{w[0]}')
+            break
+      if c is not None:
+        log.info(f'reading {c} ...')
+        db.update(parse_compose(c))
 
   # Read some text the user wants translated.
   text = get_input()
