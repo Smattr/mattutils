@@ -133,5 +133,12 @@ vmap <expr> <Esc>[200~ XTermPasteBegin("c")
 cmap <Esc>[200~ <nop>
 cmap <Esc>[201~ <nop>
 
+" disable RHEL “jump to the last cursor position”
+if has("autocmd")
+  if exists("#redhat#BufReadPost")
+    au! redhat BufReadPost
+  endif
+endif
+
 " Disable modelines (https://github.com/numirias/security/blob/master/doc/2019-06-04_ace-vim-neovim.md).
 set nomodeline
