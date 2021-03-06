@@ -27,7 +27,7 @@ HASH=$(sha1 "${PASSWORD}")
 function download() {
   if which wget &>/dev/null; then
     wget --quiet --output-document=- --user-agent 'generate-passwd <https://github.com/Smattr/mattutils/blob/master/generate-passwd>' "$1"
-  elif which dcurl &>/dev/null; then
+  elif which curl &>/dev/null; then
     curl --silent --show-error --user-agent 'generate-passwd <https://github.com/Smattr/mattutils/blob/master/generate-passwd>' "$1"
   else
     printf 'no download command available\n' >&2
