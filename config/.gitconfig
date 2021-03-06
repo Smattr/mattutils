@@ -54,6 +54,10 @@
 [log]
     decorate = True
 
+[pull]
+    rebase = False
+    autoStash = True
+
 [rebase]
     autoStash = True
     autoSquash = True
