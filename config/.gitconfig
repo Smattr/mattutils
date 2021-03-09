@@ -69,9 +69,6 @@
 [interactive]
     singlekey = True
 
-[include]
-    path = .gitconfig_mattbin
-
 # local override settings that may or may not exist
 [include]
     path = .gitconfig_local
