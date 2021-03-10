@@ -1,82 +1,82 @@
 [user]
-    name = Matthew Fernandez
+  name = Matthew Fernandez
 [color]
-    ui = True
+  ui = True
 [pager]
-    status = True
-    diff = "less -FRSX +Gg"
-    branch = True
+  status = True
+  diff = "less -FRSX +Gg"
+  branch = True
 
 [alias]
-    co = clone
-    st = status
-    glog = log --graph --stat
-    incoming = "!git fetch origin master && git log ..origin/master"
-    outgoing = "!git getch origin master && git log origin/master.."
-    in = incoming
-    out = outgoing
-    root = rev-parse --show-toplevel
-    cp = cherry-pick
+  co = clone
+  st = status
+  glog = log --graph --stat
+  incoming = "!git fetch origin master && git log ..origin/master"
+  outgoing = "!git getch origin master && git log origin/master.."
+  in = incoming
+  out = outgoing
+  root = rev-parse --show-toplevel
+  cp = cherry-pick
 
-    # fix Git’s inability to bisect when not at the top level
-    bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect \"$@\"; }; f"
+  # fix Git’s inability to bisect when not at the top level
+  bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect \"$@\"; }; f"
 
-    # More advanced rebasing tool. See rerebase.c.
-    re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
+  # More advanced rebasing tool. See rerebase.c.
+  re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
 
-    # Smart diffs. See dif.cpp.
-    di = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
-    sh = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
+  # Smart diffs. See dif.cpp.
+  di = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
+  sh = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
 
-    # Bisect-like tool. See git-linear.cpp.
-    li = linear
-    linear = "!f() { git-linear \"$@\"; }; f"
+  # Bisect-like tool. See git-linear.cpp.
+  li = linear
+  linear = "!f() { git-linear \"$@\"; }; f"
 
-    # C'mon, Git, you know what I meant.
-    bad = "!git bi bad"
-    good = "!git bi good"
+  # C'mon, Git, you know what I meant.
+  bad = "!git bi bad"
+  good = "!git bi good"
 
-    # Create a new temporary branch and check it out.
-    tmp = "!f() { { which uuidgen >/dev/null 2>/dev/null || { echo \"uuidgen not found\" >&2; exit 1; }; } && git checkout -b $(git config github.username)/$(uuidgen); }; f"
+  # Create a new temporary branch and check it out.
+  tmp = "!f() { { which uuidgen >/dev/null 2>/dev/null || { echo \"uuidgen not found\" >&2; exit 1; }; } && git checkout -b $(git config github.username)/$(uuidgen); }; f"
 
-    # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
-    git = "!exec git"
+  # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
+  git = "!exec git"
 
-    # glog back to the most recent common ancestor of several refs
-    relate = "!f() { git glog $(for i in \"$@\"; do printf '%s~1..%s ' \"$(git merge-base \"$@\")\" \"${i}\"; done); }; f"
+  # glog back to the most recent common ancestor of several refs
+  relate = "!f() { git glog $(for i in \"$@\"; do printf '%s~1..%s ' \"$(git merge-base \"$@\")\" \"${i}\"; done); }; f"
 
 [github]
-    username = smattr
+  username = smattr
 
 [merge]
-    conflictstyle = diff3
+  conflictstyle = diff3
 
 [log]
-    decorate = True
+  decorate = True
 
 [pull]
-    rebase = False
-    autoStash = True
+  rebase = False
+  autoStash = True
 
 [rebase]
-    autoStash = True
-    autoSquash = True
-    stat = True
+  autoStash = True
+  autoSquash = True
+  stat = True
 
 [diff]
-    noprefix = True
+  noprefix = True
 
 [interactive]
-    singlekey = True
+  singlekey = True
 
 [pack]
-    # Limit the amount of RAM used in a repack. Without this, an aggressive GC
-    # on a large repo often runs out of memory.
-    windowMemory = 1g
+  # Limit the amount of RAM used in a repack. Without this, an aggressive GC
+  # on a large repo often runs out of memory.
+  windowMemory = 1g
 
 [core]
-    commentChar = ";"
+  commentChar = ";"
 
 # local override settings that may or may not exist
 [include]
-    path = .gitconfig_local
+  path = .gitconfig_local
