@@ -30,7 +30,6 @@ default: \
   ${HOME}/.tmux-old-pane_current_path.conf \
   ${HOME}/.tmux-old-vi-copy.conf \
   ${HOME}/.tmux-tpm.conf \
-  ${HOME}/.typist.json \
   ${HOME}/.vimrc \
   ${HOME}/.vim \
   ${HOME}/.wgetrc \

@@ -46,3 +46,10 @@
 <Multi_key> <p> <s> <i>                 : "ψ"   U03C8    # GREEK SMALL LETTER PSI
 <Multi_key> <Z> <e> <t> <a>             : "Ζ"   U0396    # GREEK CAPITAL LETTER ZETA
 <Multi_key> <z> <e> <t> <a>             : "ζ"   U03B6    # GREEK SMALL LETTER ZETA
+
+# math stuff
+<Multi_key> <f> <o> <r> <a> <l> <l>     : "∀"
+<Multi_key> <e> <x> <i> <s> <t> <s>     : "∃"
+<Multi_key> <n> <e> <x> <i> <s> <t> <s> : "∄"
+<Multi_key> <slash> <backslash>         : "∧"
+<Multi_key> <backslash> <slash>         : "∨"
