@@ -34,6 +34,7 @@ default: \
   ${HOME}/.vimrc \
   ${HOME}/.vim \
   ${HOME}/.wgetrc \
+  ${HOME}/.XCompose \
   ${HOME}/.Xdefaults \
   ${HOME}/.zshrc \
   ${HOME}/bin/addcert.sh \
