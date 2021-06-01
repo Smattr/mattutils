@@ -45,7 +45,7 @@
  * To use this, you probably want to configure a Git alias for it. Something like:
  *
  *     [alias]
- *         re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
+ *         re = "!f() { GIT_SEQUENCE_EDITOR=rerebase git rebase \"$@\"; }; f"
  *
  * Happy hacking.
  */

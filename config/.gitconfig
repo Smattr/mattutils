@@ -22,7 +22,7 @@
   bi = "!f() { git rev-parse --show-toplevel >/dev/null && cd $(git rev-parse --show-toplevel) && git bisect \"$@\"; }; f"
 
   # More advanced rebasing tool. See rerebase.c.
-  re = "!f() { GIT_EDITOR=rerebase git rebase \"$@\"; }; f"
+  re = "!f() { GIT_SEQUENCE_EDITOR=rerebase git rebase \"$@\"; }; f"
 
   # Smart diffs. See dif.cpp.
   di = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
