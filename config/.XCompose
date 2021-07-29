@@ -53,6 +53,7 @@
 <Multi_key> <n> <e> <x> <i> <s> <t> <s> : "∄"
 <Multi_key> <slash> <backslash>         : "∧"
 <Multi_key> <backslash> <slash>         : "∨"
+<Multi_key> <less> <asciitilde> <greater> : "↔" # cannot use <-> because it matches ← first
 
 # superscripts
 <Multi_key> <acute> <A> : "ᴬ"
