@@ -54,6 +54,8 @@
 <Multi_key> <slash> <backslash>         : "∧"
 <Multi_key> <backslash> <slash>         : "∨"
 <Multi_key> <less> <asciitilde> <greater> : "↔" # cannot use <-> because it matches ← first
+<Multi_key> <t> <o> <p>                 : "⊤"
+<Multi_key> <b> <o> <t> <t> <o> <m>     : "⊥"
 
 # superscripts
 <Multi_key> <acute> <A> : "ᴬ"
