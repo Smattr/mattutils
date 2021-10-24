@@ -36,7 +36,6 @@ default: \
   ${HOME}/.XCompose \
   ${HOME}/.Xdefaults \
   ${HOME}/.zshrc \
-  ${HOME}/bin/addcert.sh \
   ${HOME}/bin/after \
   ${HOME}/bin/ag \
   ${HOME}/bin/bashd.sh \

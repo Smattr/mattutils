@@ -5,8 +5,6 @@ email me and I can provide you with the latest version. Some of these scripts
 are example code or my own experimentation, so yes, some of this code has no
 purpose.
 
-addcert.sh - Tool for adding an SSL certificate to multiple sources on a
-    system.
 bashd.sh - A script for connecting bash to a local port. Handy for probing
     environments where you don't have a PTY.
 config/ - Directory for containing my shared configuration settings.
