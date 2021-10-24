@@ -50,7 +50,6 @@ default: \
   ${HOME}/bin/loc \
   ${HOME}/bin/meta_u \
   ${HOME}/bin/prefix \
-  ${HOME}/bin/pye \
   ${HOME}/bin/pyman \
   ${HOME}/bin/rerebase \
   ${HOME}/bin/shrink \
