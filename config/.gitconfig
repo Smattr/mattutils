@@ -25,8 +25,8 @@
   re = "!f() { GIT_SEQUENCE_EDITOR=rerebase git rebase \"$@\"; }; f"
 
   # Smart diffs. See dif.cpp.
-  di = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
-  sh = "!f() { { which dif >/dev/null 2>/dev/null || { echo \"dif not found\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
+  di = "!f() { { which dif >/dev/null 2>/dev/null || { printf \"dif not found\\n\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
+  sh = "!f() { { which dif >/dev/null 2>/dev/null || { printf \"dif not found\\n\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
 
   # Bisect-like tool. See git-linear.cpp.
   li = linear
@@ -37,7 +37,7 @@
   good = "!git bi good"
 
   # Create a new temporary branch and check it out.
-  tmp = "!f() { { which uuidgen >/dev/null 2>/dev/null || { echo \"uuidgen not found\" >&2; exit 1; }; } && git checkout -b $(git config github.username)/$(uuidgen); }; f"
+  tmp = "!f() { { which uuidgen >/dev/null 2>/dev/null || { printf \"uuidgen not found\\n\" >&2; exit 1; }; } && git checkout -b $(git config github.username)/$(uuidgen); }; f"
 
   # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
   git = "!exec git"
