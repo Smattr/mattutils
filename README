@@ -58,8 +58,6 @@ misc/sizeofs.sh - A script for doing more advanced sizeof operations on C
 misc/stack-smash-hello-world.c - Hello world written using a stack smashing
     attack.
 misc/ubuntu/ - Some files related to configuring Ubuntu to be a bit nicer.
-notify-send-wrapper.sh - A way to call notify-send from a crontab or other
-    restricted environment.
 prefix - Preface each output line from a command with some given text.
 timestamp - Timestamp console stdout.
 ubiquity -  A script for automatically syncing a git repository across
