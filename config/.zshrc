@@ -74,7 +74,7 @@ alias vi="vim"
 alias hist='fc -RI' # Import History
 alias :q=exit
 alias :Q=exit
-alias tmp='pushd `mktemp -d`'
+alias tmp='pushd $(mktemp -d)'
 alias cd..="cd .."
 alias ..='cd ..'
 alias evince="dbus-launch /usr/bin/evince" # Mask evince problems in newer Ubuntu.
@@ -143,17 +143,17 @@ function vcs_prompt {
       git branch &>/dev/null
       if [ $? -eq 0 ]; then
         echo -n ' ± '
-        if [ -z "`git status --short 2>/dev/null`" ]; then
+        if [ -z "$(git status --short 2>/dev/null)" ]; then
           # Working directory is clean.
           echo -n "%{${fg_bold[green]}%}"
-        elif [ -z "`git status --short 2>/dev/null | grep -v '^?'`" ]; then
+        elif [ -z "$(git status --short 2>/dev/null | grep -v '^?')" ]; then
           # Working directory only contains changes to untracked files.
           echo -n "%{${fg_bold[yellow]}%}"
         else
           # Working directory contains changes to tracked files.
           echo -n "%{${fg_bold[red]}%}"
         fi
-        echo -n `git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-`
+        echo -n $(git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-)
         echo -n "%{${fg_no_bold[default]}%}"
         # Show bisect status.
         cd $(git rev-parse --show-toplevel)
@@ -173,17 +173,17 @@ function vcs_prompt {
       hg root &>/dev/null
       if [ $? -eq 0 ]; then
         echo -n ' ☿ '
-        if [ -z "`hg status 2>/dev/null`" ]; then
+        if [ -z "$(hg status 2>/dev/null)" ]; then
           # Working directory is clean.
           echo -n "%{${fg_bold[green]}%}"
-        elif [ -z "`hg status 2>/dev/null | grep -v '^?'`" ]; then
+        elif [ -z "$(hg status 2>/dev/null | grep -v '^?')" ]; then
           # Working directory only contains changes to untracked files.
           echo -n "%{${fg_bold[yellow]}%}"
         else
           # Working directory contains changes to tracked files.
           echo -n "%{${fg_bold[red]}%}"
         fi
-        echo -n `hg branch 2>/dev/null`
+        echo -n $(hg branch 2>/dev/null)
         echo -n "%{${fg_no_bold[default]}%}"
       fi
     fi
@@ -235,7 +235,7 @@ case $TERM in
 			echo -n "\033]0;${USER}@${HOST}: zsh (${PWD})\007";
 		}
 		preexec() {
-			COMMAND=`echo -n $1 | cat -v | sed 's/	/ /'`;
+			COMMAND=$(echo -n $1 | cat -v | sed 's/	/ /');
 			echo -n "\033]0;${USER}@${HOST}: ${COMMAND} (${PWD})\007";
 		}
 		;;
@@ -245,7 +245,7 @@ case $TERM in
 			echo -ne "\033k${USER}@${HOST}: zsh (${PWD})\033\\"; 
 		}
 		preexec() {
-			COMMAND=`echo -n $1 | cat -v | sed 's/	/ /'`;
+			COMMAND=$(echo -n $1 | cat -v | sed 's/	/ /');
 			echo -ne "\033]0;${USER}@${HOST}: ${COMMAND} (${PWD})\007";
 			echo -ne "\033k${USER}@${HOST}: ${COMMAND} (${PWD})\033\\";
 		}
