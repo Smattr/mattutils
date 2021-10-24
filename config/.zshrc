@@ -156,7 +156,7 @@ function vcs_prompt {
         echo -n $(git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-)
         echo -n "%{${fg_no_bold[default]}%}"
         # Show bisect status.
-        cd $(git rev-parse --show-toplevel)
+        cd "$(git rev-parse --show-toplevel)"
         git bisect log &>/dev/null
         if [ $? -eq 0 ]; then
           REMAINING=$(git bisect visualize 2>/dev/null | grep '^commit' | wc -l | sed 's/^[ \t]*//')
