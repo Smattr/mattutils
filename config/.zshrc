@@ -142,28 +142,28 @@ function vcs_prompt {
     if [ $? -eq 0 ]; then
       git branch &>/dev/null
       if [ $? -eq 0 ]; then
-        echo -n ' ± '
+        printf ' ± '
         if [ -z "$(git status --short 2>/dev/null)" ]; then
           # Working directory is clean.
-          echo -n "%{${fg_bold[green]}%}"
+          printf '%s' "%{${fg_bold[green]}%}"
         elif [ -z "$(git status --short 2>/dev/null | grep -v '^?')" ]; then
           # Working directory only contains changes to untracked files.
-          echo -n "%{${fg_bold[yellow]}%}"
+          printf '%s' "%{${fg_bold[yellow]}%}"
         else
           # Working directory contains changes to tracked files.
-          echo -n "%{${fg_bold[red]}%}"
+          printf '%s' "%{${fg_bold[red]}%}"
         fi
-        echo -n $(git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-)
-        echo -n "%{${fg_no_bold[default]}%}"
+        printf '%s' "$(git branch 2>/dev/null | grep '^*' | cut -d ' ' -f 2-)"
+        printf '%s' "%{${fg_no_bold[default]}%}"
         # Show bisect status.
         cd "$(git rev-parse --show-toplevel)"
         git bisect log &>/dev/null
         if [ $? -eq 0 ]; then
           REMAINING=$(git bisect visualize 2>/dev/null | grep '^commit' | wc -l | sed 's/^[ \t]*//')
           if [ ${REMAINING} -le 1 ]; then
-            echo -n " %{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
+            printf '%s' " %{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
           else
-            echo -n " %{${fg_bold[magenta]}%}⥷ ${REMAINING}%{${fg_no_bold[default]}%}"
+            printf '%s' " %{${fg_bold[magenta]}%}⥷ ${REMAINING}%{${fg_no_bold[default]}%}"
           fi
         fi
       fi
@@ -172,26 +172,26 @@ function vcs_prompt {
     if [ $? -eq 0 ]; then
       hg root &>/dev/null
       if [ $? -eq 0 ]; then
-        echo -n ' ☿ '
+        printf ' ☿ '
         if [ -z "$(hg status 2>/dev/null)" ]; then
           # Working directory is clean.
-          echo -n "%{${fg_bold[green]}%}"
+          printf '%s' "%{${fg_bold[green]}%}"
         elif [ -z "$(hg status 2>/dev/null | grep -v '^?')" ]; then
           # Working directory only contains changes to untracked files.
-          echo -n "%{${fg_bold[yellow]}%}"
+          printf '%s' "%{${fg_bold[yellow]}%}"
         else
           # Working directory contains changes to tracked files.
-          echo -n "%{${fg_bold[red]}%}"
+          printf '%s' "%{${fg_bold[red]}%}"
         fi
-        echo -n $(hg branch 2>/dev/null)
-        echo -n "%{${fg_no_bold[default]}%}"
+        printf '%s' "$(hg branch 2>/dev/null)"
+        printf '%s' "%{${fg_no_bold[default]}%}"
       fi
     fi
 }
 
 function reboot_prompt {
     if [ -e /var/run/reboot-required ]; then
-        echo -n "%{${fg[red]}%} ↺%{${fg_no_bold[default]}%}"
+        printf '%s' "%{${fg[red]}%} ↺%{${fg_no_bold[default]}%}"
     fi
 }
 
@@ -277,11 +277,11 @@ export SSH_ASKPASS=gnome-ssh-askpass
 # Check cron mail
 mail -H &>/dev/null
 if [[ $? == 0 ]]; then
-    echo "You have unread mail."
+    printf 'You have unread mail.\n'
 fi
 
 if [[ "${TERM}" != "screen" && "${TERM}" != "screen-256color" ]]; then
-    echo "You are not in screen/tmux..."
+    printf 'You are not in screen/tmux...\n'
 fi
 
 # Ubuntu-style Command not found helper.
@@ -296,7 +296,7 @@ stty start undef
 # Export of environment variables with a visible reminder.
 function exp() {
   if [ $# -eq 0 ]; then
-    echo "usage: $0 variable=value" >&2
+    printf '%s\n' "usage: $0 variable=value" >&2
     return 1
   fi
   export "$1"
