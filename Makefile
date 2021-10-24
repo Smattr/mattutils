@@ -44,7 +44,6 @@ default: \
   ${HOME}/bin/check_tmux_version.sh \
   ${HOME}/bin/cub.py \
   ${HOME}/bin/dif \
-  ${HOME}/bin/fifi.sh \
   ${HOME}/bin/find-broken.sh \
   ${HOME}/bin/fwdmail.py \
   ${HOME}/bin/generate-passwd \
