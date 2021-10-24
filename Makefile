@@ -17,7 +17,6 @@ default: \
   ${HOME}/.ssh/config_mattutils \
   ${HOME}/.agignore \
   ${HOME}/.dircolors \
-  ${HOME}/.emacs \
   ${HOME}/.fonts.conf \
   ${HOME}/.gdbinit \
   ${HOME}/.gitconfig \
