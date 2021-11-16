@@ -4,12 +4,12 @@ WIDTH=180 # Characters
 HEIGHT=45 # Lines
 
 # Priority of terminal emulators:
-if which pterm &>/dev/null; then
+if command -v pterm &>/dev/null; then
   # To lookup fonts: xlsfonts
   EMULATOR="pterm -geometry ${WIDTH}x${HEIGHT} -sb- -fn -misc-fixed-medium-r-normal--13-120-75-75-c-70-iso8859-1"
-elif which rxvt &>/dev/null; then
+elif command -v rxvt &>/dev/null; then
   EMULATOR="rxvt -geometry ${WIDTH}x${HEIGHT}"
-elif which lxterminal &>/dev/null; then
+elif command -v lxterminal &>/dev/null; then
   EMULATOR="lxterminal --geometry=${WIDTH}x${HEIGHT}"
 else
   # Well this is unpleasant...
@@ -20,9 +20,9 @@ cd ~/
 
 if [ $# -ge 1 ]; then
   RUN="-e $@"
-elif which tmux &>/dev/null; then
+elif command -v tmux &>/dev/null; then
   RUN="-e tmux"
-elif which screen &>/dev/null; then
+elif command -v screen &>/dev/null; then
   RUN="-e screen zsh"
 else
   # Curses...

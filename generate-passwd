@@ -14,9 +14,9 @@ printf '%s\n' "${PASSWORD}"
 
 # find SHA1 hash of the password
 function sha1() {
-  if which shasum &>/dev/null; then
+  if command -v shasum &>/dev/null; then
     printf '%s' "$1" | shasum | cut -d " " -f 1
-  elif which sha1sum &>/dev/null; then
+  elif command -v sha1sum &>/dev/null; then
     printf '%s' "$1" | sha1sum | cut -d " " -f 1
   else
     printf 'no SHA command available\n' >&2
@@ -27,9 +27,9 @@ HASH=$(sha1 "${PASSWORD}")
 
 # ask Have I Been Pwned if it appears in a password breach
 function download() {
-  if which wget &>/dev/null; then
+  if command -v wget &>/dev/null; then
     wget --quiet --output-document=- --user-agent 'generate-passwd <https://github.com/Smattr/mattutils/blob/master/generate-passwd>' "$1"
-  elif which curl &>/dev/null; then
+  elif command -v curl &>/dev/null; then
     curl --silent --show-error --user-agent 'generate-passwd <https://github.com/Smattr/mattutils/blob/master/generate-passwd>' "$1"
   else
     printf 'no download command available\n' >&2

@@ -138,7 +138,7 @@ autoload -U ~/.zsh/*(:t)
 # Version control status.
 setopt PROMPT_SUBST
 function vcs_prompt {
-    which git &>/dev/null
+    command -v git &>/dev/null
     if [ $? -eq 0 ]; then
       git branch &>/dev/null
       if [ $? -eq 0 ]; then
@@ -168,7 +168,7 @@ function vcs_prompt {
         fi
       fi
     fi
-    which hg &>/dev/null
+    command -v hg &>/dev/null
     if [ $? -eq 0 ]; then
       hg root &>/dev/null
       if [ $? -eq 0 ]; then

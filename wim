@@ -4,7 +4,7 @@
 
 if [ $# -gt 0 ]; then
   # Cope with the fact that $1 may be a zsh/bash macro.
-  ITEM=$(sh -c "which $1")
+  ITEM=$(sh -c "command -v $1")
   if [ -z "${ITEM}" ]; then
     printf "%s not found\n" "$1" >&2
     exit 1

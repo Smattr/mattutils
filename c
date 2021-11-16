@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # if Clink is installed, run that
-if which clink &>/dev/null; then
+if command -v clink &>/dev/null; then
 
   # on macOS, assume Clink may be dynamically linked against a
   # Macports-installed libclang that it will need some help locating
@@ -17,7 +17,7 @@ if which clink &>/dev/null; then
 fi
 
 # if we have cscope, use that
-if which cscope &>/dev/null; then
+if command -v cscope &>/dev/null; then
   if [ $# -eq 0 ]; then
     exec cscope -R
   else

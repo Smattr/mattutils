@@ -9,13 +9,13 @@ for i in /media/${USER}/*; do
   fi
   umount "$i"
   if [ $? -eq 0 ]; then
-    if which notify-send &>/dev/null; then
+    if command -v notify-send &>/dev/null; then
       notify-send "$0" "unmounted $i"
     else
       printf "unmounted %s\n" "$i"
     fi
   else
-    if which notify-send &>/dev/null; then
+    if command -v notify-send &>/dev/null; then
       notify-send --urgency=critical "$0" "failed to unmount $i"
     else
       printf "failed to unmount %s\n" "$i" >&2
