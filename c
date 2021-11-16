@@ -6,9 +6,13 @@ if command -v clink &>/dev/null; then
   # on macOS, assume Clink may be dynamically linked against a
   # Macports-installed libclang that it will need some help locating
   if [ "$(uname -s)" = "Darwin" ]; then
-    for v in 10 9 8 7 6; do
+    for v in 11 10 9 8 7 6; do
       if [ -e "/opt/local/libexec/llvm-${v}.0" ]; then
         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-${LD_LIBRARY_PATH}:}/opt/local/libexec/llvm-${v}.0/lib
+        break
+      elif [ -e "/opt/local/libexec/llvm-${v}" ]; then
+        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-${LD_LIBRARY_PATH}:}/opt/local/libexec/llvm-${v}/lib
+        break
       fi
     done
   fi
