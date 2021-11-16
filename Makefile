@@ -11,7 +11,7 @@ CXX ?= c++
 CXXFLAGS ?= -std=c++11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings -Wmissing-declarations
 
 # Serenity now
-SHELL := $(shell command -v bash)
+SHELL := $(shell which bash 2>/dev/null)
 
 default: \
   ${HOME}/.ssh/config_mattutils \
