@@ -57,7 +57,6 @@ default: \
   ${HOME}/bin/t \
   ${HOME}/bin/term \
   ${HOME}/bin/timestamp \
-  ${HOME}/bin/ubiquity \
   ${HOME}/bin/v \
   ${HOME}/bin/validate.py \
   ${HOME}/bin/wim \
