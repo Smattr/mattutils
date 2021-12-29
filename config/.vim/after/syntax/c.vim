@@ -181,3 +181,6 @@ syn keyword cConstant kSBXProfileNoInternet kSBXProfileNoNetwork
 
 " flock()
 syn keyword cConstant LOCK_EX LOCK_NB LOCK_SH LOCK_UN
+
+" openat()
+syn keyword cConstant AT_FDCWD
