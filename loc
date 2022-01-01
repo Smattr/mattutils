@@ -102,7 +102,7 @@ def main(args: [str]) -> int:
         totals[k] += v
 
     # summarise
-    for k, v in sorted(received.items()):
+    for k, v in sorted(totals.items()):
       print(f'{k}: {v}')
 
   return ret
