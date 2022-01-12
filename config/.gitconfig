@@ -8,6 +8,7 @@
   branch = True
 
 [alias]
+  ci = commit
   co = clone
   st = status
   glog = log --graph --stat
