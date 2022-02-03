@@ -47,6 +47,7 @@
   relate = "!f() { git glog $(for i in \"$@\"; do printf '%s~1..%s ' \"$(git merge-base \"$@\")\" \"${i}\"; done); }; f"
 
   cleanup = "!f() { git-cleanup.py \"$@\"; }; f"
+  reup = "!f() { git-reup.py \"$@\"; }; f"
 
 [github]
   username = smattr
