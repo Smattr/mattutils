@@ -9,7 +9,6 @@ augroup filetypedetect
     au BufRead,BufNewFile *.idl4 setfiletype idl4
     au BufRead,BufNewFile *.tmux.conf setfiletype tmux
     au BufRead,BufNewFile *.scala setfiletype scala
-    au BufRead,BufNewFile *.thy setfiletype isabelle
     au BufRead,BufNewFile *.thy set conceallevel=2
     au BufRead,BufNewFile *.go set filetype=go
     au BufRead,BufNewFile *.less setfiletype less
