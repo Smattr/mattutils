@@ -60,53 +60,6 @@ syn region mkdLinkTitle matchgroup=mkdDelimiter start=+"+     end=+"+  contained
 syn region mkdLinkTitle matchgroup=mkdDelimiter start=+'+     end=+'+  contained
 syn region mkdLinkTitle matchgroup=mkdDelimiter start=+(+     end=+)+  contained
 
-" *** Added stuff by Matthew Fernandez <matthew.fernandez@gmail.com>
-
-" Support for embedded CAmkES.
-if exists('b:current_syntax')
-  let s:current_syntax=b:current_syntax
-  unlet b:current_syntax
-endif
-syntax include @CAmkES syntax/camkes.vim
-if exists('s:current_syntax')
-  let b:current_syntax=s:current_syntax
-  unlet s:current_syntax
-endif
-syn region camkesCode matchgroup=SpecialComment fold start=/^```\s*camkes\s*$/ end=/^```\s*$/me=s-3 contains=@CAmkES containedin=ALL
-
-" Support for embedded Isabelle.
-if exists('b:current_syntax')
-  let s:current_syntax=b:current_syntax
-  unlet b:current_syntax
-endif
-syntax include @isabelle syntax/isabelle.vim
-if exists('s:current_syntax')
-  let b:current_syntax=s:current_syntax
-  unlet s:current_syntax
-endif
-syn region isabelleCode matchgroup=SpecialComment fold start=/^```\s*isabelle\s*$/ end=/^```\s*$/me=s-3 contains=@isabelle containedin=ALL
-
-" Support for embedded C.
-if exists('b:current_syntax')
-  let s:current_syntax=b:current_syntax
-  unlet b:current_syntax
-endif
-syntax include @c syntax/c.vim
-if exists('s:current_syntax')
-  let b:current_syntax=s:current_syntax
-  unlet s:current_syntax
-endif
-syn region CCode matchgroup=SpecialComment fold start=/^```\s*c\s*$/ end=/^```\s*$/me=s-3 contains=@c containedin=ALL
-
-" Support for pre-processor tags.
-syn match includeFile /^\s*{{\w\+.\{-}}}\s*$/
-HtmlHiLink includeFile SpecialComment
-
-syn match mkdReference /\[@.\{-}\]/
-HtmlHiLink mkdReference SpecialComment
-
-" *** End added stuff
-
 "define Markdown groups
 syn match  mkdLineContinue ".$" contained
 syn match  mkdLineBreak    /  \+$/
