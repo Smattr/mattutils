@@ -126,7 +126,7 @@ syn keyword cConstant SQLITE_OK SQLITE_ERROR SQLITE_INTERNAL SQLITE_PERM SQLITE_
 syn keyword cType sqlite3_int64 sqlite3_uint64 sqlite3_value
 
 " getopt
-syn keyword cConstant no_argument required_argument
+syn keyword cConstant no_argument optional_argument required_argument
 
 " Misc glibc
 syn keyword cConstant F_OK R_OK W_OK X_OK DT_BLK DT_CHR DT_DIR DT_FIFO DT_LNK DT_REG DT_SOCK DT_UNKNOWN
