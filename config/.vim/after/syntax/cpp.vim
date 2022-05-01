@@ -8,3 +8,6 @@ syn match cppCast "\<\(const\|static\|dynamic\|reinterpret\)_pointer_cast\s*$"
 
 " LLVM hacking
 syn keyword cppCast isa cast dyn_cast cast_or_null dyn_cast_or_null
+
+" GCC, Clang extension
+syn keyword cppModifier __restrict__
