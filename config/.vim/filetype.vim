@@ -11,6 +11,7 @@ augroup filetypedetect
     au BufRead,BufNewFile *.scala setfiletype scala
     au BufRead,BufNewFile *.thy set conceallevel=2
     au BufRead,BufNewFile *.go set filetype=go
+    au BufRead,BufNewFile *.gvpr setfiletype gvpr
     au BufRead,BufNewFile *.less setfiletype less
     au BufRead,BufNewFile *.md setfiletype mkd
     au BufRead,BufNewFile *.pml setfiletype promela
