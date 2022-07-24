@@ -48,6 +48,7 @@ default: \
   ${HOME}/bin/g \
   ${HOME}/bin/git-cleanup.py \
   ${HOME}/bin/git-edit.py \
+  ${HOME}/bin/git-increment.py \
   ${HOME}/bin/git-reup.py \
   ${HOME}/bin/ifind \
   ${HOME}/bin/loc \

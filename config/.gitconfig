@@ -48,6 +48,7 @@
 
   cleanup = "!f() { git-cleanup.py \"$@\"; }; f"
   edit = "!f() { git-edit.py \"$@\"; }; f"
+  inc = "!f() { git-increment.py \"$@\"; }; f"
   reup = "!f() { git-reup.py \"$@\"; }; f"
 
 [github]
