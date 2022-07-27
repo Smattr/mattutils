@@ -76,7 +76,7 @@ def main(args: List[str]) -> int:
     return 1
 
   # move to it and do the increment
-  new = f"{options.branch}-{counter + 1}"
+  new = f"{options.branch}-{counter}"
   run(["git", "checkout", "-b", new, local_branch])
 
   return 0
