@@ -57,7 +57,7 @@ def main(args: List[str]) -> int:
   try:
     local_commit = call(["git", "rev-parse", local_branch])
   except sp.CalledProcessError:
-    sys.stderr.write(f"branch {local_branch} does not exist")
+    sys.stderr.write(f"branch {local_branch} does not exist\n")
     return 1
   counter = 2
   while True:
