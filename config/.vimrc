@@ -148,3 +148,6 @@ set nomodeline
 
 " allow backspace to delete across everything
 set bs=indent,eol,start
+
+" disable Python ftplugin overriding tabstop settings
+let g:python_recommended_style = 0
