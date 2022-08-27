@@ -135,6 +135,9 @@ cmap <Esc>[201~ <nop>
 
 " disable RHEL “jump to the last cursor position”
 if has("autocmd")
+  if exists("#fedora#BufReadPost")
+    au! fedora BufReadPost
+  endif
   if exists("#redhat#BufReadPost")
     au! redhat BufReadPost
   endif
