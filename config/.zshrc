@@ -280,7 +280,8 @@ if [[ $? == 0 ]]; then
     printf 'You have unread mail.\n'
 fi
 
-if [[ "${TERM}" != "screen" && "${TERM}" != "screen-256color" ]]; then
+if [[ "${TERM}" != "screen" && "${TERM}" != "screen-256color" && \
+      "${TERM}" != "tmux"   && "${TERM}" != "tmux-256color" ]]; then
     printf 'You are not in screen/tmux...\n'
 fi
 
