@@ -14,6 +14,7 @@ predecessors.
 """
 
 import argparse
+import functools
 import re
 import shlex
 import subprocess as sp
@@ -62,6 +63,15 @@ def delete(branch: str, upstream: str):
     raise RuntimeError(
       f"{branch} still contained commits after rebasing {upstream}")
 
+def branch_sorter(base: str, branch: str) -> int:
+  """
+  sort key for incremented branches
+  """
+  if base == branch:
+    return 0
+  assert branch.startswith(f"{base}-")
+  return int(branch[len(base) + 1:])
+
 def main(args: List[str]) -> int:
 
   # parse command line options
@@ -105,7 +115,10 @@ def main(args: List[str]) -> int:
     return -1
 
   # delete the branches is reverse order
-  for i, branch in enumerate(reversed(victims)):
+  for i, branch in enumerate(sorted(victims,
+                                    key=functools.partial(branch_sorter,
+                                                          options.branch),
+                                    reverse=True)):
 
     # assume all non-final branches will not rebase cleanly and should be
     # terminated with extreme prejudice
