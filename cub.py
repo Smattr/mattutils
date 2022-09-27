@@ -69,7 +69,7 @@ def scan_file(filepath):
 
             # Find bad memset calls
             if 'memset' in line:
-                m = re.search(r'memset\s*\(.*,\s*0\s*\)', line);
+                m = re.search(r'\bmemset\s*\(.*,\s*0\s*\)', line);
                 if m is not None:
                     write_line(lineno, line)
                     sys.stderr.write(' incorrect argument order to memset?\n')
