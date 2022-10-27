@@ -44,7 +44,7 @@ def main(args: [str]):
 
   # initial run to characterise the failure
   reference = run(opts.command)
-  print('characterisation: exit status == {}'.format(reference.returncode))
+  print(f'characterisation: exit status == {reference.returncode}')
 
   input = opts.input.read()
 
@@ -74,7 +74,7 @@ def main(args: [str]):
         lineno += 1
 
     if removed > 0:
-      print('removed {} lines'.format(removed))
+      print(f'removed {removed} lines')
 
   # Next try to knock out pairs of lines. This is sometimes productive because
   # the line pass has left adjacent lines that form matching sequences. E.g.
@@ -106,7 +106,7 @@ def main(args: [str]):
         lineno += 1
 
     if removed > 0:
-      print('removed {} line pairs'.format(removed))
+      print(f'removed {removed} line pairs')
 
   # next try to knock out words
   removed = None
@@ -146,7 +146,7 @@ def main(args: [str]):
       lineno += 1
 
     if removed > 0:
-      print('removed {} words'.format(removed))
+      print(f'removed {removed} words')
 
   # try character-by-character
   removed = None
@@ -181,7 +181,7 @@ def main(args: [str]):
       lineno += 1
 
     if removed > 0:
-      print('removed {} characters'.format(removed))
+      print(f'removed {removed} characters')
 
   # Try character pairs. The previous pass can leave things like "" that would
   # be OK if we removed both characters at once, but not individually. This pass
@@ -221,7 +221,7 @@ def main(args: [str]):
       lineno += 1
 
     if removed > 0:
-      print('removed {} character pairs'.format(removed))
+      print(f'removed {removed} character pairs')
 
 
   # save the final result
