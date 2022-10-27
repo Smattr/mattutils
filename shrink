@@ -33,7 +33,6 @@ def writelines(path: str, lines: [bytes]) -> None:
     for line in lines:
       f.write(line)
       f.write(b'\n')
-    f.flush()
 
 def main(args: [str]):
 
