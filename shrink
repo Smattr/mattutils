@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
 Generic test case minimiser
 
 This tool aims to do one very simple, very dumb thing: try to minimise the size of an input file
@@ -9,223 +9,238 @@ agnostic to the tools or programming languages involved. Its blunt approach is t
 delete promising parts of the input file, retaining its deletions when they do not cause a change in
 the monitored command's execution. The main use case for this is creating minimised reproducers for
 bugs.
-'''
+"""
 
 import argparse
 import re
 import subprocess
 import sys
 
+
 class Result(object):
-  def __init__(self, returncode: int, stdout: bytes, stderr: bytes):
-    self.returncode = returncode
-    self.stdout = stdout
-    self.stderr = stderr
+    def __init__(self, returncode: int, stdout: bytes, stderr: bytes):
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+
 
 def run(cmd: str):
-  p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE)
-  stdout, stderr = p.communicate()
-  return Result(p.returncode, stdout, stderr)
+    p = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    stdout, stderr = p.communicate()
+    return Result(p.returncode, stdout, stderr)
+
 
 def writelines(path: str, lines: [bytes]) -> None:
-  with open(path, 'wb') as f:
-    for line in lines:
-      f.write(line)
-      f.write(b'\n')
+    with open(path, "wb") as f:
+        for line in lines:
+            f.write(line)
+            f.write(b"\n")
+
 
 def main(args: [str]):
 
-  parser = argparse.ArgumentParser(description='test case minimiser')
-  parser.add_argument('--input', '-i', type=argparse.FileType('rb+'),
-    help='test case', required=True)
-  parser.add_argument('--command', '-c', help='command to run', required=True)
-  opts = parser.parse_args(args[1:])
+    parser = argparse.ArgumentParser(description="test case minimiser")
+    parser.add_argument(
+        "--input", "-i", type=argparse.FileType("rb+"), help="test case", required=True
+    )
+    parser.add_argument("--command", "-c", help="command to run", required=True)
+    opts = parser.parse_args(args[1:])
 
-  # initial run to characterise the failure
-  reference = run(opts.command)
-  print(f'characterisation: exit status == {reference.returncode}')
+    # initial run to characterise the failure
+    reference = run(opts.command)
+    print(f"characterisation: exit status == {reference.returncode}")
 
-  input = opts.input.read()
+    input = opts.input.read()
 
-  # first try to knock out lines
-  lines = input.split(b'\n')
-  removed = None
-  while removed is None or removed > 0:
-    lineno = 0
-    removed = 0
+    # first try to knock out lines
+    lines = input.split(b"\n")
+    removed = None
+    while removed is None or removed > 0:
+        lineno = 0
+        removed = 0
 
-    while lineno < len(lines):
+        while lineno < len(lines):
 
-      candidate = lines[:lineno] + lines[lineno+1:]
+            candidate = lines[:lineno] + lines[lineno + 1 :]
 
-      writelines(opts.input.name, candidate)
+            writelines(opts.input.name, candidate)
 
-      outcome = run(opts.command)
+            outcome = run(opts.command)
 
-      if outcome.returncode == reference.returncode:
-        # successfully removed a line without changing the result
-        sys.stdout.write('.')
-        sys.stdout.flush()
-        lines = candidate
-        removed += 1
-      else:
-        # removing this line affected the result; must stay
-        lineno += 1
+            if outcome.returncode == reference.returncode:
+                # successfully removed a line without changing the result
+                sys.stdout.write(".")
+                sys.stdout.flush()
+                lines = candidate
+                removed += 1
+            else:
+                # removing this line affected the result; must stay
+                lineno += 1
 
-    if removed > 0:
-      print(f'removed {removed} lines')
+        if removed > 0:
+            print(f"removed {removed} lines")
 
-  # Next try to knock out pairs of lines. This is sometimes productive because
-  # the line pass has left adjacent lines that form matching sequences. E.g.
-  # "struct {" and "};".
-  removed = None
-  while removed is None or removed > 0:
-    lineno = 0
-    removed = 0
+    # Next try to knock out pairs of lines. This is sometimes productive because
+    # the line pass has left adjacent lines that form matching sequences. E.g.
+    # "struct {" and "};".
+    removed = None
+    while removed is None or removed > 0:
+        lineno = 0
+        removed = 0
 
-    while lineno + 1 < len(lines):
+        while lineno + 1 < len(lines):
 
-      candidate = lines[:lineno] + lines[lineno+2:]
+            candidate = lines[:lineno] + lines[lineno + 2 :]
 
-      writelines(opts.input.name, candidate)
+            writelines(opts.input.name, candidate)
 
-      outcome = run(opts.command)
+            outcome = run(opts.command)
 
-      if outcome.returncode == reference.returncode:
-        # successfully removed a two lines without changing the result
-        sys.stdout.write('.')
-        sys.stdout.flush()
-        lines = candidate
-        removed += 1
-        if lineno != 0:
-          # jump back to give a chance to try two lines that are newly adjacent
-          lineno -= 1
-      else:
-        # removing these lines affected the result; must stay
-        lineno += 1
+            if outcome.returncode == reference.returncode:
+                # successfully removed a two lines without changing the result
+                sys.stdout.write(".")
+                sys.stdout.flush()
+                lines = candidate
+                removed += 1
+                if lineno != 0:
+                    # jump back to give a chance to try two lines that are newly adjacent
+                    lineno -= 1
+            else:
+                # removing these lines affected the result; must stay
+                lineno += 1
 
-    if removed > 0:
-      print(f'removed {removed} line pairs')
+        if removed > 0:
+            print(f"removed {removed} line pairs")
 
-  # next try to knock out words
-  removed = None
-  while removed is None or removed > 0:
-    lineno = 0
-    removed = 0
+    # next try to knock out words
+    removed = None
+    while removed is None or removed > 0:
+        lineno = 0
+        removed = 0
 
-    while lineno < len(lines):
-      colno = 0
+        while lineno < len(lines):
+            colno = 0
 
-      while colno < len(lines[lineno]):
+            while colno < len(lines[lineno]):
 
-        line = lines[lineno]
+                line = lines[lineno]
 
-        # find the next word
-        m = re.search(b'\\b.+?\\b', line[colno:])
-        if m is None:
-          break
+                # find the next word
+                m = re.search(b"\\b.+?\\b", line[colno:])
+                if m is None:
+                    break
 
-        candidate = lines[:lineno] + \
-          [line[:colno+m.start()] + line[colno+m.end():]] + lines[lineno+1:]
+                candidate = (
+                    lines[:lineno]
+                    + [line[: colno + m.start()] + line[colno + m.end() :]]
+                    + lines[lineno + 1 :]
+                )
 
-        writelines(opts.input.name, candidate)
+                writelines(opts.input.name, candidate)
 
-        outcome = run(opts.command)
+                outcome = run(opts.command)
 
-        if outcome.returncode == reference.returncode:
-          # successfully removed a word without changing the result
-          sys.stdout.write('.')
-          sys.stdout.flush()
-          lines = candidate
-          removed += 1
-        else:
-          # removing this word affected the result; must stay
-          colno += m.end()
+                if outcome.returncode == reference.returncode:
+                    # successfully removed a word without changing the result
+                    sys.stdout.write(".")
+                    sys.stdout.flush()
+                    lines = candidate
+                    removed += 1
+                else:
+                    # removing this word affected the result; must stay
+                    colno += m.end()
 
-      lineno += 1
+            lineno += 1
 
-    if removed > 0:
-      print(f'removed {removed} words')
+        if removed > 0:
+            print(f"removed {removed} words")
 
-  # try character-by-character
-  removed = None
-  while removed is None or removed > 0:
-    lineno = 0
-    removed = 0
+    # try character-by-character
+    removed = None
+    while removed is None or removed > 0:
+        lineno = 0
+        removed = 0
 
-    while lineno < len(lines):
-      colno = 0
+        while lineno < len(lines):
+            colno = 0
 
-      while colno < len(lines[lineno]):
+            while colno < len(lines[lineno]):
 
-        line = lines[lineno]
+                line = lines[lineno]
 
-        candidate = lines[:lineno] + \
-          [line[:colno] + line[colno+1:]] + lines[lineno+1:]
+                candidate = (
+                    lines[:lineno]
+                    + [line[:colno] + line[colno + 1 :]]
+                    + lines[lineno + 1 :]
+                )
 
-        writelines(opts.input.name, candidate)
+                writelines(opts.input.name, candidate)
 
-        outcome = run(opts.command)
+                outcome = run(opts.command)
 
-        if outcome.returncode == reference.returncode:
-          # successfully removed a character without changing the result
-          sys.stdout.write('.')
-          sys.stdout.flush()
-          lines = candidate
-          removed += 1
-        else:
-          # removing this character affected the result; must stay
-          colno += 1
+                if outcome.returncode == reference.returncode:
+                    # successfully removed a character without changing the result
+                    sys.stdout.write(".")
+                    sys.stdout.flush()
+                    lines = candidate
+                    removed += 1
+                else:
+                    # removing this character affected the result; must stay
+                    colno += 1
 
-      lineno += 1
+            lineno += 1
 
-    if removed > 0:
-      print(f'removed {removed} characters')
+        if removed > 0:
+            print(f"removed {removed} characters")
 
-  # Try character pairs. The previous pass can leave things like "" that would
-  # be OK if we removed both characters at once, but not individually. This pass
-  # is also helpful for dropping comment leaders that are two characters (e.g.
-  # "//").
-  removed = None
-  while removed is None or removed > 0:
-    lineno = 0
-    removed = 0
+    # Try character pairs. The previous pass can leave things like "" that would
+    # be OK if we removed both characters at once, but not individually. This pass
+    # is also helpful for dropping comment leaders that are two characters (e.g.
+    # "//").
+    removed = None
+    while removed is None or removed > 0:
+        lineno = 0
+        removed = 0
 
-    while lineno < len(lines):
-      colno = 0
+        while lineno < len(lines):
+            colno = 0
 
-      while colno + 1 < len(lines[lineno]):
+            while colno + 1 < len(lines[lineno]):
 
-        line = lines[lineno]
+                line = lines[lineno]
 
-        candidate = lines[:lineno] + \
-          [line[:colno] + line[colno+2:]] + lines[lineno+1:]
+                candidate = (
+                    lines[:lineno]
+                    + [line[:colno] + line[colno + 2 :]]
+                    + lines[lineno + 1 :]
+                )
 
-        writelines(opts.input.name, candidate)
+                writelines(opts.input.name, candidate)
 
-        outcome = run(opts.command)
+                outcome = run(opts.command)
 
-        if outcome.returncode == reference.returncode:
-          # successfully removed a character pair without changing the result
-          sys.stdout.write('.')
-          sys.stdout.flush()
-          lines = candidate
-          removed += 1
-          if colno != 0:
-            colno -= 1
-        else:
-          # removing this character pair affected the result; must stay
-          colno += 1
+                if outcome.returncode == reference.returncode:
+                    # successfully removed a character pair without changing the result
+                    sys.stdout.write(".")
+                    sys.stdout.flush()
+                    lines = candidate
+                    removed += 1
+                    if colno != 0:
+                        colno -= 1
+                else:
+                    # removing this character pair affected the result; must stay
+                    colno += 1
 
-      lineno += 1
+            lineno += 1
 
-    if removed > 0:
-      print(f'removed {removed} character pairs')
+        if removed > 0:
+            print(f"removed {removed} character pairs")
+
+    # save the final result
+    writelines(opts.input.name, lines)
 
 
-  # save the final result
-  writelines(opts.input.name, lines)
-
-if __name__ == '__main__':
-  sys.exit(main(sys.argv))
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
