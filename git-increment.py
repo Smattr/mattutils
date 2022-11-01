@@ -46,7 +46,7 @@ def main(args: List[str]) -> int:
   upstream = call(["git", "ls-remote", "origin", options.branch])
   if len(upstream.strip()) == 0:
     sys.stderr.write(f"\033[31;1mWARNING:\033[0m {options.branch} does not "
-                     "exist upstream")
+                     "exist upstream\n")
     commit = None
   else:
     commit = upstream.split()[0]
@@ -72,7 +72,7 @@ def main(args: List[str]) -> int:
   # check it matches upstream
   if commit is not None and commit != local_commit:
     sys.stderr.write(f"branch {local_branch} is not at the same commit as "
-                     f"upstream {options.branch}")
+                     f"upstream {options.branch}\n")
     return 1
 
   # move to it and do the increment
