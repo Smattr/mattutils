@@ -33,7 +33,7 @@ def call(args: List[str]):
 def force_delete(branch: str):
   run(["git", "branch", "--delete", "--force", branch])
 
-def delete(branch: str, upstream: str):
+def delete(branch: str, remote: str, upstream: str):
 
   # move to the branch to delete
   run(["git", "checkout", branch])
@@ -43,14 +43,14 @@ def delete(branch: str, upstream: str):
   run(["git", "checkout", "-b", tmp])
 
   # rebase onto main
-  run(["git", "pull", "--rebase", "origin", upstream])
+  run(["git", "pull", "--rebase", remote, upstream])
 
   # check where this moved our pointer to
   us = call(["git", "rev-parse", tmp])
-  them = call(["git", "rev-parse", f"origin/{upstream}"])
+  them = call(["git", "rev-parse", f"{remote}/{upstream}"])
 
   # move to main
-  run(["git", "checkout", upstream])
+  run(["git", "checkout", f"{remote}/{upstream}"])
 
   # remove our temporary branch
   force_delete(tmp)
@@ -76,6 +76,8 @@ def main(args: List[str]) -> int:
 
   # parse command line options
   parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument("--remote", help="remote to compare against",
+    default="origin")
   parser.add_argument("--onto", help="branch that the target was merged into")
   parser.add_argument("branch", help="branch to reap")
   options = parser.parse_args(args[1:])
@@ -91,7 +93,7 @@ def main(args: List[str]) -> int:
 
   # if the user did not give us a base, figure it out from upstream
   if options.onto is None:
-    show = call(["git", "remote", "show", "origin"])
+    show = call(["git", "remote", "show", options.remote])
     default = re.search(r"^\s*HEAD branch: (.*)$", show, flags=re.MULTILINE)
     if default is None:
       sys.stderr.write("could not figure out default branch name\n")
@@ -126,7 +128,7 @@ def main(args: List[str]) -> int:
       force_delete(branch)
 
     else:
-      delete(branch, options.onto)
+      delete(branch, options.remote, options.onto)
 
   return 0
 
