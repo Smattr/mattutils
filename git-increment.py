@@ -29,6 +29,8 @@ def main(args: List[str]) -> int:
 
   # parse command line options
   parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument("--remote", help="remote to compare against",
+    default="origin")
   parser.add_argument("branch", help="branch to increment")
   options = parser.parse_args(args[1:])
 
@@ -43,7 +45,7 @@ def main(args: List[str]) -> int:
   del changes
 
   # check this branch exists upstream
-  upstream = call(["git", "ls-remote", "origin", options.branch])
+  upstream = call(["git", "ls-remote", options.remote, options.branch])
   if len(upstream.strip()) == 0:
     sys.stderr.write(f"\033[31;1mWARNING:\033[0m {options.branch} does not "
                      "exist upstream\n")
