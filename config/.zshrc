@@ -159,7 +159,7 @@ function vcs_prompt {
         cd "$(git rev-parse --show-toplevel)"
         git bisect log &>/dev/null
         if [ $? -eq 0 ]; then
-          REMAINING=$(git bisect visualize 2>/dev/null | grep '^commit' | wc -l | sed 's/^[ \t]*//')
+          REMAINING=$(git bisect visualize --pretty=oneline 2>/dev/null | wc -l)
           if [ ${REMAINING} -le 1 ]; then
             printf '%s' " %{${fg_bold[red]}%}⥷ 1%{${fg_no_bold[default]}%}"
           else
