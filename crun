@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+
+"""
+run a snippet of C or C++
+"""
+
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import List
+
+C_PRELUDE = """
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <math.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#define fmt(x) _Generic(x,   \
+  char:          "%c",       \
+  char*:         "%s",       \
+  int:           "%d",       \
+  long:          "%ld",      \
+  unsigned:      "%u",       \
+  unsigned long: "%lu")
+
+
+int main(void) {
+"""
+
+C_CODA = """
+  return EXIT_SUCCESS;
+}
+"""
+
+CXX_PRELUDE = """
+#include <algorithm>
+#include <cassert>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <functional>
+#include <ios>
+#include <iostream>
+#include <limits>
+#include <map>
+#include <numeric>
+#include <set>
+#include <sstream>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+using namespace std;
+
+int main(void) {
+"""
+
+CXX_CODA = C_CODA
+
+
+def run(compiler: str, language: str, prelude: str, coda: str, snippet: str):
+    """compile and run a snippet"""
+    with tempfile.TemporaryDirectory() as tmp:
+
+        src = Path(tmp) / f"main.{language}"
+        src.write_text(f"{prelude}{snippet}{coda}")
+
+        dst = Path(tmp) / "a.out"
+
+        std = "-std=c++20" if language == "c++" else "-std=c11"
+        subprocess.check_call(
+            [compiler, std, "-Wall", "-Wextra", "-x", language, "-o", dst, src]
+        )
+
+        subprocess.check_call([dst])
+
+
+def run_c(snippet: str):
+    """compile and run a snippet of C"""
+
+    # if the snippet is a single token, assume we should print it
+    if re.match(r"\w+$", snippet):
+        snippet = f'printf(fmt({snippet}), {snippet});printf("\\n");'
+
+    cc = os.environ.get("CC", "cc")
+    run(cc, "c", C_PRELUDE, C_CODA, snippet)
+
+
+def run_cxx(snippet: str):
+    """compile and run a snippet of C++"""
+
+    # if the snippet is a single token, assume we should print it
+    if re.match(r"\w+$", snippet):
+        snippet = f"std::cout << {snippet} << '\\n';"
+
+    cxx = os.environ.get("CXX", "c++")
+    run(cxx, "c++", CXX_PRELUDE, CXX_CODA, snippet)
+
+
+def main(argv: List[str]) -> int:
+
+    cxx_mode = Path(argv[0]).stem == "cxxrun"
+
+    if len(argv) > 1:
+        snippet = "\n".join(argv[1:])
+    else:
+        snippet = sys.stdin.read()
+
+    if cxx_mode:
+        run_cxx(snippet)
+    else:
+        run_c(snippet)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

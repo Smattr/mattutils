@@ -40,7 +40,9 @@ default: \
   ${HOME}/bin/bashd.sh \
   ${HOME}/bin/c \
   ${HOME}/bin/check_tmux_version.sh \
+  ${HOME}/bin/crun \
   ${HOME}/bin/cub.py \
+  ${HOME}/bin/cxxrun \
   ${HOME}/bin/dif \
   ${HOME}/bin/find-broken.sh \
   ${HOME}/bin/fwdmail.py \
@@ -71,6 +73,10 @@ ${HOME}/.ssh/config_mattutils: config/.ssh/config Makefile
 	@printf ' [LN] %s\n' "$(notdir $@)"
 	${V}if [ ! -e "$@" ]; then mkdir -p ${HOME}/.ssh && ln -s $$(pwd)/$< $@; elif [ ! -L "$@" ]; then printf 'Warning: Skipping %s that already exists\n' "$@" >&2; fi
 
+${HOME}/bin/cxxrun: crun Makefile
+	@printf ' [LN] %s\n' "$(notdir $@)"
+	${V}mkdir -p "$(dir $@)"
+	${V}if [ ! -e "$@" ]; then ln -s $$(pwd)/crun $@; elif [ ! -L "$@" ]; then printf 'Warning: Skipping %s that already exists\n' "$@" >&2; fi
 
 ${HOME}/bin/dif: dif.cpp
 	@printf ' [CXX] %s\n' "$(notdir $@)"
