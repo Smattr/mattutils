@@ -312,7 +312,7 @@ static int action_add(git_repository *repo, State &state, int argc,
 
     } else {
 
-      /* It's possible the user gave us an open range (e.g. "..master") in which
+      /* It's possible the user gave us an open range (e.g. "..main") in which
        * case we need to substitute HEAD for the missing limit.
        */
       if (spec.size() > 2 && spec.substr(0, 2) == "..") {
