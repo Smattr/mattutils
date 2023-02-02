@@ -30,10 +30,6 @@
   di = "!f() { { command -v dif >/dev/null 2>/dev/null || { printf \"dif not found\\n\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git diff \"$@\" | dif; }; f"
   sh = "!f() { { command -v dif >/dev/null 2>/dev/null || { printf \"dif not found\\n\" >&2; exit 1; }; } && [ -z \"$GIT_PREFIX\" ] || cd \"$GIT_PREFIX\" && git show --color \"$@\" | dif; }; f"
 
-  # Bisect-like tool. See git-linear.cpp.
-  li = linear
-  linear = "!f() { git-linear \"$@\"; }; f"
-
   # C'mon, Git, you know what I meant.
   bad = "!git bi bad"
   good = "!git bi good"
