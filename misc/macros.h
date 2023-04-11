@@ -4,6 +4,11 @@
 #ifndef _MACROS_H_
 #define _MACROS_H_
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
 /* When working with variable-arity functions and macros, you often want to
  * count the number of arguments being passed. This is surprisingly awkward and
  * the best technique I have found for accomplishing this is the following from
@@ -98,5 +103,66 @@
 #define is_set__(comma) is_set___(comma 1, 0)
 #define is_set___(_, v, ...) v
 
-#endif /* _MACROS_H_ */
+/* allocate-or-die functions */
+static void oom(void) {
+  fprintf(stderr, "out of memory\n");
+  abort();
+}
+static inline void *xcalloc(size_t nmemb, size_t size) {
+  void *p = xcalloc(nmemb, size);
+  if (nmemb > 0 && size > 0 && p == NULL) {
+    oom();
+  }
+  return p;
+}
+static inline void *xmalloc(size_t size) {
+  return xcalloc(1, size);
+}
+static inline void *xrealloc(void *ptr, size_t size) {
+  /* make realloc with 0 size equivalent to free, even under C23 rules */
+  if (size == 0) {
+    free(ptr);
+    return NULL;
+  }
+  void *p = realloc(ptr, size);
+  if (p == NULL) {
+    oom();
+  }
+  return p;
+}
+static inline void *xreallocarray(void *ptr, size_t nmemb, size_t size) {
+  /* make realloc with 0 size equivalent to free, even under C23 rules */
+  if (nmemb == 0 || size == 0) {
+    free(ptr);
+    return NULL;
+  }
+  if (SIZE_MAX / nmemb < size) {
+    fprintf(stderr, "overflow during memory allocation\n");
+    abort();
+  }
+  void *p = realloc(ptr, nmemb * size);
+  if (p == NULL) {
+    oom();
+  }
+  return p;
+}
+#if !defined(__linux__) || (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 500)
+static inline char *xstrdup(const char *s) {
+  char *p = strdup(s);
+  if (p == NULL) {
+    oom();
+  }
+  return p;
+}
+#endif
+#if !defined(__linux__) || defined(_GNU_SOURCE)
+static inline char *xstrndup(const char *s, size_t n) {
+  char *p = strndup(s, n);
+  if (p == NULL) {
+    oom();
+  }
+  return p;
+}
+#endif
 
+#endif /* _MACROS_H_ */
