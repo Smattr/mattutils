@@ -11,7 +11,7 @@
   ci = commit
   co = clone
   st = status
-  glog = log --graph --stat
+  glog = log --graph --pretty=fuller --stat
   incoming = "!git fetch origin master && git log ..origin/master"
   outgoing = "!git getch origin master && git log origin/master.."
   in = incoming
