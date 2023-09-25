@@ -33,6 +33,8 @@
   # C'mon, Git, you know what I meant.
   bad = "!git bi bad"
   good = "!git bi good"
+  new = "git bi new"
+  old = "git bi old"
 
   # Create a new temporary branch and check it out.
   tmp = "!f() { { command -v uuidgen >/dev/null 2>/dev/null || { printf \"uuidgen not found\\n\" >&2; exit 1; }; } && git checkout -b $(git config github.username)/$(uuidgen); }; f"
