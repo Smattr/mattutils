@@ -19,118 +19,126 @@ import re
 import shlex
 import subprocess as sp
 import sys
-from typing import List
 import uuid
+from typing import List
+
 
 def run(args: List[str]):
-  print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
-  sp.check_call(args)
+    print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
+    sp.check_call(args)
+
 
 def call(args: List[str]):
-  print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
-  return sp.check_output(args, universal_newlines=True)
+    print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
+    return sp.check_output(args, universal_newlines=True)
+
 
 def force_delete(branch: str):
-  run(["git", "branch", "--delete", "--force", branch])
+    run(["git", "branch", "--delete", "--force", branch])
+
 
 def delete(branch: str, remote: str, upstream: str):
 
-  # move to the branch to delete
-  run(["git", "checkout", branch])
+    # move to the branch to delete
+    run(["git", "checkout", branch])
 
-  # create a new temporary branch
-  tmp = str(uuid.uuid4())
-  run(["git", "checkout", "-b", tmp])
+    # create a new temporary branch
+    tmp = str(uuid.uuid4())
+    run(["git", "checkout", "-b", tmp])
 
-  # rebase onto main
-  run(["git", "pull", "--rebase", remote, upstream])
+    # rebase onto main
+    run(["git", "pull", "--rebase", remote, upstream])
 
-  # check where this moved our pointer to
-  us = call(["git", "rev-parse", tmp])
-  them = call(["git", "rev-parse", f"{remote}/{upstream}"])
+    # check where this moved our pointer to
+    us = call(["git", "rev-parse", tmp])
+    them = call(["git", "rev-parse", f"{remote}/{upstream}"])
 
-  # move to main
-  run(["git", "checkout", f"{remote}/{upstream}"])
+    # move to main
+    run(["git", "checkout", f"{remote}/{upstream}"])
 
-  # remove our temporary branch
-  force_delete(tmp)
+    # remove our temporary branch
+    force_delete(tmp)
 
-  # if rebasing left no commits in addition to main, we can delete the target
-  if us == them:
-    force_delete(branch)
+    # if rebasing left no commits in addition to main, we can delete the target
+    if us == them:
+        force_delete(branch)
 
-  else:
-    raise RuntimeError(
-      f"{branch} still contained commits after rebasing {upstream}")
+    else:
+        raise RuntimeError(
+            f"{branch} still contained commits after rebasing {upstream}"
+        )
+
 
 def branch_sorter(base: str, branch: str) -> int:
-  """
-  sort key for incremented branches
-  """
-  if base == branch:
-    return 0
-  assert branch.startswith(f"{base}-")
-  return int(branch[len(base) + 1:])
+    """
+    sort key for incremented branches
+    """
+    if base == branch:
+        return 0
+    assert branch.startswith(f"{base}-")
+    return int(branch[len(base) + 1 :])
+
 
 def main(args: List[str]) -> int:
 
-  # parse command line options
-  parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument("--remote", help="remote to compare against",
-    default="origin")
-  parser.add_argument("--onto", help="branch that the target was merged into")
-  parser.add_argument("branch", help="branch to reap")
-  options = parser.parse_args(args[1:])
+    # parse command line options
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--remote", help="remote to compare against", default="origin")
+    parser.add_argument("--onto", help="branch that the target was merged into")
+    parser.add_argument("branch", help="branch to reap")
+    options = parser.parse_args(args[1:])
 
-  # check this is actually a Git repository
-  run(["git", "rev-parse", "HEAD"])
+    # check this is actually a Git repository
+    run(["git", "rev-parse", "HEAD"])
 
-  # is the working directory clean?
-  changes = call(["git", "status", "--short", "--ignore-submodules"])
-  if re.search(r"^.[^\?]", changes, flags=re.MULTILINE) is not None:
-    sys.stderr.write("changes in working directory; aborting\n")
-    return -1
+    # is the working directory clean?
+    changes = call(["git", "status", "--short", "--ignore-submodules"])
+    if re.search(r"^.[^\?]", changes, flags=re.MULTILINE) is not None:
+        sys.stderr.write("changes in working directory; aborting\n")
+        return -1
 
-  # if the user did not give us a base, figure it out from upstream
-  if options.onto is None:
-    show = call(["git", "remote", "show", options.remote])
-    default = re.search(r"^\s*HEAD branch: (.*)$", show, flags=re.MULTILINE)
-    if default is None:
-      sys.stderr.write("could not figure out default branch name\n")
-      return -1
-    options.onto = default.group(1)
+    # if the user did not give us a base, figure it out from upstream
+    if options.onto is None:
+        show = call(["git", "remote", "show", options.remote])
+        default = re.search(r"^\s*HEAD branch: (.*)$", show, flags=re.MULTILINE)
+        if default is None:
+            sys.stderr.write("could not figure out default branch name\n")
+            return -1
+        options.onto = default.group(1)
 
-  # find the branch(es) we are aiming to remove
-  victims: List[str] = []
-  branches = call(["git", "branch"])
-  for line in branches.split("\n"):
-    branch = line[2:]
-    if branch.startswith(options.branch):
-      suffix = branch[len(options.branch):]
-      if re.match(r"(-\d+)?$", suffix) is not None:
-        victims.append(branch)
+    # find the branch(es) we are aiming to remove
+    victims: List[str] = []
+    branches = call(["git", "branch"])
+    for line in branches.split("\n"):
+        branch = line[2:]
+        if branch.startswith(options.branch):
+            suffix = branch[len(options.branch) :]
+            if re.match(r"(-\d+)?$", suffix) is not None:
+                victims.append(branch)
 
-  print(f"going to delete {victims}")
+    print(f"going to delete {victims}")
 
-  if len(victims) == 0:
-    sys.stderr.write("no branches to delete\n")
-    return -1
+    if len(victims) == 0:
+        sys.stderr.write("no branches to delete\n")
+        return -1
 
-  # delete the branches is reverse order
-  for i, branch in enumerate(sorted(victims,
-                                    key=functools.partial(branch_sorter,
-                                                          options.branch),
-                                    reverse=True)):
+    # delete the branches is reverse order
+    for i, branch in enumerate(
+        sorted(
+            victims, key=functools.partial(branch_sorter, options.branch), reverse=True
+        )
+    ):
 
-    # assume all non-final branches will not rebase cleanly and should be
-    # terminated with extreme prejudice
-    if i != 0:
-      force_delete(branch)
+        # assume all non-final branches will not rebase cleanly and should be
+        # terminated with extreme prejudice
+        if i != 0:
+            force_delete(branch)
 
-    else:
-      delete(branch, options.remote, options.onto)
+        else:
+            delete(branch, options.remote, options.onto)
 
-  return 0
+    return 0
+
 
 if __name__ == "__main__":
-  sys.exit(main(sys.argv))
+    sys.exit(main(sys.argv))
