@@ -62,7 +62,7 @@ def main(args: List[str]) -> int:
 
     # find the head to which we will retime
     if len(options.ref) >= 1:
-        head = options.ref[-2]
+        head = options.ref[-1]
     else:
         head = "HEAD"
 
