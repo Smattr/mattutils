@@ -58,7 +58,7 @@ def main(args: List[str]) -> int:
         if default is None:
             sys.stderr.write("could not figure out default branch name\n")
             return -1
-        options.onto = default.group(1)
+        options.onto = f"{options.remote}/{default.group(1)}"
 
     # find the head to which we will retime
     if len(options.ref) >= 1:
@@ -70,9 +70,7 @@ def main(args: List[str]) -> int:
     if len(options.ref) == 2:
         base = options.ref[0]
     else:
-        base = call(
-            ["git", "merge-base", "--", f"{options.remote}/{options.onto}", head]
-        ).strip()
+        base = call(["git", "merge-base", "--", options.onto, head]).strip()
 
     # get current timestamp in the right format
     now = call(["date", "--rfc-email"]).strip()
