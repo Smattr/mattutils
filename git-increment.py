@@ -50,7 +50,7 @@ def main(args: List[str]) -> int:
     upstream = call(["git", "ls-remote", options.remote, options.branch])
     if len(upstream.strip()) == 0:
         sys.stderr.write(
-            f"\033[31;1mWARNING:\033[0m {options.branch} does not " "exist upstream\n"
+            f"\033[31;1mWARNING:\033[0m {options.branch} does not exist upstream\n"
         )
         commit = None
     else:
