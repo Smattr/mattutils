@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# for when you want to take a quick note
+
+if [ $# -ne 0 ]; then
+  printf 'Usage: z\n  take a quick note\n' >&2
+  exit 1
+fi
+
+if [ -z "${EDITOR}" ]; then
+  EDITOR=$(which vim)
+fi
+if [ -z "${EDITOR}" ]; then
+  EDITOR=vi
+fi
+
+LOG=${HOME}/.z
+
+cat - >>${LOG} <<EOT
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ captain’s log, $(date '+%Y-%m-%d %H:%M:%S')                                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+  Hostname: $(hostname --fqdn)
+  Username: $(whoami)
+  uptime: $(uptime)
+  uname -rms: $(uname -rms)
+
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ ps aux                                                                     │
+  └─┬──────────────────────────────────────────────────────────────────────────┘
+$(ps aux | sed 's/^/    │ /')
+
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ tmux capture-pane                                                          │
+  └─┬──────────────────────────────────────────────────────────────────────────┘
+$(tmux capture-pane -pS - | sed 's/^/    │ /')
+
+  
+EOT
+
+${EDITOR} + ${LOG}

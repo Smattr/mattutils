@@ -66,6 +66,7 @@ default: \
   ${HOME}/bin/v \
   ${HOME}/bin/validate.py \
   ${HOME}/bin/wim \
+  ${HOME}/bin/z \
 
 
 ${HOME}/.ssh/config_mattutils: config/.ssh/config Makefile
