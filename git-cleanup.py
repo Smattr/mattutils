@@ -19,7 +19,6 @@ import re
 import shlex
 import subprocess as sp
 import sys
-import uuid
 from typing import List
 
 
@@ -40,24 +39,17 @@ def force_delete(branch: str):
 def delete(branch: str, remote: str, upstream: str):
 
     # move to the branch to delete
-    run(["git", "checkout", branch])
-
-    # create a new temporary branch
-    tmp = str(uuid.uuid4())
-    run(["git", "checkout", "-b", tmp])
+    run(["git", "checkout", "--detach", branch])
 
     # rebase onto main
     run(["git", "pull", "--rebase", remote, upstream])
 
     # check where this moved our pointer to
-    us = call(["git", "rev-parse", tmp])
+    us = call(["git", "rev-parse", "HEAD"])
     them = call(["git", "rev-parse", f"{remote}/{upstream}"])
 
     # move to main
     run(["git", "checkout", f"{remote}/{upstream}"])
-
-    # remove our temporary branch
-    force_delete(tmp)
 
     # if rebasing left no commits in addition to main, we can delete the target
     if us == them:
