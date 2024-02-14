@@ -15,8 +15,25 @@ if command -v zsh &>/dev/null; then
   export SHELL=$(command -v zsh)
 fi
 
+# Sometime in the Systemd version range (251, 254] and the Tmux Fedora version
+# range (3.3a-1, 3.3a-7], the two have stopped cooperating. I have not been able
+# to determine the precise root cause though it may be
+# https://bugzilla.redhat.com/show_bug.cgi?id=2158980 that landed as Tmux
+# 3.3a-3. The symptoms are Systemd hangs on shutdown for ≥2mins waiting for
+# “tmux-spawn” to exit. Detect and work around this scenario by wrapping Tmux in
+# something that Systemd knows how to murder.
+SYSTEMD=
+if command -v systemctl &>/dev/null; then
+  if command -v systemd-run &>/dev/null; then
+    V=$(systemctl --version | grep '^systemd' | cut -d' ' -f 2)
+    if [ ${V} -gt 251 ]; then
+      SYSTEMD="systemd-run --scope --user"
+    fi
+  fi
+fi
+
 if "${TMUX_BIN}" list-sessions &>/dev/null; then
-  exec ssh-agent "${TMUX_BIN}" attach
+  exec ${SYSTEMD} ssh-agent "${TMUX_BIN}" attach
 else
-  exec ssh-agent "${TMUX_BIN}"
+  exec ${SYSTEMD} ssh-agent "${TMUX_BIN}"
 fi
