@@ -80,6 +80,14 @@
   # on a large repo often runs out of memory.
   windowMemory = 1g
 
+# proactively catch data corruption
+[fetch]
+  fsckobjects = true
+[receive]
+  fsckobjects = true
+[transfer]
+  fsckobjects = true
+
 [core]
   commentChar = ";"
 
