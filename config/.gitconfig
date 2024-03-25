@@ -55,7 +55,7 @@
   username = smattr
 
 [merge]
-  conflictstyle = diff3
+  conflictstyle = zdiff3
 
 [log]
   decorate = True
