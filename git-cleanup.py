@@ -104,6 +104,10 @@ def main(args: List[str]) -> int:
             return -1
         options.onto = default.group(1)
 
+    # if the branch contains ':', assume it is <fork>:<branch> as Github’s copy
+    # button gives you
+    options.branch = options.branch.split(":", maxsplit=1)[-1]
+
     # find the branch(es) we are aiming to remove
     victims: List[str] = []
     branches = call(["git", "branch"])
