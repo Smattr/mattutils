@@ -75,6 +75,12 @@ def main(args: List[str]) -> int:
 
     # parse command line options
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--dry-run",
+        "-N",
+        action="store_true",
+        help="do not perform destructive actions",
+    )
     parser.add_argument("--remote", help="remote to compare against", default="origin")
     parser.add_argument("--onto", help="branch that the target was merged into")
     parser.add_argument("branch", help="branch to reap")
@@ -109,6 +115,10 @@ def main(args: List[str]) -> int:
                 victims.append(branch)
 
     print(f"going to delete {victims}")
+
+    if options.dry_run:
+        print("exiting due to --dry-run")
+        return 0
 
     if len(victims) == 0:
         sys.stderr.write("no branches to delete\n")
