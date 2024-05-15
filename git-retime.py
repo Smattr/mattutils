@@ -5,6 +5,7 @@ rewrite Git timestamps
 """
 
 import argparse
+import os
 import re
 import shlex
 import subprocess as sp
@@ -13,8 +14,10 @@ from typing import List
 
 
 def run(args: List[str]):
+    env = os.environ.copy()
+    env["FILTER_BRANCH_SQUELCH_WARNING"] = "1"
     print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
-    sp.check_call(args)
+    sp.check_call(args, env=env)
 
 
 def call(args: List[str]):
