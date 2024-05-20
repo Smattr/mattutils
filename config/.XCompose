@@ -167,6 +167,9 @@
 <Multi_key> <b> <underscore> <9> : "╖"
 <Multi_key> <b> <equal> <plus> : "╪"
 <Multi_key> <b> <underscore> <plus> : "╫"
+<Multi_key> <b> <slash> : "╱"
+<Multi_key> <b> <backslash> : "╲"
+<Multi_key> <b> <x> : "╳"
 
 # arrow heads
 <Multi_key> <b> <acute> : "▲"
