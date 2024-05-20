@@ -28,13 +28,14 @@ if command -v ack &>/dev/null; then
   exec ack "$@"
 fi
 
-# Fallback: egrep or grep
-for GREP in egrep grep; do
-  if command -v ${GREP} &>/dev/null; then
-    find . 2>/dev/null -type f -print0 | xargs -0 -P $(getconf _NPROCESSORS_ONLN) ${GREP} --binary-files=without-match --color=always -HI "$@" | ${GREP} . | less -iRnSFX
-    exit ${PIPESTATUS[2]}
-  fi
-done
+# Fallback: grep
+if command -v grep &>/dev/null; then
+  find . 2>/dev/null -type f -print0 | \
+    xargs -0 -P $(getconf _NPROCESSORS_ONLN) \
+    grep --binary-files=without-match --color=always --extended-regex -HI "$@" | \
+    grep . | less -iRnSFX
+  exit ${PIPESTATUS[2]}
+fi
 
 printf 'no suitable tool found\n' >&2
 exit 1
