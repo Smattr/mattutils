@@ -98,7 +98,7 @@ set foldlevelstart=20
 " TERM=screen-256color, Vim autodetecting t_Co=256 and Pterm displaying things
 " incorrectly means we need to set the following or visual highlighting is
 " invisible.
-hi Visual cterm=reverse
+hi Visual cterm=reverse ctermbg=NONE ctermfg=NONE
 
 " Some less sane environments have syntax highlighting off by default, so force
 " it on.
