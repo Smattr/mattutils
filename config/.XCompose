@@ -176,3 +176,6 @@
 <Multi_key> <b> <v> : "▼"
 <Multi_key> <b> <less> : "◄"
 <Multi_key> <b> <greater> : "►"
+
+# bullet
+<Multi_key> <asterisk> <asterisk> : "•"
