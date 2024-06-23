@@ -172,7 +172,7 @@
 <Multi_key> <b> <x> : "╳"
 
 # arrow heads
-<Multi_key> <b> <acute> : "▲"
+<Multi_key> <b> <asciicircum> : "▲"
 <Multi_key> <b> <v> : "▼"
 <Multi_key> <b> <less> : "◄"
 <Multi_key> <b> <greater> : "►"
