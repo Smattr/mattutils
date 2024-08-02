@@ -12,10 +12,6 @@
   co = clone
   st = status
   glog = log --graph --pretty=fuller --stat
-  incoming = "!git fetch origin master && git log ..origin/master"
-  outgoing = "!git getch origin master && git log origin/master.."
-  in = incoming
-  out = outgoing
   root = rev-parse --show-toplevel
   cp = cherry-pick
   pf = push --force-with-lease
