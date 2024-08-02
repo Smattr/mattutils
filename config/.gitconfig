@@ -47,6 +47,8 @@
   retime = "!f() { git-retime.py \"$@\"; }; f"
   reup = "!f() { git-reup.py \"$@\"; }; f"
 
+  unstash = "!f() { git stash show >/dev/null && { git stash show -p | git apply -p0 -; } && git stash drop; }; f"
+
 [github]
   username = smattr
 
