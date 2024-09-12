@@ -7,9 +7,6 @@ endif
 CC ?= cc
 CFLAGS ?= -std=c11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings -Wmissing-prototypes
 
-CXX ?= c++
-CXXFLAGS ?= -std=c++11 -O3 -W -Wall -Wextra -Wshadow -Wwrite-strings -Wmissing-declarations
-
 # Serenity now
 SHELL := $(shell which bash 2>/dev/null)
 
@@ -74,10 +71,10 @@ ${HOME}/.ssh/config_mattutils: config/.ssh/config Makefile
 	${V}if [ ! -e "$@" ]; then mkdir -p ${HOME}/.ssh && ln -s $$(pwd)/$< $@; elif [ ! -L "$@" ]; then printf 'Warning: Skipping %s that already exists\n' "$@" >&2; fi
 
 
-${HOME}/bin/dif: dif.cpp
-	@printf ' [CXX] %s\n' "$(notdir $@)"
+${HOME}/bin/dif: dif.c
+	@printf ' [CC] %s\n' "$(notdir $@)"
 	${V}mkdir -p "$(dir $@)"
-	${V}${CXX} ${CXXFLAGS} -o $@ $<
+	${V}${CC} ${CFLAGS} -o $@ $<
 
 ${HOME}/.%: config/.% Makefile
 	@printf ' [LN] %s\n' "$(notdir $@)"
