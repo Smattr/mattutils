@@ -236,7 +236,7 @@ int main(int argc, char **argv) {
   }
   diff.out = -1;
 
-  for (bool dropping = false, line_start = true;;) {
+  for (bool prelude = true, dropping = false, line_start = true;;) {
 
     errno = 0;
     if (getline(&buffer, &buffer_size, in) < 0) {
@@ -248,6 +248,17 @@ int main(int argc, char **argv) {
         goto done;
       }
       break;
+    }
+
+    // are we exiting the prelude and into the diff context?
+    if (prelude) {
+      static const char *const STARTERS[] = {"diff ", "index ", "+++ ", "--- "};
+      for (size_t i = 0; i < sizeof(STARTERS) / sizeof(STARTERS[0]); ++i) {
+        prelude &= strncmp(buffer, STARTERS[i], strlen(STARTERS[i])) != 0;
+        if (strncmp(buffer, "\033[1m", strlen("\033[1m")) == 0)
+          prelude &= strncmp(&buffer[strlen("\033[1m")], STARTERS[i],
+                             strlen(STARTERS[i])) != 0;
+      }
     }
 
     for (size_t i = 0; buffer[i] != '\0'; ++i) {
@@ -271,16 +282,18 @@ int main(int argc, char **argv) {
           }
 
           const char *esc = NULL;
-          if (line_start && buffer[i] == '+' && buffer[i + 1] != '+') {
-            esc = "\033[32m"; // green
-          } else if (line_start && buffer[i] == '-' && buffer[i + 1] != '-') {
-            esc = "\033[31m"; // red
-          } else if (line_start && buffer[i] == '@') {
-            esc = "\033[36m"; // cyan
-          } else if (buffer[i] == '\n') {
-            esc = "\033[0m"; // reset
-          } else if (line_start && buffer[i] != ' ') {
-            esc = "\033[1m"; // bold
+          if (!prelude) {
+            if (line_start && buffer[i] == '+' && buffer[i + 1] != '+') {
+              esc = "\033[32m"; // green
+            } else if (line_start && buffer[i] == '-' && buffer[i + 1] != '-') {
+              esc = "\033[31m"; // red
+            } else if (line_start && buffer[i] == '@') {
+              esc = "\033[36m"; // cyan
+            } else if (buffer[i] == '\n') {
+              esc = "\033[0m"; // reset
+            } else if (line_start && buffer[i] != ' ') {
+              esc = "\033[1m"; // bold
+            }
           }
           if (esc != NULL) {
             while (true) {
