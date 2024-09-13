@@ -277,30 +277,32 @@ int main(int argc, char **argv) {
         prelude &= strncmp(buffer, STARTERS[i], strlen(STARTERS[i])) != 0;
     }
 
+    if (add_colour) {
+
+      // Do we need to start less? We start it here so as to avoid running
+      // it (and clearing the screen) if the diff is empty.
+      if (less.pid == 0) {
+        const int r = run_less(&less);
+        if (r != 0) {
+          fprintf(stderr, "failed to run less: %s\n", strerror(errno));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+
+        // wrap output in `FILE *` to avoid dealing with EINTR etc
+        out = fdopen(less.in, "w");
+        if (out == NULL) {
+          fprintf(stderr, "failed to fdopen: %s\n", strerror(errno));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+        less.in = -1;
+      }
+    }
+
     for (size_t i = 0; buffer[i] != '\0'; ++i) {
 
       if (add_colour) {
-
-        // Do we need to start less? We start it here so as to avoid running
-        // it (and clearing the screen) if the diff is empty.
-        if (less.pid == 0) {
-          const int r = run_less(&less);
-          if (r != 0) {
-            fprintf(stderr, "failed to run less: %s\n", strerror(errno));
-            rc = EXIT_FAILURE;
-            goto done;
-          }
-
-          // wrap output in `FILE *` to avoid dealing with EINTR etc
-          out = fdopen(less.in, "w");
-          if (out == NULL) {
-            fprintf(stderr, "failed to fdopen: %s\n", strerror(errno));
-            rc = EXIT_FAILURE;
-            goto done;
-          }
-          less.in = -1;
-        }
-
         const char *esc = NULL;
         if (!prelude) {
           if (i == 0 && buffer[i] == '+' && buffer[i + 1] != '+') {
