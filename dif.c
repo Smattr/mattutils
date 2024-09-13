@@ -228,6 +228,7 @@ int main(int argc, char **argv) {
   proc_t diff = {.in = -1, .out = STDIN_FILENO};
   proc_t less = {.in = STDOUT_FILENO, .out = -1};
   FILE *in = NULL;
+  FILE *out = stdout;
   char *buffer = NULL;
   size_t buffer_size = 0;
   int rc = EXIT_SUCCESS;
@@ -289,6 +290,15 @@ int main(int argc, char **argv) {
             rc = EXIT_FAILURE;
             goto done;
           }
+
+          // wrap output in `FILE *` to avoid dealing with EINTR etc
+          out = fdopen(less.in, "w");
+          if (out == NULL) {
+            fprintf(stderr, "failed to fdopen: %s\n", strerror(errno));
+            rc = EXIT_FAILURE;
+            goto done;
+          }
+          less.in = -1;
         }
 
         const char *esc = NULL;
@@ -306,33 +316,18 @@ int main(int argc, char **argv) {
           }
         }
         if (esc != NULL) {
-          while (true) {
-            const ssize_t written = write(less.in, esc, strlen(esc));
-            if (written < 0) {
-              if (errno == EINTR)
-                continue;
-              fprintf(stderr, "failed to write to output: %s\n",
-                      strerror(errno));
-              rc = EXIT_FAILURE;
-              goto done;
-            }
-            assert((size_t)written == strlen(esc));
-            break;
+          if (fputs(esc, out) < 0) {
+            fprintf(stderr, "failed to write to output: %s\n", strerror(EIO));
+            rc = EXIT_FAILURE;
+            goto done;
           }
         }
       }
 
-      while (true) {
-        const ssize_t written = write(less.in, &buffer[i], 1);
-        if (written < 0) {
-          if (errno == EINTR)
-            continue;
-          fprintf(stderr, "failed to write to output: %s\n", strerror(errno));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-        assert(written == 1);
-        break;
+      if (fputc(buffer[i], out) < 0) {
+        fprintf(stderr, "failed to write to output: %s\n", strerror(EIO));
+        rc = EXIT_FAILURE;
+        goto done;
       }
     }
   }
@@ -365,6 +360,8 @@ done:
   } while (0);
 
   // close our pipe to prompt `less` to exit
+  if (out != NULL)
+    (void)fclose(out);
   if (less.in >= 0)
     (void)close(less.in);
 
