@@ -206,6 +206,23 @@ done:
   return rc;
 }
 
+/// strip ANSI colour codes from a string
+static void decolourise(char *s) {
+  assert(s != NULL);
+
+  bool dropping = false;
+  for (size_t dst = 0, src = 0;; ++src) {
+    if (!dropping && s[src] == '\033')
+      dropping = true;
+    if (!dropping)
+      s[dst++] = s[src];
+    if (dropping && s[src] == 'm')
+      dropping = false;
+    if (s[src] == '\0')
+      break;
+  }
+}
+
 int main(int argc, char **argv) {
 
   proc_t diff = {.in = -1, .out = STDIN_FILENO};
@@ -236,7 +253,7 @@ int main(int argc, char **argv) {
   }
   diff.out = -1;
 
-  for (bool prelude = true, dropping = false, line_start = true;;) {
+  for (bool prelude = true, line_start = true;;) {
 
     errno = 0;
     if (getline(&buffer, &buffer_size, in) < 0) {
@@ -250,86 +267,75 @@ int main(int argc, char **argv) {
       break;
     }
 
+    decolourise(buffer);
+
     // are we exiting the prelude and into the diff context?
     if (prelude) {
       static const char *const STARTERS[] = {"diff ", "index ", "+++ ", "--- "};
-      for (size_t i = 0; i < sizeof(STARTERS) / sizeof(STARTERS[0]); ++i) {
+      for (size_t i = 0; i < sizeof(STARTERS) / sizeof(STARTERS[0]); ++i)
         prelude &= strncmp(buffer, STARTERS[i], strlen(STARTERS[i])) != 0;
-        if (strncmp(buffer, "\033[1m", strlen("\033[1m")) == 0)
-          prelude &= strncmp(&buffer[strlen("\033[1m")], STARTERS[i],
-                             strlen(STARTERS[i])) != 0;
-      }
     }
 
     for (size_t i = 0; buffer[i] != '\0'; ++i) {
 
-      if (!dropping && buffer[i] == '\033')
-        dropping = true;
+      if (add_colour) {
 
-      if (!dropping) {
-
-        if (add_colour) {
-
-          // Do we need to start less? We start it here so as to avoid running
-          // it (and clearing the screen) if the diff is empty.
-          if (less.pid == 0) {
-            const int r = run_less(&less);
-            if (r != 0) {
-              fprintf(stderr, "failed to run less: %s\n", strerror(errno));
-              rc = EXIT_FAILURE;
-              goto done;
-            }
-          }
-
-          const char *esc = NULL;
-          if (!prelude) {
-            if (line_start && buffer[i] == '+' && buffer[i + 1] != '+') {
-              esc = "\033[32m"; // green
-            } else if (line_start && buffer[i] == '-' && buffer[i + 1] != '-') {
-              esc = "\033[31m"; // red
-            } else if (line_start && buffer[i] == '@') {
-              esc = "\033[36m"; // cyan
-            } else if (buffer[i] == '\n') {
-              esc = "\033[0m"; // reset
-            } else if (line_start && buffer[i] != ' ') {
-              esc = "\033[1m"; // bold
-            }
-          }
-          if (esc != NULL) {
-            while (true) {
-              const ssize_t written = write(less.in, esc, strlen(esc));
-              if (written < 0) {
-                if (errno == EINTR)
-                  continue;
-                fprintf(stderr, "failed to write to output: %s\n",
-                        strerror(errno));
-                rc = EXIT_FAILURE;
-                goto done;
-              }
-              assert((size_t)written == strlen(esc));
-              break;
-            }
-          }
-        }
-
-        while (true) {
-          const ssize_t written = write(less.in, &buffer[i], 1);
-          if (written < 0) {
-            if (errno == EINTR)
-              continue;
-            fprintf(stderr, "failed to write to output: %s\n", strerror(errno));
+        // Do we need to start less? We start it here so as to avoid running
+        // it (and clearing the screen) if the diff is empty.
+        if (less.pid == 0) {
+          const int r = run_less(&less);
+          if (r != 0) {
+            fprintf(stderr, "failed to run less: %s\n", strerror(errno));
             rc = EXIT_FAILURE;
             goto done;
           }
-          assert(written == 1);
-          break;
         }
 
-        line_start = buffer[i] == '\n';
+        const char *esc = NULL;
+        if (!prelude) {
+          if (line_start && buffer[i] == '+' && buffer[i + 1] != '+') {
+            esc = "\033[32m"; // green
+          } else if (line_start && buffer[i] == '-' && buffer[i + 1] != '-') {
+            esc = "\033[31m"; // red
+          } else if (line_start && buffer[i] == '@') {
+            esc = "\033[36m"; // cyan
+          } else if (buffer[i] == '\n') {
+            esc = "\033[0m"; // reset
+          } else if (line_start && buffer[i] != ' ') {
+            esc = "\033[1m"; // bold
+          }
+        }
+        if (esc != NULL) {
+          while (true) {
+            const ssize_t written = write(less.in, esc, strlen(esc));
+            if (written < 0) {
+              if (errno == EINTR)
+                continue;
+              fprintf(stderr, "failed to write to output: %s\n",
+                      strerror(errno));
+              rc = EXIT_FAILURE;
+              goto done;
+            }
+            assert((size_t)written == strlen(esc));
+            break;
+          }
+        }
       }
 
-      if (dropping && buffer[i] == 'm')
-        dropping = false;
+      while (true) {
+        const ssize_t written = write(less.in, &buffer[i], 1);
+        if (written < 0) {
+          if (errno == EINTR)
+            continue;
+          fprintf(stderr, "failed to write to output: %s\n", strerror(errno));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+        assert(written == 1);
+        break;
+      }
+
+      line_start = buffer[i] == '\n';
     }
   }
 
