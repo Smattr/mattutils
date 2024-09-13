@@ -413,6 +413,12 @@ static int flush_lines(bool colourise, pending_t *pending, FILE *sink) {
   return 0;
 }
 
+static bool startswith(const char *s, const char *prefix) {
+  assert(s != NULL);
+  assert(prefix != NULL);
+  return strncmp(s, prefix, strlen(prefix)) == 0;
+}
+
 int main(int argc, char **argv) {
 
   proc_t diff = {.in = -1, .out = STDIN_FILENO};
@@ -465,7 +471,7 @@ int main(int argc, char **argv) {
     if (prelude) {
       static const char *const STARTERS[] = {"diff ", "index ", "+++ ", "--- "};
       for (size_t i = 0; i < sizeof(STARTERS) / sizeof(STARTERS[0]); ++i)
-        prelude &= strncmp(buffer, STARTERS[i], strlen(STARTERS[i])) != 0;
+        prelude &= !startswith(buffer, STARTERS[i]);
     }
 
     if (add_colour) {
