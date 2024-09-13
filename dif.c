@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -273,10 +274,15 @@ static void lines_free(lines_t *lines) {
   *lines = (lines_t){0};
 }
 
+/// the type of change a diff hunk represents
+typedef enum { ADDED, MODIFIED, DELETED } transition_t;
+
 /// diff lines that have been accrued but not yet output
 typedef struct {
-  lines_t neg; ///< “deleted” lines
-  lines_t pos; ///< “added” lines
+  char *heading;     ///< last “diff --git …” line we saw
+  transition_t mode; ///< what kind of change is this hunk?
+  lines_t neg;       ///< “deleted” lines
+  lines_t pos;       ///< “added” lines
 } pending_t;
 
 /// is this a white space character we expect to encounter in a code line?
@@ -536,6 +542,95 @@ int main(int argc, char **argv) {
       }
     }
 
+    // if this is a diff leader, save it for later
+    if (add_colour && startswith(buffer, "diff --git ")) {
+      free(pending.heading);
+      pending.heading = buffer;
+      pending.mode = MODIFIED;
+      buffer = NULL;
+      buffer_size = 0;
+      continue;
+    }
+
+    // if we see a mode line, update what kind of change this is
+    if (add_colour && startswith(buffer, "new file ")) {
+      pending.mode = ADDED;
+      continue;
+    }
+    if (add_colour && startswith(buffer, "deleted file ")) {
+      pending.mode = DELETED;
+      continue;
+    }
+
+    // if we see an index line, flush the heading
+    if (add_colour && startswith(buffer, "index ") && pending.heading != NULL) {
+      // learn the width of the terminal
+      static size_t width;
+      if (width == 0) {
+        struct winsize ws = {0};
+        if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) < 0)
+          return errno;
+        width = ws.ws_col;
+      }
+
+      size_t j;
+      if (pending.mode == ADDED) {
+        if (fputs("\033[32;7madded: \033[1m", out) < 0) {
+          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+        j = strlen("added :");
+      } else if (pending.mode == MODIFIED) {
+        if (fputs("\033[33;7mmodified: \033[1m", out) < 0) {
+          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+        j = strlen("modified: ");
+      } else {
+        if (fputs("\033[31;7mdeleted: \033[1m", out) < 0) {
+          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+        j = strlen("deleted: ");
+      }
+
+      for (size_t i = strlen("diff --git "); pending.heading[i] != '\0';
+           ++i, ++j) {
+        if (pending.heading[i] == ' ')
+          break;
+        if (fputc(pending.heading[i], out) < 0) {
+          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+      }
+      for (; j < width; ++j) {
+        if (fputs(" ", out) < 0) {
+          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+      }
+      if (fputs("\033[0m\n", out) < 0) {
+        fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+
+      continue;
+    }
+
+    // suppress the diff leader lines following the command
+    if (add_colour) {
+      if (startswith(buffer, "+++ "))
+        continue;
+      if (startswith(buffer, "--- "))
+        continue;
+    }
+
     // output our current line
     const int r = flush_line(!prelude && add_colour, buffer, NULL, out);
     if (r != 0) {
@@ -558,6 +653,7 @@ int main(int argc, char **argv) {
 done:
   lines_free(&pending.pos);
   lines_free(&pending.neg);
+  free(pending.heading);
   free(buffer);
 
   // close our pipe to prompt `diff` to exit
