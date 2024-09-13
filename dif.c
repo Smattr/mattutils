@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
   }
   diff.out = -1;
 
-  for (bool prelude = true, line_start = true;;) {
+  for (bool prelude = true;;) {
 
     errno = 0;
     if (getline(&buffer, &buffer_size, in) < 0) {
@@ -293,15 +293,15 @@ int main(int argc, char **argv) {
 
         const char *esc = NULL;
         if (!prelude) {
-          if (line_start && buffer[i] == '+' && buffer[i + 1] != '+') {
+          if (i == 0 && buffer[i] == '+' && buffer[i + 1] != '+') {
             esc = "\033[32m"; // green
-          } else if (line_start && buffer[i] == '-' && buffer[i + 1] != '-') {
+          } else if (i == 0 && buffer[i] == '-' && buffer[i + 1] != '-') {
             esc = "\033[31m"; // red
-          } else if (line_start && buffer[i] == '@') {
+          } else if (i == 0 && buffer[i] == '@') {
             esc = "\033[36m"; // cyan
           } else if (buffer[i] == '\n') {
             esc = "\033[0m"; // reset
-          } else if (line_start && buffer[i] != ' ') {
+          } else if (i == 0 && buffer[i] != ' ') {
             esc = "\033[1m"; // bold
           }
         }
@@ -334,8 +334,6 @@ int main(int argc, char **argv) {
         assert(written == 1);
         break;
       }
-
-      line_start = buffer[i] == '\n';
     }
   }
 
