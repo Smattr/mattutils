@@ -279,17 +279,70 @@ typedef struct {
   lines_t pending_pos; ///< queued “added” lines to be output
 } state_t;
 
+/// is this a white space character we expect to encounter in a code line?
+static bool is_space(char c) { return c == ' ' || c == '\t'; }
+
 /// write out a diff line
+///
+/// If a `pair` is provided, this will attempt to do diff-so-fancy-style
+/// highlighting within the diff line.
 ///
 /// \param colourise Add ANSI colour to the output?
 /// \param line Line to write
+/// \param pair Optional matching inverse diff line
 /// \param sink Output to write to
 /// \return 0 on success or an errno on failure
-static int flush_line(bool colourise, const char *line, FILE *sink) {
+static int flush_line(bool colourise, const char *line, const char *pair,
+                      FILE *sink) {
   assert(line != NULL);
   assert(sink != NULL);
+  assert(pair == NULL || (line[0] == '+' && pair[0] == '-') ||
+         (line[0] == '-' && pair[0] == '+'));
 
-  for (size_t i = 0; line[i] != '\0'; ++i) {
+  // is the common prefix and suffix only white space?
+  bool spaces = true;
+
+  // find the common prefix
+  size_t prefix = 1;
+  if (pair != NULL) {
+    for (size_t i = 1; line[i] != '\0' && line[i] == pair[i]; ++i) {
+      spaces &= is_space(line[i]);
+      ++prefix;
+    }
+  }
+
+  // find the common suffix
+  const size_t line_len = strlen(line);
+  assert(line_len > 0 && line[line_len - 1] == '\n');
+  size_t suffix = 1;
+  if (pair != NULL) {
+    const size_t pair_len = strlen(pair);
+    assert(pair_len > 0 && pair[pair_len - 1] == '\n');
+    for (size_t i = 1; i < line_len && i < pair_len &&
+                       line[line_len - i - 1] == pair[pair_len - i - 1];
+         ++i) {
+      spaces &= is_space(line[line_len - i - 1]);
+      ++suffix;
+    }
+
+    // If the suffix extends into the prefix, reduce it. This can happen in
+    // diffs like:
+    //   -foo(a, b)
+    //   +foo(a, c, b)
+    // Without this tweak, prefix would be 8 and suffix would be 5.
+    if (prefix + suffix > line_len)
+      suffix = line_len - prefix;
+    if (prefix + suffix > pair_len)
+      suffix = pair_len - prefix;
+  }
+
+  // should we perform word highlighting?
+  const bool highlight_words =
+      !spaces && // the common prefix/suffix is not just white space
+      (prefix > 1 || suffix > 1) // we have a non-trivial common prefix/suffix
+      && prefix != line_len;     // the lines do not somehow match exactly
+
+  for (size_t i = 0; i < line_len; ++i) {
 
     if (colourise) {
       const char *esc = NULL;
@@ -303,6 +356,15 @@ static int flush_line(bool colourise, const char *line, FILE *sink) {
         esc = "\033[0m"; // reset
       } else if (i == 0 && line[i] != ' ') {
         esc = "\033[1m"; // bold
+      } else if (i != 0 && highlight_words) {
+        if (i == prefix) {
+          esc = "\033[7m";
+        }
+        // avoid `else if` in order to handle the scenario where `prefix +
+        // suffix == line_len`
+        if (line_len - i == suffix) {
+          esc = "\033[27m";
+        }
       }
       if (esc != NULL) {
         if (fputs(esc, sink) < 0)
@@ -328,17 +390,24 @@ static int flush_lines(bool colourise, state_t *state, FILE *sink) {
   assert(sink != NULL);
 
   for (size_t i = 0; i < state->pending_neg.n_line; ++i) {
-    const int r = flush_line(colourise, state->pending_neg.line[i], sink);
+    const char *pair = NULL;
+    if (state->pending_neg.n_line == state->pending_pos.n_line)
+      pair = state->pending_pos.line[i];
+    const int r = flush_line(colourise, state->pending_neg.line[i], pair, sink);
     if (r != 0)
       return r;
   }
-  lines_clear(&state->pending_neg);
 
   for (size_t i = 0; i < state->pending_pos.n_line; ++i) {
-    const int r = flush_line(colourise, state->pending_pos.line[i], sink);
+    const char *pair = NULL;
+    if (state->pending_neg.n_line == state->pending_pos.n_line)
+      pair = state->pending_neg.line[i];
+    const int r = flush_line(colourise, state->pending_pos.line[i], pair, sink);
     if (r != 0)
       return r;
   }
+
+  lines_clear(&state->pending_neg);
   lines_clear(&state->pending_pos);
 
   return 0;
@@ -463,7 +532,7 @@ int main(int argc, char **argv) {
     }
 
     // output our current line
-    const int r = flush_line(!prelude && add_colour, buffer, out);
+    const int r = flush_line(!prelude && add_colour, buffer, NULL, out);
     if (r != 0) {
       fprintf(stderr, "failed to write line: %s\n", strerror(r));
       rc = EXIT_FAILURE;
