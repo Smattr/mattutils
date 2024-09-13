@@ -240,8 +240,8 @@ static int lines_append(lines_t *lines, char *line) {
   assert(line != NULL);
 
   if (lines->n_line == lines->c_line) {
-    size_t new_c = lines->c_line == 0 ? 128 : (lines->c_line * 2);
-    char **l = realloc(lines->line, new_c * sizeof(lines->line[0]));
+    const size_t new_c = lines->c_line == 0 ? 128 : (lines->c_line * 2);
+    char **const l = realloc(lines->line, new_c * sizeof(lines->line[0]));
     if (l == NULL)
       return ENOMEM;
     lines->c_line = new_c;
