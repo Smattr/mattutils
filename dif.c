@@ -223,6 +223,44 @@ static void decolourise(char *s) {
   }
 }
 
+/// write out a diff line
+///
+/// \param colourise Add ANSI colour to the output?
+/// \param line Line to write
+/// \param sink Output to write to
+/// \return 0 on success or an errno on failure
+static int flush_line(bool colourise, const char *line, FILE *sink) {
+  assert(line != NULL);
+  assert(sink != NULL);
+
+  for (size_t i = 0; line[i] != '\0'; ++i) {
+
+    if (colourise) {
+      const char *esc = NULL;
+      if (i == 0 && line[i] == '+' && line[i + 1] != '+') {
+        esc = "\033[32m"; // green
+      } else if (i == 0 && line[i] == '-' && line[i + 1] != '-') {
+        esc = "\033[31m"; // red
+      } else if (i == 0 && line[i] == '@') {
+        esc = "\033[36m"; // cyan
+      } else if (line[i] == '\n') {
+        esc = "\033[0m"; // reset
+      } else if (i == 0 && line[i] != ' ') {
+        esc = "\033[1m"; // bold
+      }
+      if (esc != NULL) {
+        if (fputs(esc, sink) < 0)
+          return EIO;
+      }
+    }
+
+    if (fputc(line[i], sink) < 0)
+      return EIO;
+  }
+
+  return 0;
+}
+
 int main(int argc, char **argv) {
 
   proc_t diff = {.in = -1, .out = STDIN_FILENO};
@@ -300,37 +338,11 @@ int main(int argc, char **argv) {
       }
     }
 
-    for (size_t i = 0; buffer[i] != '\0'; ++i) {
-
-      if (add_colour) {
-        const char *esc = NULL;
-        if (!prelude) {
-          if (i == 0 && buffer[i] == '+' && buffer[i + 1] != '+') {
-            esc = "\033[32m"; // green
-          } else if (i == 0 && buffer[i] == '-' && buffer[i + 1] != '-') {
-            esc = "\033[31m"; // red
-          } else if (i == 0 && buffer[i] == '@') {
-            esc = "\033[36m"; // cyan
-          } else if (buffer[i] == '\n') {
-            esc = "\033[0m"; // reset
-          } else if (i == 0 && buffer[i] != ' ') {
-            esc = "\033[1m"; // bold
-          }
-        }
-        if (esc != NULL) {
-          if (fputs(esc, out) < 0) {
-            fprintf(stderr, "failed to write to output: %s\n", strerror(EIO));
-            rc = EXIT_FAILURE;
-            goto done;
-          }
-        }
-      }
-
-      if (fputc(buffer[i], out) < 0) {
-        fprintf(stderr, "failed to write to output: %s\n", strerror(EIO));
-        rc = EXIT_FAILURE;
-        goto done;
-      }
+    const int r = flush_line(!prelude && add_colour, buffer, out);
+    if (r != 0) {
+      fprintf(stderr, "failed to write line: %s\n", strerror(r));
+      rc = EXIT_FAILURE;
+      goto done;
     }
   }
 
