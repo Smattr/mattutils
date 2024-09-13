@@ -223,6 +223,62 @@ static void decolourise(char *s) {
   }
 }
 
+/// a collection of accumulated lines
+typedef struct {
+  char **line;   ///< line data
+  size_t n_line; ///< number of entries in `line`
+  size_t c_line; ///< number of available backing entries in `line`
+} lines_t;
+
+/// add a new line to a list
+///
+/// \param lines List to add to
+/// \param line Line to add
+/// \return 0 on success or an errno on failure
+static int lines_append(lines_t *lines, char *line) {
+  assert(lines != NULL);
+  assert(line != NULL);
+
+  if (lines->n_line == lines->c_line) {
+    size_t new_c = lines->c_line == 0 ? 128 : (lines->c_line * 2);
+    char **l = realloc(lines->line, new_c * sizeof(lines->line[0]));
+    if (l == NULL)
+      return ENOMEM;
+    lines->c_line = new_c;
+    lines->line = l;
+  }
+
+  assert(lines->n_line < lines->c_line);
+  lines->line[lines->n_line] = line;
+  ++lines->n_line;
+
+  return 0;
+}
+
+/// remove all entries from a list
+static void lines_clear(lines_t *lines) {
+  assert(lines != NULL);
+
+  for (size_t i = 0; i < lines->n_line; ++i)
+    free(lines->line[i]);
+  lines->n_line = 0;
+}
+
+/// remove all entries from a list and deallocate backing storage
+static void lines_free(lines_t *lines) {
+  assert(lines != NULL);
+
+  lines_clear(lines);
+  free(lines->line);
+  *lines = (lines_t){0};
+}
+
+/// parsing state
+typedef struct {
+  lines_t pending_neg; ///< queued “deleted” lines to be output
+  lines_t pending_pos; ///< queued “added” lines to be output
+} state_t;
+
 /// write out a diff line
 ///
 /// \param colourise Add ANSI colour to the output?
@@ -261,6 +317,33 @@ static int flush_line(bool colourise, const char *line, FILE *sink) {
   return 0;
 }
 
+/// write out diff lines
+///
+/// \param colourise Add ANSI colour to the output?
+/// \param state Negative and positive lines to write
+/// \param sink Output to write to
+/// \return 0 on success or an errno on failure
+static int flush_lines(bool colourise, state_t *state, FILE *sink) {
+  assert(state != NULL);
+  assert(sink != NULL);
+
+  for (size_t i = 0; i < state->pending_neg.n_line; ++i) {
+    const int r = flush_line(colourise, state->pending_neg.line[i], sink);
+    if (r != 0)
+      return r;
+  }
+  lines_clear(&state->pending_neg);
+
+  for (size_t i = 0; i < state->pending_pos.n_line; ++i) {
+    const int r = flush_line(colourise, state->pending_pos.line[i], sink);
+    if (r != 0)
+      return r;
+  }
+  lines_clear(&state->pending_pos);
+
+  return 0;
+}
+
 int main(int argc, char **argv) {
 
   proc_t diff = {.in = -1, .out = STDIN_FILENO};
@@ -269,6 +352,7 @@ int main(int argc, char **argv) {
   FILE *out = stdout;
   char *buffer = NULL;
   size_t buffer_size = 0;
+  state_t state = {0};
   int rc = EXIT_SUCCESS;
 
   if (argc > 1) {
@@ -338,6 +422,47 @@ int main(int argc, char **argv) {
       }
     }
 
+    // accumulate this line if we can later output it with more contextual hints
+    if (!prelude) {
+      if (buffer[0] == '-' && buffer[1] != '-' &&
+          state.pending_pos.n_line == 0) {
+        // a negative line that may have a later matching positive line
+        const int r = lines_append(&state.pending_neg, buffer);
+        if (r != 0) {
+          fprintf(stderr, "failed to accumulate negative line: %s\n",
+                  strerror(r));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+        buffer = NULL;
+        buffer_size = 0;
+        continue;
+      } else if (buffer[0] == '+' && buffer[1] != '+') {
+        // a positive line that may have an earlier matching negative line
+        const int r = lines_append(&state.pending_pos, buffer);
+        if (r != 0) {
+          fprintf(stderr, "failed to accumulate positive line: %s\n",
+                  strerror(r));
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+        buffer = NULL;
+        buffer_size = 0;
+        continue;
+      }
+    }
+
+    // output any preceding lines to the one we are about to write
+    {
+      const int r = flush_lines(add_colour, &state, out);
+      if (r != 0) {
+        fprintf(stderr, "failed to flush lines: %s\n", strerror(r));
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+    }
+
+    // output our current line
     const int r = flush_line(!prelude && add_colour, buffer, out);
     if (r != 0) {
       fprintf(stderr, "failed to write line: %s\n", strerror(r));
@@ -346,7 +471,19 @@ int main(int argc, char **argv) {
     }
   }
 
+  // output any trailing lines we buffered
+  {
+    const int r = flush_lines(add_colour, &state, out);
+    if (r != 0) {
+      fprintf(stderr, "failed to flush lines: %s\n", strerror(r));
+      rc = EXIT_FAILURE;
+      goto done;
+    }
+  }
+
 done:
+  lines_free(&state.pending_pos);
+  lines_free(&state.pending_neg);
   free(buffer);
 
   // close our pipe to prompt `diff` to exit
