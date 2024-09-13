@@ -364,7 +364,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  // decide whether to colorise the output
+  // decide whether to colourise the output
   const bool add_colour = isatty(STDOUT_FILENO);
 
   // wrap input in `FILE *` to permit `getline`
