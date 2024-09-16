@@ -445,6 +445,15 @@ static int write_header(transition_t mode, const char *heading, FILE *sink) {
     width = ws.ws_col;
   }
 
+  // determine the path to the file being changed
+  const char *const file_pair = &heading[strlen("diff --git ")];
+  const size_t file_pair_len = strlen(file_pair);
+  assert(file_pair_len % 2 == 0 && "heading not \"diff --git foo foo\\n\"");
+  assert(file_pair[file_pair_len - 1] == '\n' &&
+         "heading not \"diff --git foo foo\\n\"");
+  assert(file_pair[file_pair_len / 2 - 1] == ' ' &&
+         "heading not \"diff --git foo foo\\n\"");
+
   size_t j;
   if (mode == ADDED) {
     if (fputs("\033[32;7madded: \033[1m", sink) < 0)
@@ -460,12 +469,9 @@ static int write_header(transition_t mode, const char *heading, FILE *sink) {
     j = strlen("deleted: ");
   }
 
-  for (size_t i = strlen("diff --git "); heading[i] != '\0'; ++i, ++j) {
-    if (heading[i] == ' ')
-      break;
-    if (fputc(heading[i], sink) < 0)
-      return EIO;
-  }
+  if (fprintf(sink, "%.*s", (int)file_pair_len / 2 - 1, file_pair) < 0)
+    return EIO;
+  j += file_pair_len / 2 - 1;
   for (; j < width; ++j) {
     if (fputs(" ", sink) < 0)
       return EIO;
