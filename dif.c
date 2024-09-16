@@ -425,6 +425,57 @@ static bool startswith(const char *s, const char *prefix) {
   return strncmp(s, prefix, strlen(prefix)) == 0;
 }
 
+/// write a diff-so-fancy style section header
+///
+/// \param mode Type of change being made to the upcoming file
+/// \param heading The “diff --git …” line responsible for this header
+/// \param sink Output to write to
+/// \return 0 on success or an errno on failure
+static int write_header(transition_t mode, const char *heading, FILE *sink) {
+  assert(heading != NULL);
+  assert(startswith(heading, "diff --git "));
+  assert(sink != NULL);
+
+  // learn the width of the terminal
+  static size_t width;
+  if (width == 0) {
+    struct winsize ws = {0};
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) < 0)
+      return errno;
+    width = ws.ws_col;
+  }
+
+  size_t j;
+  if (mode == ADDED) {
+    if (fputs("\033[32;7madded: \033[1m", sink) < 0)
+      return EIO;
+    j = strlen("added :");
+  } else if (mode == MODIFIED) {
+    if (fputs("\033[33;7mmodified: \033[1m", sink) < 0)
+      return EIO;
+    j = strlen("modified: ");
+  } else {
+    if (fputs("\033[31;7mdeleted: \033[1m", sink) < 0)
+      return EIO;
+    j = strlen("deleted: ");
+  }
+
+  for (size_t i = strlen("diff --git "); heading[i] != '\0'; ++i, ++j) {
+    if (heading[i] == ' ')
+      break;
+    if (fputc(heading[i], sink) < 0)
+      return EIO;
+  }
+  for (; j < width; ++j) {
+    if (fputs(" ", sink) < 0)
+      return EIO;
+  }
+  if (fputs("\033[0m\n", sink) < 0)
+    return EIO;
+
+  return 0;
+}
+
 int main(int argc, char **argv) {
 
   proc_t diff = {.in = -1, .out = STDIN_FILENO};
@@ -564,62 +615,12 @@ int main(int argc, char **argv) {
 
     // if we see an index line, flush the heading
     if (add_colour && startswith(buffer, "index ") && pending.heading != NULL) {
-      // learn the width of the terminal
-      static size_t width;
-      if (width == 0) {
-        struct winsize ws = {0};
-        if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) < 0)
-          return errno;
-        width = ws.ws_col;
-      }
-
-      size_t j;
-      if (pending.mode == ADDED) {
-        if (fputs("\033[32;7madded: \033[1m", out) < 0) {
-          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-        j = strlen("added :");
-      } else if (pending.mode == MODIFIED) {
-        if (fputs("\033[33;7mmodified: \033[1m", out) < 0) {
-          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-        j = strlen("modified: ");
-      } else {
-        if (fputs("\033[31;7mdeleted: \033[1m", out) < 0) {
-          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-        j = strlen("deleted: ");
-      }
-
-      for (size_t i = strlen("diff --git "); pending.heading[i] != '\0';
-           ++i, ++j) {
-        if (pending.heading[i] == ' ')
-          break;
-        if (fputc(pending.heading[i], out) < 0) {
-          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-      }
-      for (; j < width; ++j) {
-        if (fputs(" ", out) < 0) {
-          fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-      }
-      if (fputs("\033[0m\n", out) < 0) {
-        fprintf(stderr, "failed to write header: %s\n", strerror(EIO));
+      const int r = write_header(pending.mode, pending.heading, out);
+      if (r != 0) {
+        fprintf(stderr, "failed to write header: %s\n", strerror(r));
         rc = EXIT_FAILURE;
         goto done;
       }
-
       continue;
     }
 
