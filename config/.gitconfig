@@ -11,7 +11,7 @@
   ci = commit
   co = clone
   st = status
-  glog = log --graph --pretty=fuller --stat
+  gl = log --graph --pretty=fuller --stat
   root = rev-parse --show-toplevel
   cp = cherry-pick
   pf = push --force-with-lease
@@ -37,9 +37,6 @@
 
   # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
   git = "!exec git"
-
-  # glog back to the most recent common ancestor of several refs
-  relate = "!f() { git glog $(for i in \"$@\"; do printf '%s~1..%s ' \"$(git merge-base \"$@\")\" \"${i}\"; done); }; f"
 
   cleanup = "!f() { git-cleanup.py \"$@\"; }; f"
   edit = "!f() { git-edit.py \"$@\"; }; f"
