@@ -33,8 +33,7 @@ $(ps aux | sed 's/^/    │ /')
   ┌────────────────────────────────────────────────────────────────────────────┐
   │ tmux capture-pane                                                          │
   └─┬──────────────────────────────────────────────────────────────────────────┘
-$(tmux capture-pane -pS - | sed 's/^/    │ /')
-
+$(((which tmux &>/dev/null || (echo '<tmux unavailable>' && exit 1)) && tmux capture-pane -pS -) | sed 's/^/    │ /')
   
 EOT
 
