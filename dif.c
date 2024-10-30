@@ -489,33 +489,57 @@ static int write_header(transition_t mode, const char *heading, FILE *sink) {
     width = ws.ws_col;
   }
 
-  // determine the path to the file being changed
+  // determine the path(s) to the file being changed
   const char *const file_pair = &heading[strlen("diff --git ")];
   const size_t file_pair_len = strlen(file_pair);
-  ASSERT(file_pair_len % 2 == 0 && "heading not \"diff --git foo foo\\n\"");
   ASSERT(file_pair[file_pair_len - 1] == '\n' &&
-         "heading not \"diff --git foo foo\\n\"");
-  ASSERT(file_pair[file_pair_len / 2 - 1] == ' ' &&
-         "heading not \"diff --git foo foo\\n\"");
+         "heading not \"diff --git …\\n\"");
+  const char *const space = strchr(file_pair, ' ');
+  ASSERT(space != NULL && "no ' ' in file pair section of \"diff --git …\"");
+
+  const char *const from = file_pair;
+  const size_t from_len = (size_t)(space - file_pair);
+  const char *const to = space + 1;
+  const size_t to_len = file_pair_len - from_len - 2;
+
+  // if the file was moved, we may have two different paths
+  const bool was_moved = from_len != to_len || strncmp(from, to, from_len) != 0;
 
   size_t j;
   if (mode == ADDED) {
+    ASSERT(!was_moved);
     if (fputs("\033[32;7madded: \033[1m", sink) < 0)
       return EIO;
     j = strlen("added :");
   } else if (mode == MODIFIED) {
-    if (fputs("\033[33;7mmodified: \033[1m", sink) < 0)
+    j = 0;
+    if (fputs("\033[33;7m", sink) < 0)
       return EIO;
-    j = strlen("modified: ");
+    if (was_moved) {
+      if (fputs("moved and ", sink) < 0)
+        return EIO;
+      j += strlen("moved and ");
+    }
+    if (fputs("modified: \033[1m", sink) < 0)
+      return EIO;
+    j += strlen("modified: ");
   } else {
+    ASSERT(!was_moved);
     if (fputs("\033[31;7mdeleted: \033[1m", sink) < 0)
       return EIO;
     j = strlen("deleted: ");
   }
 
-  if (fprintf(sink, "%.*s", (int)file_pair_len / 2 - 1, file_pair) < 0)
+  if (fprintf(sink, "%.*s", (int)from_len, from) < 0)
     return EIO;
-  j += file_pair_len / 2 - 1;
+  j += from_len;
+
+  if (was_moved) {
+    if (fprintf(sink, " → %.*s", (int)to_len, to) < 0)
+      return EIO;
+    j += 3 + to_len;
+  }
+
   for (; j < width; ++j) {
     if (fputs(" ", sink) < 0)
       return EIO;
