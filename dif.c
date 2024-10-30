@@ -690,8 +690,11 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    // if we see an index line, flush the heading
-    if (add_colour && startswith(buffer, "index ") && pending.heading != NULL) {
+    // if we see an index line or a pure move, flush the heading
+    if (add_colour &&
+        (startswith(buffer, "index ") ||
+         strcmp(buffer, "similarity index 100%\n") == 0) &&
+        pending.heading != NULL) {
       const int r = write_header(pending.mode, pending.heading, out);
       if (r != 0) {
         fprintf(stderr, "failed to write header: %s\n", strerror(r));
@@ -701,11 +704,15 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    // suppress the diff leader lines following the command
     if (add_colour) {
+      // suppress the diff leader lines following the command
       if (startswith(buffer, "+++ "))
         continue;
       if (startswith(buffer, "--- "))
+        continue;
+
+      // suppress similarity lines
+      if (startswith(buffer, "similarity "))
         continue;
     }
 
