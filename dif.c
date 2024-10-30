@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <spawn.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -44,6 +45,37 @@
 #ifdef __APPLE__
 #include <crt_externs.h>
 #endif
+
+/// process IDs for debugging emergencies
+static pid_t diff_pid;
+static pid_t less_pid;
+
+/// kill children and undo damage they may have done
+static void sanity(void) {
+  // unceremoniously murder our children
+  if (diff_pid != 0)
+    kill(diff_pid, SIGKILL);
+  if (less_pid != 0)
+    kill(less_pid, SIGKILL);
+
+  // undo any havoc they may have wrought, using stdout because stdin has
+  // likely been remapped
+  (void)system("stty --file=/dev/stdout sane");
+}
+
+/// assertion that anticipates TTY chaos
+///
+/// Under other programs, when failing an assertion a failure message is printed
+/// and `abort` is called. For us, diff+less are using the terminal and may have
+/// put it in a state where the failure message is invisible. This macro
+/// attempts to recover from this ambiguous state and get us a readable failure.
+#define ASSERT(expr)                                                           \
+  do {                                                                         \
+    if (!(expr)) {                                                             \
+      sanity();                                                                \
+      assert(expr);                                                            \
+    }                                                                          \
+  } while (0)
 
 /// get a pointer to `environ`
 static char **get_environ(void) {
@@ -106,8 +138,8 @@ done:
 /// \param argv Extra command line options
 /// \return 0 on success or an errno on failure
 static int run_diff(proc_t *diff, int argc, char **argv) {
-  assert(argc > 0);
-  assert(argv != NULL);
+  ASSERT(argc > 0);
+  ASSERT(argv != NULL);
 
   *diff = (proc_t){.in = -1, .out = -1};
   const char **args = NULL;
@@ -149,6 +181,7 @@ static int run_diff(proc_t *diff, int argc, char **argv) {
     goto done;
 
   // success
+  diff_pid = pid;
   *diff = (proc_t){.pid = pid, .in = -1, .out = out[0]};
   out[0] = -1;
 
@@ -168,7 +201,7 @@ done:
 /// \param less [out] Handle to the started process on success
 /// \return 0 on success or an errno on failure
 static int run_less(proc_t *less) {
-  assert(less != NULL);
+  ASSERT(less != NULL);
 
   *less = (proc_t){.in = -1, .out = -1};
   posix_spawn_file_actions_t fa;
@@ -194,6 +227,7 @@ static int run_less(proc_t *less) {
     goto done;
 
   // success
+  less_pid = pid;
   *less = (proc_t){.pid = pid, .in = out[1], .out = -1};
   out[1] = -1;
 
@@ -209,7 +243,7 @@ done:
 
 /// strip ANSI colour codes from a string
 static void decolourise(char *s) {
-  assert(s != NULL);
+  ASSERT(s != NULL);
 
   bool dropping = false;
   for (size_t dst = 0, src = 0;; ++src) {
@@ -237,8 +271,8 @@ typedef struct {
 /// \param line Line to add
 /// \return 0 on success or an errno on failure
 static int lines_append(lines_t *lines, char *line) {
-  assert(lines != NULL);
-  assert(line != NULL);
+  ASSERT(lines != NULL);
+  ASSERT(line != NULL);
 
   if (lines->n_line == lines->c_line) {
     const size_t new_c = lines->c_line == 0 ? 128 : (lines->c_line * 2);
@@ -249,7 +283,7 @@ static int lines_append(lines_t *lines, char *line) {
     lines->line = l;
   }
 
-  assert(lines->n_line < lines->c_line);
+  ASSERT(lines->n_line < lines->c_line);
   lines->line[lines->n_line] = line;
   ++lines->n_line;
 
@@ -258,7 +292,7 @@ static int lines_append(lines_t *lines, char *line) {
 
 /// remove all entries from a list
 static void lines_clear(lines_t *lines) {
-  assert(lines != NULL);
+  ASSERT(lines != NULL);
 
   for (size_t i = 0; i < lines->n_line; ++i)
     free(lines->line[i]);
@@ -267,7 +301,7 @@ static void lines_clear(lines_t *lines) {
 
 /// remove all entries from a list and deallocate backing storage
 static void lines_free(lines_t *lines) {
-  assert(lines != NULL);
+  ASSERT(lines != NULL);
 
   lines_clear(lines);
   free(lines->line);
@@ -300,9 +334,9 @@ static bool is_space(char c) { return c == ' ' || c == '\t'; }
 /// \return 0 on success or an errno on failure
 static int flush_line(bool colourise, const char *line, const char *pair,
                       FILE *sink) {
-  assert(line != NULL);
-  assert(sink != NULL);
-  assert(pair == NULL || (line[0] == '+' && pair[0] == '-') ||
+  ASSERT(line != NULL);
+  ASSERT(sink != NULL);
+  ASSERT(pair == NULL || (line[0] == '+' && pair[0] == '-') ||
          (line[0] == '-' && pair[0] == '+'));
 
   // is the common prefix and suffix only white space?
@@ -319,11 +353,11 @@ static int flush_line(bool colourise, const char *line, const char *pair,
 
   // find the common suffix
   const size_t line_len = strlen(line);
-  assert(line_len > 0 && line[line_len - 1] == '\n');
+  ASSERT(line_len > 0 && line[line_len - 1] == '\n');
   size_t suffix = 1;
   if (pair != NULL) {
     const size_t pair_len = strlen(pair);
-    assert(pair_len > 0 && pair[pair_len - 1] == '\n');
+    ASSERT(pair_len > 0 && pair[pair_len - 1] == '\n');
     for (size_t i = 1; i < line_len && i < pair_len &&
                        line[line_len - i - 1] == pair[pair_len - i - 1];
          ++i) {
@@ -392,8 +426,8 @@ static int flush_line(bool colourise, const char *line, const char *pair,
 /// \param sink Output to write to
 /// \return 0 on success or an errno on failure
 static int flush_lines(bool colourise, pending_t *pending, FILE *sink) {
-  assert(pending != NULL);
-  assert(sink != NULL);
+  ASSERT(pending != NULL);
+  ASSERT(sink != NULL);
 
   for (size_t i = 0; i < pending->neg.n_line; ++i) {
     const char *pair = NULL;
@@ -420,8 +454,8 @@ static int flush_lines(bool colourise, pending_t *pending, FILE *sink) {
 }
 
 static bool startswith(const char *s, const char *prefix) {
-  assert(s != NULL);
-  assert(prefix != NULL);
+  ASSERT(s != NULL);
+  ASSERT(prefix != NULL);
   return strncmp(s, prefix, strlen(prefix)) == 0;
 }
 
@@ -432,9 +466,9 @@ static bool startswith(const char *s, const char *prefix) {
 /// \param sink Output to write to
 /// \return 0 on success or an errno on failure
 static int write_header(transition_t mode, const char *heading, FILE *sink) {
-  assert(heading != NULL);
-  assert(startswith(heading, "diff --git "));
-  assert(sink != NULL);
+  ASSERT(heading != NULL);
+  ASSERT(startswith(heading, "diff --git "));
+  ASSERT(sink != NULL);
 
   // learn the width of the terminal
   static size_t width;
@@ -448,10 +482,10 @@ static int write_header(transition_t mode, const char *heading, FILE *sink) {
   // determine the path to the file being changed
   const char *const file_pair = &heading[strlen("diff --git ")];
   const size_t file_pair_len = strlen(file_pair);
-  assert(file_pair_len % 2 == 0 && "heading not \"diff --git foo foo\\n\"");
-  assert(file_pair[file_pair_len - 1] == '\n' &&
+  ASSERT(file_pair_len % 2 == 0 && "heading not \"diff --git foo foo\\n\"");
+  ASSERT(file_pair[file_pair_len - 1] == '\n' &&
          "heading not \"diff --git foo foo\\n\"");
-  assert(file_pair[file_pair_len / 2 - 1] == ' ' &&
+  ASSERT(file_pair[file_pair_len / 2 - 1] == ' ' &&
          "heading not \"diff --git foo foo\\n\"");
 
   size_t j;
