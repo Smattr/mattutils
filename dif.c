@@ -510,7 +510,7 @@ static int write_header(transition_t mode, const char *heading, FILE *sink) {
     ASSERT(!was_moved);
     if (fputs("\033[32;7madded: \033[1m", sink) < 0)
       return EIO;
-    j = strlen("added :");
+    j = strlen("added: ");
   } else if (mode == MODIFIED) {
     if (fputs("\033[33;7mmodified: \033[1m", sink) < 0)
       return EIO;
