@@ -512,17 +512,9 @@ static int write_header(transition_t mode, const char *heading, FILE *sink) {
       return EIO;
     j = strlen("added :");
   } else if (mode == MODIFIED) {
-    j = 0;
-    if (fputs("\033[33;7m", sink) < 0)
+    if (fputs("\033[33;7mmodified: \033[1m", sink) < 0)
       return EIO;
-    if (was_moved) {
-      if (fputs("moved and ", sink) < 0)
-        return EIO;
-      j += strlen("moved and ");
-    }
-    if (fputs("modified: \033[1m", sink) < 0)
-      return EIO;
-    j += strlen("modified: ");
+    j = strlen("modified: ");
   } else {
     ASSERT(!was_moved);
     if (fputs("\033[31;7mdeleted: \033[1m", sink) < 0)
