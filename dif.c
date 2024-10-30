@@ -654,6 +654,9 @@ int main(int argc, char **argv) {
         buffer = NULL;
         buffer_size = 0;
         continue;
+      } else if (startswith(buffer, "rename ")) {
+        // ignore notes about renames that we can infer from the diff header
+        continue;
       }
     }
 
