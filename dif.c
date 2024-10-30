@@ -77,6 +77,16 @@ static void sanity(void) {
     }                                                                          \
   } while (0)
 
+/// a “last gasp” debugging helper
+#define SOS(args...)                                                           \
+  do {                                                                         \
+    sanity();                                                                  \
+    fprintf(stderr, "%s:%d: ", __FILE__, __LINE__);                            \
+    fprintf(stderr, args);                                                     \
+    fflush(stderr);                                                            \
+    exit(EXIT_FAILURE);                                                        \
+  } while (0)
+
 /// get a pointer to `environ`
 static char **get_environ(void) {
 #ifdef __APPLE__
