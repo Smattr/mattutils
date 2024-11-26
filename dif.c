@@ -60,7 +60,7 @@ static void sanity(void) {
 
   // undo any havoc they may have wrought, using stdout because stdin has
   // likely been remapped
-  (void)system("stty --file=/dev/stdout sane");
+  int r __attribute__((unused)) = system("stty --file=/dev/stdout sane");
 }
 
 /// assertion that anticipates TTY chaos
