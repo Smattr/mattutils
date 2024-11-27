@@ -363,12 +363,12 @@ static int flush_line(bool colourise, const char *line, const char *pair,
 
   // find the common suffix
   const size_t line_len = strlen(line);
-  ASSERT(line_len > 0 && line[line_len - 1] == '\n');
-  size_t suffix = 1;
+  ASSERT(line_len > 0);
+  size_t suffix = 0;
   if (pair != NULL) {
     const size_t pair_len = strlen(pair);
-    ASSERT(pair_len > 0 && pair[pair_len - 1] == '\n');
-    for (size_t i = 1; i < line_len && i < pair_len &&
+    ASSERT(pair_len > 0);
+    for (size_t i = 0; i < line_len && i < pair_len &&
                        line[line_len - i - 1] == pair[pair_len - i - 1];
          ++i) {
       spaces &= is_space(line[line_len - i - 1]);
@@ -389,7 +389,7 @@ static int flush_line(bool colourise, const char *line, const char *pair,
   // should we perform word highlighting?
   const bool highlight_words =
       !spaces && // the common prefix/suffix is not just white space
-      (prefix > 1 || suffix > 1) // we have a non-trivial common prefix/suffix
+      (prefix > 1 || suffix > 0) // we have a non-trivial common prefix/suffix
       && prefix != line_len;     // the lines do not somehow match exactly
 
   for (size_t i = 0; i < line_len; ++i) {
@@ -424,6 +424,13 @@ static int flush_line(bool colourise, const char *line, const char *pair,
 
     if (fputc(line[i], sink) < 0)
       return EIO;
+
+    // if this line was not properly terminated, ensure we return to a sane
+    // state
+    if (i + 1 == line_len && line[i] != '\n') {
+      if (fputs("\033[0m", sink) < 0)
+        return EIO;
+    }
   }
 
   return 0;
