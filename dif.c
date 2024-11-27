@@ -353,7 +353,7 @@ static int flush_line(bool colourise, const char *line, const char *pair,
   bool spaces = true;
 
   // find the common prefix
-  size_t prefix = 1;
+  size_t prefix = 1; // account for '+'/'-'
   if (pair != NULL) {
     for (size_t i = 1; line[i] != '\0' && line[i] == pair[i]; ++i) {
       spaces &= is_space(line[i]);
@@ -408,12 +408,12 @@ static int flush_line(bool colourise, const char *line, const char *pair,
         esc = "\033[1m"; // bold
       } else if (i != 0 && highlight_words) {
         if (i == prefix) {
-          esc = "\033[7m";
+          esc = "\033[7m"; // invert colours
         }
         // avoid `else if` in order to handle the scenario where `prefix +
         // suffix == line_len`
         if (line_len - i == suffix) {
-          esc = "\033[27m";
+          esc = "\033[27m"; // uninvert colours
         }
       }
       if (esc != NULL) {
