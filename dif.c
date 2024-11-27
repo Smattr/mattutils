@@ -396,9 +396,9 @@ static int flush_line(bool colourise, const char *line, const char *pair,
 
     if (colourise) {
       const char *esc = NULL;
-      if (i == 0 && line[i] == '+' && line[i + 1] != '+') {
+      if (i == 0 && line[i] == '+') {
         esc = "\033[32m"; // green
-      } else if (i == 0 && line[i] == '-' && line[i + 1] != '-') {
+      } else if (i == 0 && line[i] == '-') {
         esc = "\033[31m"; // red
       } else if (i == 0 && line[i] == '@') {
         esc = "\033[36m"; // cyan
@@ -629,7 +629,8 @@ int main(int argc, char **argv) {
 
     // accumulate this line if we can later output it with more contextual hints
     if (!prelude) {
-      if (buffer[0] == '-' && buffer[1] != '-' && pending.pos.n_line == 0) {
+      if (buffer[0] == '-' && !startswith(buffer, "--- ") &&
+          pending.pos.n_line == 0) {
         // a negative line that may have a later matching positive line
         const int r = lines_append(&pending.neg, buffer);
         if (r != 0) {
@@ -641,7 +642,7 @@ int main(int argc, char **argv) {
         buffer = NULL;
         buffer_size = 0;
         continue;
-      } else if (buffer[0] == '+' && buffer[1] != '+') {
+      } else if (buffer[0] == '+' && !startswith(buffer, "+++ ")) {
         // a positive line that may have an earlier matching negative line
         const int r = lines_append(&pending.pos, buffer);
         if (r != 0) {
