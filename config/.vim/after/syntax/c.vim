@@ -237,3 +237,6 @@ syn keyword cConstant PTRACE_O_EXITKILL PTRACE_O_TRACECLONE PTRACE_O_TRACECLONE
 
 " C11 threads
 syn keyword cConstant thrd_success thrd_nomem thrd_timeout thrd_busy thrd_error
+
+" memfd_create
+syn keyword cConstant MFD_CLOEXEC MFD_ALLOW_SEALING MFD_HUGETLB
