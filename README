@@ -45,14 +45,6 @@ misc/puts-ldpreload-example.c - A nice simple example of an LD_PRELOAD hack.
     These tricks are useful for instrumenting closed source programs.
 misc/ram-churn.c - A utility for pushing all running processes' pages to disk
     (i.e. evicting them from RAM).
-misc/RTL8192CU_kernel_2.6.38.patch - If you have a Realtek RTL8192CU wireless
-    device and have attempted to use it on Linux, you will have discovered that
-    the Realtek driver doesn't compile under any kernel after 2.6.35. This patch
-    fixes the driver for 2.6.38. If you've got the RAR archive from Realtek, the
-    best approach is to extract it, run the install.sh script, when it fails
-    modify the script to comment out the tar zxvf line, apply the patch, re-run
-    the script. There's an in-kernel driver in the staging tree scheduled for
-    inclusion in the 2.6.39 so this patch shouldn't be relevant for long.
 misc/sizeofs.sh - A script for doing more advanced sizeof operations on C
     entities that are not known at compile time.
 misc/stack-smash-hello-world.c - Hello world written using a stack smashing
