@@ -57,6 +57,52 @@
 <Multi_key> <t> <o> <p>                 : "⊤"
 <Multi_key> <b> <o> <t> <t> <o> <m>     : "⊥"
 
+# superscripts
+<Multi_key> <asciicircum> <underscore> <A> : "ᴬ"
+<Multi_key> <asciicircum> <underscore> <B> : "ᴮ"
+<Multi_key> <asciicircum> <underscore> <D> : "ᴰ"
+<Multi_key> <asciicircum> <underscore> <E> : "ᴱ"
+<Multi_key> <asciicircum> <underscore> <G> : "ᴳ"
+<Multi_key> <asciicircum> <underscore> <H> : "ᴴ"
+<Multi_key> <asciicircum> <underscore> <I> : "ᴵ"
+<Multi_key> <asciicircum> <underscore> <J> : "ᴶ"
+<Multi_key> <asciicircum> <underscore> <K> : "ᴷ"
+<Multi_key> <asciicircum> <underscore> <L> : "ᴸ"
+<Multi_key> <asciicircum> <underscore> <M> : "ᴹ"
+<Multi_key> <asciicircum> <underscore> <N> : "ᴺ"
+<Multi_key> <asciicircum> <underscore> <O> : "ᴼ"
+<Multi_key> <asciicircum> <underscore> <P> : "ᴾ"
+<Multi_key> <asciicircum> <underscore> <R> : "ᴿ"
+<Multi_key> <asciicircum> <underscore> <T> : "ᵀ"
+<Multi_key> <asciicircum> <underscore> <U> : "ᵁ"
+<Multi_key> <asciicircum> <underscore> <V> : "ⱽ"
+<Multi_key> <asciicircum> <underscore> <W> : "ᵂ"
+<Multi_key> <asciicircum> <underscore> <a> : "ᵃ"
+<Multi_key> <asciicircum> <underscore> <b> : "ᵇ"
+<Multi_key> <asciicircum> <underscore> <c> : "ᶜ"
+<Multi_key> <asciicircum> <underscore> <d> : "ᵈ"
+<Multi_key> <asciicircum> <underscore> <e> : "ᵉ"
+<Multi_key> <asciicircum> <underscore> <f> : "ᶠ"
+<Multi_key> <asciicircum> <underscore> <g> : "ᵍ"
+# <Multi_key> <asciicircum> <underscore> <h> : "ʰ" # already in en_US.UTF-8 defaults
+# <Multi_key> <asciicircum> <underscore> <i> : "ⁱ" # already in en_US.UTF-8 defaults
+# <Multi_key> <asciicircum> <underscore> <j> : "ʲ" # already in en_US.UTF-8 defaults
+<Multi_key> <asciicircum> <underscore> <k> : "ᵏ"
+# <Multi_key> <asciicircum> <underscore> <l> : "ˡ" # already in en_US.UTF-8 defaults
+<Multi_key> <asciicircum> <underscore> <m> : "ᵐ"
+# <Multi_key> <asciicircum> <underscore> <n> : "ⁿ" # already in en_US.UTF-8 defaults
+<Multi_key> <asciicircum> <underscore> <o> : "ᵒ"
+<Multi_key> <asciicircum> <underscore> <p> : "ᵖ"
+# <Multi_key> <asciicircum> <underscore> <r> : "ʳ" # already in en_US.UTF-8 defaults
+# <Multi_key> <asciicircum> <underscore> <s> : "ˢ" # already in en_US.UTF-8 defaults
+<Multi_key> <asciicircum> <underscore> <t> : "ᵗ"
+<Multi_key> <asciicircum> <underscore> <u> : "ᵘ"
+<Multi_key> <asciicircum> <underscore> <v> : "ᵛ"
+# <Multi_key> <asciicircum> <underscore> <w> : "ʷ" # already in en_US.UTF-8 defaults
+# <Multi_key> <asciicircum> <underscore> <x> : "ˣ" # already in en_US.UTF-8 defaults
+# <Multi_key> <asciicircum> <underscore> <y> : "ʸ" # already in en_US.UTF-8 defaults
+<Multi_key> <asciicircum> <underscore> <z> : "ᶻ"
+
 # subscripts
 <Multi_key> <underscore> <a> : "ₐ"
 <Multi_key> <underscore> <e> : "ₑ"
