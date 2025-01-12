@@ -82,6 +82,7 @@ def main(args: List[str]) -> int:
         action="store_true",
         help="do not perform destructive actions",
     )
+    parser.add_argument("--debug", action="store_true", help="enable debugging output")
     parser.add_argument("--remote", help="remote to compare against", default="origin")
     parser.add_argument("--onto", help="branch that the target was merged into")
     parser.add_argument("branch", help="branch to reap")
@@ -107,6 +108,8 @@ def main(args: List[str]) -> int:
             sys.stderr.write("could not figure out default branch name\n")
             return -1
         options.onto = default.group(1)
+        if options.debug:
+            sys.stderr.write(f"debug: figured out default branch is {options.onto}\n")
 
     # if the branch contains ':', assume it is <fork>:<branch> as Github’s copy
     # button gives you
@@ -121,6 +124,12 @@ def main(args: List[str]) -> int:
             suffix = branch[len(options.branch) :]
             if re.match(r"(-\d+)?$", suffix) is not None:
                 victims.append(branch)
+            elif options.debug:
+                sys.stderr.write(
+                    f'debug: branch "{branch}"’s suffix "{suffix}" did not match\n'
+                )
+        elif options.debug:
+            sys.stderr.write(f"debug: skipping branch {branch}\n")
 
     print(f"going to delete {victims}")
 
