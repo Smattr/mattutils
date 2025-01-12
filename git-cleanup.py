@@ -119,7 +119,7 @@ def main(args: List[str]) -> int:
     victims: List[str] = []
     branches = call(["git", "branch"])
     for line in branches.split("\n"):
-        branch = line[2:]
+        branch = line.lstrip(" *")
         if branch.startswith(options.branch):
             suffix = branch[len(options.branch) :]
             if re.match(r"(-\d+)?$", suffix) is not None:
