@@ -167,25 +167,6 @@ function vcs_prompt {
         fi
       fi
     fi
-    command -v hg &>/dev/null
-    if [ $? -eq 0 ]; then
-      hg root &>/dev/null
-      if [ $? -eq 0 ]; then
-        printf ' ☿ '
-        if [ -z "$(hg status 2>/dev/null)" ]; then
-          # Working directory is clean.
-          printf '%s' "%{${fg_bold[green]}%}"
-        elif [ -z "$(hg status 2>/dev/null | grep -v '^?')" ]; then
-          # Working directory only contains changes to untracked files.
-          printf '%s' "%{${fg_bold[yellow]}%}"
-        else
-          # Working directory contains changes to tracked files.
-          printf '%s' "%{${fg_bold[red]}%}"
-        fi
-        printf '%s' "$(hg branch 2>/dev/null)"
-        printf '%s' "%{${fg_no_bold[default]}%}"
-      fi
-    fi
 }
 
 function reboot_prompt {
