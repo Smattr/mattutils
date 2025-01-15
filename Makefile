@@ -60,6 +60,7 @@ default: \
   ${HOME}/bin/t \
   ${HOME}/bin/term \
   ${HOME}/bin/timestamp \
+  ${HOME}/bin/update.py \
   ${HOME}/bin/v \
   ${HOME}/bin/validate.py \
   ${HOME}/bin/wim \
