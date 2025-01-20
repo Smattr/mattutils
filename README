@@ -21,7 +21,6 @@ misc/alloc/ - Fragments of a half-finished allocation library.
 misc/alloc-monitor.c - Yet another LD_PRELOAD hack for instrumenting calls to
     malloc and free.
 misc/balloon.c - A memory balloon application.
-misc/cat.bf - An implementation of cat in brainfuck for fun and profit.
 misc/error-handling.c - An example (experiment?) of out-of-line error handling
     in C.
 misc/fuckit-cc - A script for violently suppressing errors in your C code.
