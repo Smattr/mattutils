@@ -29,8 +29,6 @@ misc/macros.h - A header file of handy C macros.
 misc/mem-exec.c - Utility for testing executability of memory regions.
 misc/memset.c - Various memset implementations.
 misc/probe-mmap.c - Determine the dimensions of your mmap region.
-misc/ram-churn.c - A utility for pushing all running processes' pages to disk
-    (i.e. evicting them from RAM).
 misc/sizeofs.sh - A script for doing more advanced sizeof operations on C
     entities that are not known at compile time.
 misc/stack-smash-hello-world.c - Hello world written using a stack smashing
