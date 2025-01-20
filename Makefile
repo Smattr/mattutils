@@ -32,7 +32,6 @@ default: \
   ${HOME}/.XCompose \
   ${HOME}/.Xdefaults \
   ${HOME}/.zshrc \
-  ${HOME}/bin/after \
   ${HOME}/bin/ag \
   ${HOME}/bin/bashd.sh \
   ${HOME}/bin/c \
