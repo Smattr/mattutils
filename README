@@ -24,9 +24,6 @@ misc/balloon.c - A memory balloon application.
 misc/fuckit-cc - A script for violently suppressing errors in your C code.
     Considered harmful.
 misc/is-bound.c - Program for checking whether a socket is currently bound.
-misc/linked_list.[ch] - An implementation of a linked list in C. This was some
-    code from when I was learning C. If you want a linked list, you are
-    probably better served by rolling your own.
 misc/lock-monitor/ - A tool for catching deadlock and livelock issues.
 misc/lubuntu/ - Some files related to setting up a nicer configuration on
     Lubuntu.
