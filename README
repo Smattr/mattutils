@@ -25,8 +25,6 @@ misc/fuckit-cc - A script for violently suppressing errors in your C code.
     Considered harmful.
 misc/is-bound.c - Program for checking whether a socket is currently bound.
 misc/lock-monitor/ - A tool for catching deadlock and livelock issues.
-misc/lubuntu/ - Some files related to setting up a nicer configuration on
-    Lubuntu.
 misc/macros.h - A header file of handy C macros.
 misc/mem-exec.c - Utility for testing executability of memory regions.
 misc/memset.c - Various memset implementations.
