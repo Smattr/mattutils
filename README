@@ -28,8 +28,6 @@ misc/lock-monitor/ - A tool for catching deadlock and livelock issues.
 misc/macros.h - A header file of handy C macros.
 misc/mem-exec.c - Utility for testing executability of memory regions.
 misc/memset.c - Various memset implementations.
-misc/overloading.c - Function overloading in C. Betcha thought it was
-    impossible.
 misc/probe-mmap.c - Determine the dimensions of your mmap region.
 misc/puts-ldpreload-example.c - A nice simple example of an LD_PRELOAD hack.
     These tricks are useful for instrumenting closed source programs.
