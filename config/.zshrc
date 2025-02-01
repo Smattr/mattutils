@@ -132,7 +132,6 @@ bindkey '\e\e[5D' backward-word
 # Allow custom completion
 
 fpath=(~/.zsh $fpath)
-autoload -U ~/.zsh/*(:t)
 
 # Version control status.
 setopt PROMPT_SUBST
