@@ -15,7 +15,6 @@ predecessors.
 
 import argparse
 import functools
-import os
 import re
 import shlex
 import subprocess as sp
@@ -87,9 +86,6 @@ def main(args: List[str]) -> int:
     parser.add_argument("--onto", help="branch that the target was merged into")
     parser.add_argument("branch", help="branch to reap")
     options = parser.parse_args(args[1:])
-
-    # suppress user’s ~/.gitconfig
-    os.environ["GIT_CONFIG_GLOBAL"] = os.devnull
 
     # check this is actually a Git repository
     run(["git", "rev-parse", "HEAD"])
