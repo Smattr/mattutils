@@ -46,6 +46,10 @@ def main(args: List[str]) -> int:
         return -1
     del changes
 
+    # if the branch contains ':', assume it is <fork>:<branch> as Github’s copy
+    # button gives you
+    options.branch = options.branch.split(":", maxsplit=1)[-1]
+
     # check this branch exists upstream
     upstream = call(["git", "ls-remote", options.remote, options.branch])
     if len(upstream.strip()) == 0:
