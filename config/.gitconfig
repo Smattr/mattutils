@@ -65,6 +65,7 @@
   stat = True
 
 [diff]
+  algorithm = histogram
   noprefix = True
 
 [interactive]
@@ -85,6 +86,18 @@
 
 [core]
   commentChar = ";"
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = version:refname
+
+[fetch]
+  prune = true
+
+[commit]
+  verbose = true
 
 # local override settings that may or may not exist
 [include]
