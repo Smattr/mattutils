@@ -15,7 +15,7 @@ from pathlib import Path
 def run(args, cwd=None):
     """run a command with some niceties"""
     cd = "" if cwd is None else f"cd {shlex.quote(str(cwd))} && "
-    print(f"+ {cd}{' '.join(shlex.quote(str(a)) for a in args)}")
+    print(f"+ {cd}{shlex.join(str(a) for a in args)}")
     subprocess.check_call(args, cwd=cwd)
 
 

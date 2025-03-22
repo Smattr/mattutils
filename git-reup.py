@@ -14,12 +14,12 @@ from typing import List
 
 
 def run(args: List[str]):
-    print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
+    print(f"+ {shlex.join(str(x) for x in args)}")
     sp.check_call(args)
 
 
 def call(args: List[str]):
-    print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
+    print(f"+ {shlex.join(str(x) for x in args)}")
     return sp.check_output(args, universal_newlines=True)
 
 
