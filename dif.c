@@ -78,11 +78,11 @@ static void sanity(void) {
   } while (0)
 
 /// a “last gasp” debugging helper
-#define SOS(args...)                                                           \
+#define SOS(...)                                                               \
   do {                                                                         \
     sanity();                                                                  \
     fprintf(stderr, "%s:%d: ", __FILE__, __LINE__);                            \
-    fprintf(stderr, args);                                                     \
+    fprintf(stderr, __VA_ARGS__);                                              \
     fflush(stderr);                                                            \
     exit(EXIT_FAILURE);                                                        \
   } while (0)
