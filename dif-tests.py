@@ -11,7 +11,6 @@ import pexpect
 import pytest
 
 
-@pytest.mark.xfail(strict=True)
 def test_unicode_prefix(tmp_path: Path):
     """are non-ASCII characters shown correctly when their prefix matches?"""
 

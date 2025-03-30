@@ -386,6 +386,27 @@ static int flush_line(bool colourise, const char *line, const char *pair,
       suffix = pair_len - prefix;
   }
 
+  // shrink the prefix if it falls in the middle of a UTF-8 character
+  for (size_t i = 1; i < prefix;) {
+    const unsigned char l = (unsigned char)line[i];
+    const size_t length = (l >> 7) == 0    ? 1
+                          : (l >> 5) == 6  ? 2
+                          : (l >> 4) == 14 ? 3
+                          : (l >> 3) == 30 ? 4
+                                           : 0;
+    if (length == 0) {
+      // malformed UTF-8
+      prefix = i;
+      break;
+    }
+    if (i + length > prefix) {
+      // prefix is in the middle of a UTF-8 character
+      prefix = i;
+      break;
+    }
+    i += length;
+  }
+
   // should we perform word highlighting?
   const bool highlight_words =
       !spaces && // the common prefix/suffix is not just white space
