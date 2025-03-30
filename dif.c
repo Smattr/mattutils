@@ -332,6 +332,22 @@ typedef struct {
 /// is this a white space character we expect to encounter in a code line?
 static bool is_space(char c) { return c == ' ' || c == '\t'; }
 
+/// find byte-length of a UTF-8 character
+///
+/// \param initial First byte of the character
+/// \return UTF-8 character’s length or 0 if this is a malformed sequence
+static size_t utf8_len(unsigned char initial) {
+  if ((initial >> 7) == 0)
+    return 1;
+  if ((initial >> 5) == 6)
+    return 2;
+  if ((initial >> 4) == 14)
+    return 3;
+  if ((initial >> 3) == 30)
+    return 4;
+  return 0;
+}
+
 /// write out a diff line
 ///
 /// If a `pair` is provided, this will attempt to do diff-so-fancy-style
@@ -365,8 +381,8 @@ static int flush_line(bool colourise, const char *line, const char *pair,
   const size_t line_len = strlen(line);
   ASSERT(line_len > 0);
   size_t suffix = 0;
+  const size_t pair_len = pair == NULL ? 0 : strlen(pair);
   if (pair != NULL) {
-    const size_t pair_len = strlen(pair);
     ASSERT(pair_len > 0);
     for (size_t i = 0; i < line_len && i < pair_len &&
                        line[line_len - i - 1] == pair[pair_len - i - 1];
@@ -388,12 +404,7 @@ static int flush_line(bool colourise, const char *line, const char *pair,
 
   // shrink the prefix if it falls in the middle of a UTF-8 character
   for (size_t i = 1; i < prefix;) {
-    const unsigned char l = (unsigned char)line[i];
-    const size_t length = (l >> 7) == 0    ? 1
-                          : (l >> 5) == 6  ? 2
-                          : (l >> 4) == 14 ? 3
-                          : (l >> 3) == 30 ? 4
-                                           : 0;
+    const size_t length = utf8_len((unsigned char)line[i]);
     if (length == 0) {
       // malformed UTF-8
       prefix = i;
@@ -405,6 +416,28 @@ static int flush_line(bool colourise, const char *line, const char *pair,
       break;
     }
     i += length;
+  }
+
+  // shrink the suffix if it falls in the middle of a UTF-8 character
+  if (suffix > 0) {
+    for (size_t i = 1; i + suffix < line_len;) {
+      const size_t length = utf8_len((unsigned char)line[i]);
+      if (i + length + suffix > line_len) {
+        suffix = line_len - i - length;
+        break;
+      }
+      i += length == 0 ? 1 : length;
+    }
+  }
+  if (suffix > 0) {
+    for (size_t i = 1; i + suffix < pair_len;) {
+      const size_t length = utf8_len((unsigned char)pair[i]);
+      if (i + length + suffix > pair_len) {
+        suffix = pair_len - i - length;
+        break;
+      }
+      i += length == 0 ? 1 : length;
+    }
   }
 
   // should we perform word highlighting?

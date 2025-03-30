@@ -26,7 +26,6 @@ def test_unicode_prefix(tmp_path: Path):
     proc.expect(pexpect.EOF)
 
 
-@pytest.mark.xfail(strict=True)
 def test_unicode_suffix(tmp_path: Path):
     """are non-ASCII characters shown correctly when their suffix matches?"""
 
