@@ -20,7 +20,7 @@ def test_unicode_prefix(tmp_path: Path):
     b = tmp_path / "b"
     b.write_text("foo ┌──┐ \n", encoding="utf-8")
 
-    proc = pexpect.spawn("dif", [str(a), str(b)], encoding="utf-8", dimensions=(4, 80))
+    proc = pexpect.spawn("dif", [str(a), str(b)], encoding="utf-8")
     proc.expect(re.compile(r"^\[31m-.*┌.*┐", flags=re.MULTILINE))
     proc.expect(re.compile(r"^\[32m+.*┌.*┐", flags=re.MULTILINE))
     proc.expect(pexpect.EOF)
@@ -35,7 +35,7 @@ def test_unicode_suffix(tmp_path: Path):
     b = tmp_path / "b"
     b.write_text("foo ┌──┐\n", encoding="utf-8")
 
-    proc = pexpect.spawn("dif", [str(a), str(b)], encoding="utf-8", dimensions=(4, 80))
+    proc = pexpect.spawn("dif", [str(a), str(b)], encoding="utf-8")
     proc.expect(re.compile(r"^\[31m-.*┌.*┐", flags=re.MULTILINE))
     proc.expect(re.compile(r"^\[32m+.*┌.*┐", flags=re.MULTILINE))
     proc.expect(pexpect.EOF)
