@@ -5,10 +5,25 @@ tests for dif.c
 """
 
 import re
+import subprocess
 from pathlib import Path
 
 import pexpect
 import pytest
+
+
+def test_embedded_nul():
+    """how does `dif` react to a `\0` byte in the content?"""
+    diff = (
+        b"diff --git a b\n"
+        b"--- a\n"
+        b"+++ b\n"
+        b"@@ -11,6 +11,21 @@\n"
+        b"-foo\n"
+        b"+ba\x00r\n"
+    )
+
+    subprocess.run(["dif"], input=diff, check=True)
 
 
 def test_plus_plus(tmp_path: Path):
