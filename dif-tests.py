@@ -26,6 +26,20 @@ def test_embedded_nul():
     subprocess.run(["dif"], input=diff, check=True)
 
 
+def test_missing_newline():
+    """how does `dif` react to a missing final end line?"""
+    diff = (
+        b"diff --git a b\n"
+        b"--- a\n"
+        b"+++ b\n"
+        b"@@ -11,6 +11,21 @@\n"
+        b"-foo\n"
+        b"+ba\x00r"
+    )
+
+    subprocess.run(["dif"], input=diff, check=True)
+
+
 def test_plus_plus(tmp_path: Path):
     """
     are lines beginning with e.g. `++[^+]` correctly detected as not part of the header?
