@@ -40,6 +40,20 @@ def test_missing_newline():
     subprocess.run(["dif"], input=diff, check=True)
 
 
+@pytest.mark.xfail(strict=True)
+def test_no_git_diff_header(tmp_path: Path):
+    """does `dif` correctly highlight something not coming from `git`?"""
+
+    a = tmp_path / "a"
+    a.write_text("foo\n", encoding="utf-8")
+
+    b = tmp_path / "b"
+    b.write_text("bar\n", encoding="utf-8")
+
+    proc = pexpect.spawn("dif", [str(a), str(b)], encoding="utf-8")
+    proc.expect(re.compile(f"{a} → {b}"))
+
+
 def test_plus_plus(tmp_path: Path):
     """
     are lines beginning with e.g. `++[^+]` correctly detected as not part of the header?
