@@ -41,6 +41,35 @@ def test_missing_newline():
     subprocess.run(["dif"], input=diff, check=True)
 
 
+def test_moved():
+    """`dif` should not crash on encountering moved files"""
+
+    diff = textwrap.dedent(
+        """\
+    diff --git foo quux
+    similarity index 74%
+    rename from foo
+    rename to quux
+    index a168ae3..e3c2802 100644
+    --- foo
+    +++ quux
+    @@ -1,4 +1,4 @@
+    -hello
+    +world
+     bar
+     baz
+     baz
+    """
+    )
+
+    proc = pexpect.spawn("dif")
+    proc.send(diff)
+    proc.sendeof()
+    proc.wait()
+    proc.close()
+    assert proc.signalstatus is None, "`dif` crashed when processing move"
+
+
 @pytest.mark.xfail(strict=True)
 def test_no_git_diff_header(tmp_path: Path):
     """does `dif` correctly highlight something not coming from `git`?"""
