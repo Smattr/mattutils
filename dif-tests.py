@@ -29,16 +29,17 @@ def test_embedded_nul():
 
 def test_missing_newline():
     """how does `dif` react to a missing final end line?"""
-    diff = (
-        b"diff --git a b\n"
-        b"--- a\n"
-        b"+++ b\n"
-        b"@@ -11,6 +11,21 @@\n"
-        b"-foo\n"
-        b"+ba\x00r"
+    diff = textwrap.dedent(
+        """\
+    diff --git a b
+    --- a
+    +++ b
+    @@ -11,6 +11,21 @@
+    -foo
+    +bar"""
     )
 
-    subprocess.run(["dif"], input=diff, check=True)
+    subprocess.run(["dif"], input=diff, check=True, text=True)
 
 
 def test_moved():
