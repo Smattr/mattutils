@@ -6,6 +6,7 @@ tests for dif.c
 
 import re
 import subprocess
+import textwrap
 from pathlib import Path
 
 import pexpect
@@ -66,6 +67,29 @@ def test_plus_plus(tmp_path: Path):
 
     proc = pexpect.spawn("dif", [str(a), str(b)], encoding="utf-8")
     proc.expect(re.compile(r"^\[32m++", flags=re.MULTILINE))
+
+
+def test_rename_ignore(tmp_path: Path):
+    """does `dif` ignore “rename …” lines?"""
+
+    # a diff that indicates a rename
+    diff = textwrap.dedent(
+        """\
+    diff --git a b
+    similarity index 100%
+    rename from a
+    rename to b
+    """
+    )
+
+    # run this through `dif`
+    proc = subprocess.run(
+        ["dif"], input=diff, stdout=subprocess.PIPE, check=True, text=True
+    )
+
+    assert (
+        re.search(r"\brename\b", proc.stdout) is None
+    ), "rename lines were not suppressed"
 
 
 def test_unicode_prefix(tmp_path: Path):
