@@ -55,7 +55,6 @@ default: \
   ${HOME}/bin/rerebase \
   ${HOME}/bin/shrink \
   ${HOME}/bin/s \
-  ${HOME}/bin/ssh-proxy \
   ${HOME}/bin/t \
   ${HOME}/bin/term \
   ${HOME}/bin/timestamp \
