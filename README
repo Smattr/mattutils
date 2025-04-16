@@ -14,7 +14,6 @@ fwdmail.py - A script for forwarding your local mail to an external address.
 generate-passwd - A script for generating random passwords.
 internal/ - A directory for scripts for managing operations specific to this
     repository.
-manage-kernels - Script for uninstalling Linux kernels.
 misc/ - A directory for miscellaneous half-finished bits or tools that I don't
     actually deploy anywhere, but like to track changes to.
 misc/alloc/ - Fragments of a half-finished allocation library.
