@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+
+"""
+instrument compilation with oi.h
+"""
+
+import os
+import sys
+from pathlib import Path
+from typing import List
+
+
+def main(args: List[str]) -> int:
+    """entry point"""
+
+    oi_h = Path(__file__).parent / "oi.h"
+
+    # if this looks like a compiler, teach it to pre-include our instrumentation
+    if Path(args[1]).name in ("cc", "gcc", "clang", "c++", "g++", "clang++"):
+        args = [args[1], f"-include{oi_h}"] + args[2:]
+
+    # otherwise, assume it is something that listens to $CFLAGS, $CXXFLAGS
+    else:
+        if "CFLAGS" in os.environ:
+            cflags = f"{os.environ['CFLAGS']} -include{oi_h}"
+        else:
+            cflags = f"-include{oi_h}"
+        if "CXXFLAGS" in os.environ:
+            cxxflags = f"{os.environ['CXXFLAGS']} -include{oi_h}"
+        else:
+            cxxflags = f"-include{oi_h}"
+        args = ["env", f"CFLAGS={cflags}", f"CXXFLAGS={cxxflags}"] + args[1:]
+
+    os.execvp(args[0], args)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
