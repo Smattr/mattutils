@@ -14,6 +14,11 @@ if [ $# -gt 0 ]; then
   fi
 fi
 
+# if we have Clink’s Vim wrapper, preference that
+if which clink-vim &>/dev/null; then
+  exec clink-vim ${argv0} ${argv1} "$@"
+fi
+
 if which vim &>/dev/null; then
   exec vim ${argv0} ${argv1} "$@"
 fi
