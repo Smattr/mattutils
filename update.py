@@ -12,11 +12,14 @@ import tempfile
 from pathlib import Path
 
 
-def run(args, cwd=None):
+def run(args, cwd=None) -> str:
     """run a command with some niceties"""
     cd = "" if cwd is None else f"cd {shlex.quote(str(cwd))} && "
     print(f"+ {cd}{shlex.join(str(a) for a in args)}")
-    subprocess.check_call(args, cwd=cwd)
+    p = subprocess.run(args, stdout=subprocess.PIPE, cwd=cwd, check=False, text=True)
+    sys.stdout.write(p.stdout)
+    p.check_returncode()
+    return p.stdout
 
 
 def main(args):
@@ -60,6 +63,15 @@ def main(args):
         )
         run(["cmake", "--build", build, "--parallel"])
         run(["sudo", "cmake", "--build", build, "--target", "install"])
+
+        # note where this was derived from
+        metadata = workdir / "metadata.txt"
+        commit = run(["git", "rev-parse", "HEAD"], workdir)
+        metadata.write_text(
+            f"built from {commit} of https://github.com/smattr/{options.project}",
+            encoding="utf-8"
+        )
+        run(["sudo", "mv", metadata, f"/opt/{options.project}/metadata.txt"])
 
     return 0
 
