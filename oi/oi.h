@@ -67,7 +67,9 @@ oi_print_(const char *format, ...) {
 #endif
 #endif
 
+  extern void flockfile(FILE *);
   flockfile(stderr);
+
   const time_t now = time(NULL);
   const struct tm *const now_tm = localtime(&now);
   fprintf(stderr, "%s[OI %04d-%02d-%02d %02d:%02d] %s:%d: ",
@@ -76,6 +78,8 @@ oi_print_(const char *format, ...) {
           oi_filename_, oi_lineno_);
   vfprintf(stderr, format, ap);
   fprintf(stderr, "%s\n", use_colour ? "\033[0m" : "");
+
+  extern void funlockfile(FILE *);
   funlockfile(stderr);
 
   va_end(ap);
