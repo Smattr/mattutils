@@ -36,6 +36,7 @@ def main(args):
             [
                 "git",
                 "clone",
+                "--depth=1",
                 "--recurse-submodules",
                 f"https://github.com/smattr/{options.project}",
                 workdir,
