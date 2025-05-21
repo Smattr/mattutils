@@ -13,8 +13,8 @@
 
 #include <assert.h>
 #include <stdarg.h>
-#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -304,3 +304,75 @@ static inline void oi__(void) {}
           __builtin_types_compatible_p(__typeof__(fmt), char[]), fmt,          \
           "unused"),                                                           \
       oi_make_value_(fmt), ##__VA_ARGS__))
+
+#ifdef __has_include
+#if __has_include(<execinfo.h>)
+#include <execinfo.h>
+#endif
+#endif
+
+/// print a backtrace of the caller’s location
+///
+/// This function is not expected to be called directly by users. It is only
+/// expected to be called from the `oi_bt` macro.
+///
+/// @param filename Source file of the caller
+/// @param lineno Source line number of the caller
+static inline __attribute__((always_inline)) void oi_bt_(const char *filename,
+                                                         int lineno) {
+
+  oi_open_(filename, lineno);
+
+  // Glibc backtrace support
+  extern int backtrace(void **, int) __attribute((weak));
+  extern char **backtrace_symbols(void *const *buffer, int)
+      __attribute__((weak));
+
+  // give up if we do not have backtrace support
+  if (backtrace == NULL || backtrace_symbols == NULL) {
+    oi__("backtraces unavailable");
+    oi_close_();
+    return;
+  }
+
+  void **buffer = NULL;
+  int size = 0;
+  int seen = 0;
+
+  // read our backtrace
+  while (size == seen) {
+    size = size == 0 ? 128 : size * 2;
+    void **const b = (void **)realloc(buffer, (size_t)size);
+    if (b == NULL) {
+      free(buffer);
+      oi__("out of memory");
+      oi_close_();
+      return;
+    }
+    buffer = b;
+
+    seen = backtrace(buffer, size);
+  }
+
+  // translate it into something human readable
+  char **const names = backtrace_symbols(buffer, seen);
+  free(buffer);
+  if (names == NULL) {
+    oi__("out of memory");
+    oi_close_();
+    return;
+  }
+
+  // dump it
+  oi__("backtrace (use -rdynamic to GCC to get function names):");
+  for (int i = 0; i < seen; ++i)
+    oi__(" %s", names[i]);
+
+  free(names);
+  oi_close_();
+}
+
+/// print a backtrace of the current location
+///
+/// If backtraces are unavailable, this prints an error and continues.
+#define oi_bt() oi_bt_(__FILE__, __LINE__)
