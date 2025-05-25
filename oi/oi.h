@@ -150,7 +150,14 @@ oi_print_(const char *ignored, const char *format, struct oi_value_ ignored2,
 #endif
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#endif
   extern void flockfile(FILE *);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
   flockfile(stderr);
 
   const time_t now = time(NULL);
@@ -162,7 +169,14 @@ oi_print_(const char *ignored, const char *format, struct oi_value_ ignored2,
   vfprintf(stderr, format, ap);
   fprintf(stderr, "%s\n", use_colour ? "\033[0m" : "");
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#endif
   extern void funlockfile(FILE *);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
   funlockfile(stderr);
 
   va_end(ap);
@@ -411,9 +425,16 @@ static inline __attribute__((always_inline)) void oi_bt_(const char *filename,
   oi_open_(filename, lineno);
 
   // Glibc backtrace support
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#endif
   extern int backtrace(void **, int) __attribute((weak));
   extern char **backtrace_symbols(void *const *buffer, int)
       __attribute__((weak));
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
   // give up if we do not have backtrace support
   if (backtrace == NULL || backtrace_symbols == NULL) {
