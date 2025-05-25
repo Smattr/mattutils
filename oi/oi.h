@@ -398,13 +398,21 @@ static inline void oi__(void) {}
       const char *: oi_char_ptr_)
 #endif
 
+/// return a format string, if we were given one, else a stub substitute
+#ifdef __cplusplus
+template <typename T> static inline const char *oi_fmt_(T) { return "unused"; }
+
+template <> inline const char *oi_fmt_<char[]>(char fmt[]) { return fmt; }
+#else
+#define oi_fmt_(control)                                                       \
+  __builtin_choose_expr(                                                       \
+      __builtin_types_compatible_p(__typeof__(control), char[]), (control),    \
+      "unused")
+#endif
+
 #define oi__(fmt, ...)                                                         \
   ((#fmt[0] == '"' ? oi_print_ : oi_expr_(fmt))(                               \
-      #fmt,                                                                    \
-      __builtin_choose_expr(                                                   \
-          __builtin_types_compatible_p(__typeof__(fmt), char[]), fmt,          \
-          "unused"),                                                           \
-      oi_make_value_(fmt), ##__VA_ARGS__))
+      #fmt, oi_fmt_(fmt), oi_make_value_(fmt), ##__VA_ARGS__))
 
 #ifdef __has_include
 #if __has_include(<execinfo.h>)
