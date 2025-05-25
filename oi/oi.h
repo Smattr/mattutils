@@ -90,6 +90,61 @@ static inline struct oi_value_ oi_make_char_ptr_(const char *value) {
 ///
 /// This macro is not expected to be called directly by users. It is only
 /// expected to be called from the `oi` macro.
+#ifdef __cplusplus
+template <typename T> static inline oi_value_ oi_make_value_(T v);
+
+template <> inline oi_value_ oi_make_value_(signed char v) {
+  return oi_make_signed_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(short v) {
+  return oi_make_signed_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(int v) {
+  return oi_make_signed_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(long v) {
+  return oi_make_signed_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(long long v) {
+  return oi_make_signed_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(unsigned char v) {
+  return oi_make_unsigned_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(unsigned short v) {
+  return oi_make_unsigned_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(unsigned v) {
+  return oi_make_unsigned_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(unsigned long v) {
+  return oi_make_unsigned_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(unsigned long long v) {
+  return oi_make_unsigned_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(float v) {
+  return oi_make_double_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(double v) {
+  return oi_make_double_(v);
+}
+
+template <> inline oi_value_ oi_make_value_(const char *v) {
+  return oi_make_char_ptr_(v);
+}
+#else
 #define oi_make_value_(v)                                                      \
   (_Generic((v),                                                               \
        signed char: oi_make_signed_,                                           \
@@ -106,6 +161,7 @@ static inline struct oi_value_ oi_make_char_ptr_(const char *value) {
        double: oi_make_double_,                                                \
        char *: oi_make_char_ptr_,                                              \
        const char *: oi_make_char_ptr_)(v))
+#endif
 
 /// setup for a debugging print
 ///
