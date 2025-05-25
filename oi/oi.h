@@ -253,6 +253,83 @@ static inline void oi_char_ptr_(const char *name, const char *ignored,
   oi_print_(NULL, "%s == \"%s\"", value, name, value.char_ptr_value);
 }
 
+/// type-branch to an expression printer
+#ifdef __cplusplus
+template <typename T>
+static inline void oi_expr__(const char *name, const char *ignored,
+                             oi_value_ value, ...);
+template <>
+inline void oi_expr__<signed char>(const char *name, const char *ignored,
+                                   oi_value_ value, ...) {
+  oi_signed_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<short>(const char *name, const char *ignored,
+                             oi_value_ value, ...) {
+  oi_signed_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<int>(const char *name, const char *ignored,
+                           oi_value_ value, ...) {
+  oi_signed_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<long>(const char *name, const char *ignored,
+                            oi_value_ value, ...) {
+  oi_signed_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<long long>(const char *name, const char *ignored,
+                                 oi_value_ value, ...) {
+  oi_signed_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<unsigned char>(const char *name, const char *ignored,
+                                     oi_value_ value, ...) {
+  oi_unsigned_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<unsigned short>(const char *name, const char *ignored,
+                                      oi_value_ value, ...) {
+  oi_unsigned_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<unsigned>(const char *name, const char *ignored,
+                                oi_value_ value, ...) {
+  oi_unsigned_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<unsigned long>(const char *name, const char *ignored,
+                                     oi_value_ value, ...) {
+  oi_unsigned_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<unsigned long long>(const char *name, const char *ignored,
+                                          oi_value_ value, ...) {
+  oi_unsigned_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<float>(const char *name, const char *ignored,
+                             oi_value_ value, ...) {
+  oi_double_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<double>(const char *name, const char *ignored,
+                              oi_value_ value, ...) {
+  oi_double_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<char *>(const char *name, const char *ignored,
+                              oi_value_ value, ...) {
+  oi_char_ptr_(name, ignored, value);
+}
+template <>
+inline void oi_expr__<const char *>(const char *name, const char *ignored,
+                                    oi_value_ value, ...) {
+  oi_char_ptr_(name, ignored, value);
+}
+#endif
+
 /// tear down from a debugging print
 ///
 /// This function is not expected to be called directly by users. It is only
@@ -287,6 +364,9 @@ static inline void oi__(void) {}
 ///
 /// This is not expected to be called directly by users. It is only expected to
 /// be called from the `oi` macro.
+#ifdef __cplusplus
+#define oi_expr_(control) (oi_expr__<decltype(control)>)
+#else
 #define oi_expr_(control)                                                      \
   _Generic((control),                                                          \
       signed char: oi_signed_,                                                 \
@@ -302,6 +382,7 @@ static inline void oi__(void) {}
       double: oi_double_,                                                      \
       char *: oi_char_ptr_,                                                    \
       const char *: oi_char_ptr_)
+#endif
 
 #define oi__(fmt, ...)                                                         \
   ((#fmt[0] == '"' ? oi_print_ : oi_expr_(fmt))(                               \
