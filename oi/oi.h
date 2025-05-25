@@ -426,8 +426,12 @@ static inline void (*oi_expr_(const char *))(const char *, const char *,
 
 /// return a format string, if we were given one, else a stub substitute
 #ifdef __cplusplus
-template <typename T> static inline const char *oi_fmt_(T) { return "unused"; }
-template <> inline const char *oi_fmt_(const char fmt[]) { return fmt; }
+template <typename T> static inline constexpr const char *oi_fmt_(T) {
+  return "unused";
+}
+template <> inline constexpr const char *oi_fmt_(const char fmt[]) {
+  return fmt;
+}
 #else
 #define oi_fmt_(control)                                                       \
   __builtin_choose_expr(                                                       \
