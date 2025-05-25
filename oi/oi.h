@@ -283,22 +283,28 @@ static inline void oi__(void) {}
   for (int oi_ = (oi_open_(__FILE__, __LINE__), 1); oi_; oi_close_(), --oi_)   \
   (void)oi__
 
+/// select an expression printer
+///
+/// This is not expected to be called directly by users. It is only expected to
+/// be called from the `oi` macro.
+#define oi_expr_(control)                                                      \
+  _Generic((control),                                                          \
+      signed char: oi_signed_,                                                 \
+      short: oi_signed_,                                                       \
+      int: oi_signed_,                                                         \
+      long: oi_signed_,                                                        \
+      long long: oi_signed_,                                                   \
+      unsigned char: oi_unsigned_,                                             \
+      unsigned short: oi_unsigned_,                                            \
+      unsigned long: oi_unsigned_,                                             \
+      unsigned long long: oi_unsigned_,                                        \
+      float: oi_double_,                                                       \
+      double: oi_double_,                                                      \
+      char *: oi_char_ptr_,                                                    \
+      const char *: oi_char_ptr_)
+
 #define oi__(fmt, ...)                                                         \
-  ((#fmt[0] == '"' ? oi_print_                                                 \
-                   : _Generic((fmt),                                           \
-            signed char: oi_signed_,                                           \
-            short: oi_signed_,                                                 \
-            int: oi_signed_,                                                   \
-            long: oi_signed_,                                                  \
-            long long: oi_signed_,                                             \
-            unsigned char: oi_unsigned_,                                       \
-            unsigned short: oi_unsigned_,                                      \
-            unsigned long: oi_unsigned_,                                       \
-            unsigned long long: oi_unsigned_,                                  \
-            float: oi_double_,                                                 \
-            double: oi_double_,                                                \
-            char *: oi_char_ptr_,                                              \
-            const char *: oi_char_ptr_))(                                      \
+  ((#fmt[0] == '"' ? oi_print_ : oi_expr_(fmt))(                               \
       #fmt,                                                                    \
       __builtin_choose_expr(                                                   \
           __builtin_types_compatible_p(__typeof__(fmt), char[]), fmt,          \
