@@ -173,10 +173,8 @@ static inline void oi_open_(const char *filename, int lineno) {
 /// This function is not expected to be called directly by users. It is only
 /// expected to be called from the `oi` macro.
 ///
-/// @param ignored This parameter is unused
 /// @param format A printf-style format string
-/// @param ignored2 This parameter is unused
-/// @param ... printf-style format arguments
+/// @param ap printf-style format arguments
 static inline __attribute__((format(printf, 1, 0))) void
 oi_vprint_(const char *format, va_list ap) {
   oi_printed_ = 1;
