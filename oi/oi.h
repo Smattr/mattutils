@@ -88,60 +88,48 @@ static inline struct oi_value_ oi_make_char_ptr_(const char *value) {
 
 /// construct a `oi_value_`
 ///
-/// This macro is not expected to be called directly by users. It is only
-/// expected to be called from the `oi` macro.
+/// These functions are not expected to be called directly by users. They are
+/// only expected to be called from the `oi` macro.
 #ifdef __cplusplus
-template <typename T> static inline oi_value_ oi_make_value_(T v);
-
-template <> inline oi_value_ oi_make_value_(signed char v) {
+static inline oi_value_ oi_make_value_(signed char v) {
   return oi_make_signed_(v);
 }
 
-template <> inline oi_value_ oi_make_value_(short v) {
+static inline oi_value_ oi_make_value_(short v) { return oi_make_signed_(v); }
+
+static inline oi_value_ oi_make_value_(int v) { return oi_make_signed_(v); }
+
+static inline oi_value_ oi_make_value_(long v) { return oi_make_signed_(v); }
+
+static inline oi_value_ oi_make_value_(long long v) {
   return oi_make_signed_(v);
 }
 
-template <> inline oi_value_ oi_make_value_(int v) {
-  return oi_make_signed_(v);
-}
-
-template <> inline oi_value_ oi_make_value_(long v) {
-  return oi_make_signed_(v);
-}
-
-template <> inline oi_value_ oi_make_value_(long long v) {
-  return oi_make_signed_(v);
-}
-
-template <> inline oi_value_ oi_make_value_(unsigned char v) {
+static inline oi_value_ oi_make_value_(unsigned char v) {
   return oi_make_unsigned_(v);
 }
 
-template <> inline oi_value_ oi_make_value_(unsigned short v) {
+static inline oi_value_ oi_make_value_(unsigned short v) {
   return oi_make_unsigned_(v);
 }
 
-template <> inline oi_value_ oi_make_value_(unsigned v) {
+static inline oi_value_ oi_make_value_(unsigned v) {
   return oi_make_unsigned_(v);
 }
 
-template <> inline oi_value_ oi_make_value_(unsigned long v) {
+static inline oi_value_ oi_make_value_(unsigned long v) {
   return oi_make_unsigned_(v);
 }
 
-template <> inline oi_value_ oi_make_value_(unsigned long long v) {
+static inline oi_value_ oi_make_value_(unsigned long long v) {
   return oi_make_unsigned_(v);
 }
 
-template <> inline oi_value_ oi_make_value_(float v) {
-  return oi_make_double_(v);
-}
+static inline oi_value_ oi_make_value_(float v) { return oi_make_double_(v); }
 
-template <> inline oi_value_ oi_make_value_(double v) {
-  return oi_make_double_(v);
-}
+static inline oi_value_ oi_make_value_(double v) { return oi_make_double_(v); }
 
-template <> inline oi_value_ oi_make_value_(const char *v) {
+static inline oi_value_ oi_make_value_(const char *v) {
   return oi_make_char_ptr_(v);
 }
 #else
