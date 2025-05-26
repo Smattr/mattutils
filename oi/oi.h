@@ -8,6 +8,9 @@
 /// This header aims to give you a ready-to-go flexible implementation optimised
 /// for typing few characters (`oi` is very short) and debugging faster. See the
 /// adjacent `oi` script for an easy way of including this in compilation.
+///
+/// If you are trying to understand the implementation below, start with the
+/// `oi` macro and work backwards from there.
 
 #pragma once
 
