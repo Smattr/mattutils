@@ -189,15 +189,9 @@ static inline void oi_open_(const char *filename, int lineno) {
 /// @param format A printf-style format string
 /// @param ignored2 This parameter is unused
 /// @param ... printf-style format arguments
-static inline __attribute__((format(printf, 2, 4))) void
-oi_print_(const char *ignored, const char *format, struct oi_value_ ignored2,
-          ...) {
-  (void)ignored;
-
+static inline __attribute__((format(printf, 1, 0))) void
+oi_vprint_(const char *format, va_list ap) {
   oi_printed_ = 1;
-
-  va_list ap;
-  va_start(ap, ignored2);
 
   int use_colour = 0;
 #ifdef __has_include
@@ -234,6 +228,26 @@ oi_print_(const char *ignored, const char *format, struct oi_value_ ignored2,
 #pragma GCC diagnostic pop
 #endif
   funlockfile(stderr);
+}
+
+/// do a debugging print
+///
+/// This function is not expected to be called directly by users. It is only
+/// expected to be called from the `oi` macro.
+///
+/// @param ignored This parameter is unused
+/// @param format A printf-style format string
+/// @param ignored2 This parameter is unused
+/// @param ... printf-style format arguments
+static inline __attribute__((format(printf, 2, 4))) void
+oi_print_(const char *ignored, const char *format, struct oi_value_ ignored2,
+          ...) {
+  (void)ignored;
+
+  va_list ap;
+  va_start(ap, ignored2);
+
+  oi_vprint_(format, ap);
 
   va_end(ap);
 }
