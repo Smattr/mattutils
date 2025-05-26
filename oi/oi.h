@@ -371,56 +371,6 @@ static inline void oi__(void) {}
 ///
 /// This is not expected to be called directly by users. It is only expected to
 /// be called from the `oi` macro.
-#ifdef __cplusplus
-static inline void (*oi_expr_(signed char))(const char *, const char *,
-                                            oi_value_, ...) {
-  return oi_signed_;
-}
-static inline void (*oi_expr_(short))(const char *, const char *, oi_value_,
-                                      ...) {
-  return oi_signed_;
-}
-static inline void (*oi_expr_(int))(const char *, const char *, oi_value_,
-                                    ...) {
-  return oi_signed_;
-}
-static inline void (*oi_expr_(long))(const char *, const char *, oi_value_,
-                                     ...) {
-  return oi_signed_;
-}
-static inline void (*oi_expr_(long long))(const char *, const char *, oi_value_,
-                                          ...) {
-  return oi_signed_;
-}
-static inline void (*oi_expr_(unsigned char))(const char *, const char *,
-                                              oi_value_, ...) {
-  return oi_unsigned_;
-}
-static inline void (*oi_expr_(unsigned short))(const char *, const char *,
-                                               oi_value_, ...) {
-  return oi_unsigned_;
-}
-static inline void (*oi_expr_(unsigned long))(const char *, const char *,
-                                              oi_value_, ...) {
-  return oi_unsigned_;
-}
-static inline void (*oi_expr_(unsigned long long))(const char *, const char *,
-                                                   oi_value_, ...) {
-  return oi_unsigned_;
-}
-static inline void (*oi_expr_(float))(const char *, const char *, oi_value_,
-                                      ...) {
-  return oi_double_;
-}
-static inline void (*oi_expr_(double))(const char *, const char *, oi_value_,
-                                       ...) {
-  return oi_double_;
-}
-static inline void (*oi_expr_(const char *))(const char *, const char *,
-                                             oi_value_, ...) {
-  return oi_char_ptr_;
-}
-#else
 #define oi_expr_(control)                                                      \
   _Generic((control),                                                          \
       signed char: oi_signed_,                                                 \
@@ -436,7 +386,6 @@ static inline void (*oi_expr_(const char *))(const char *, const char *,
       double: oi_double_,                                                      \
       char *: oi_char_ptr_,                                                    \
       const char *: oi_char_ptr_)
-#endif
 
 /// return a format string, if we were given one, else a stub substitute
 #ifdef __cplusplus
@@ -453,9 +402,98 @@ template <> inline constexpr const char *oi_fmt_(const char fmt[]) {
       "unused")
 #endif
 
+#ifdef __cplusplus
+/// call another `oi_*` function based on the template parameters
+template <bool do_print, typename T>
+static inline void oi_print_expr_(const char *expr, const char *fmt, T value,
+                                  ...);
+
+template <>
+inline __attribute__((format(printf, 2, 4))) void
+oi_print_expr_<true>(const char *, const char *format, const char *value, ...) {
+  va_list ap;
+  va_start(ap, value);
+
+  oi_vprint_(format, ap);
+
+  va_end(ap);
+}
+
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  signed char value, ...) {
+  oi_signed_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *, short value,
+                                  ...) {
+  oi_signed_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *, int value,
+                                  ...) {
+  oi_signed_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *, long value,
+                                  ...) {
+  oi_signed_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  long long value, ...) {
+  oi_signed_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  unsigned char value, ...) {
+  oi_unsigned_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  unsigned short value, ...) {
+  oi_unsigned_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  unsigned value, ...) {
+  oi_unsigned_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  unsigned long value, ...) {
+  oi_unsigned_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  unsigned long long value, ...) {
+  oi_unsigned_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *, float value,
+                                  ...) {
+  oi_double_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *, double value,
+                                  ...) {
+  oi_double_(expr, nullptr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, const char *,
+                                  const char *value, ...) {
+  oi_char_ptr_(expr, nullptr, oi_make_value_(value));
+}
+#endif
+
+#ifdef __cplusplus
+#define oi__(fmt, ...)                                                         \
+  oi_print_expr_<#fmt[0] == '"'>(#fmt, oi_fmt_(fmt), fmt, ##__VA_ARGS__)
+#else
 #define oi__(fmt, ...)                                                         \
   ((#fmt[0] == '"' ? oi_print_ : oi_expr_(fmt))(                               \
       #fmt, oi_fmt_(fmt), oi_make_value_(fmt), ##__VA_ARGS__))
+#endif
 
 #ifdef __has_include
 #if __has_include(<execinfo.h>)
