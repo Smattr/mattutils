@@ -557,6 +557,81 @@ static inline __attribute__((always_inline)) void oi_bt_(const char *filename,
 
   free(names);
   oi_close_();
+
+  return;
+
+  // dead code to test all relevant `oi` variants compile
+
+  oi;
+  oi("hello world");
+  oi("hello %s", "world");
+
+  {
+    signed char x = 42;
+    oi(x);
+  }
+  {
+    short x = 42;
+    oi(x);
+  }
+  {
+    int x = 42;
+    oi(x);
+  }
+  {
+    long x = 42;
+    oi(x);
+  }
+  {
+    long long x = 42;
+    oi(x);
+  }
+  {
+    unsigned char x = 42;
+    oi(x);
+  }
+  {
+    unsigned short x = 42;
+    oi(x);
+  }
+  {
+    unsigned x = 42;
+    oi(x);
+  }
+  {
+    unsigned long x = 42;
+    oi(x);
+  }
+  {
+    unsigned long long x = 42;
+    oi(x);
+  }
+  {
+    float x = 42;
+    oi(x);
+  }
+  {
+    double x = 42;
+    oi(x);
+  }
+  {
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+#ifndef __cplusplus
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+#endif
+#endif
+    char *x = "hello world";
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+    oi(x);
+  }
+  {
+    const char *x = "hello world";
+    oi(x);
+  }
 }
 
 /// print a backtrace of the current location
