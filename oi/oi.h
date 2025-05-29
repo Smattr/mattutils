@@ -441,6 +441,10 @@ inline void oi_print_expr_<false>(const char *expr, double value, ...) {
   oi_double_(expr, oi_make_value_(value));
 }
 template <>
+inline void oi_print_expr_<false>(const char *expr, char *value, ...) {
+  oi_char_ptr_(expr, oi_make_value_(value));
+}
+template <>
 inline void oi_print_expr_<false>(const char *expr, const char *value, ...) {
   oi_char_ptr_(expr, oi_make_value_(value));
 }
