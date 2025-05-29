@@ -31,6 +31,21 @@
 #endif
 #endif
 
+#ifdef __SIZEOF_INT128__
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif
+typedef __int128 oi_int_t_;
+typedef unsigned __int128 oi_uint_t_;
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+#else
+typedef int64_t oi_int_t_;
+typedef uint64_t oi_uint_t_;
+#endif
+
 /// has the user called `oi_open_` but not yet called `oi_print_`?
 static __thread int oi_printed_;
 
@@ -44,8 +59,8 @@ static __thread int oi_lineno_;
 /// members is in use.
 struct oi_value_ {
   union {
-    int64_t signed_value;
-    uint64_t unsigned_value;
+    oi_int_t_ signed_value;
+    oi_uint_t_ unsigned_value;
     double double_value;
     const char *char_ptr_value;
   };
@@ -239,25 +254,6 @@ oi_print_(const char *format, struct oi_value_ ignored, ...) {
   va_end(ap);
 }
 
-/// print a signed value for debugging
-///
-/// This function is not expected to be called directly by users. It is only
-/// expected to be called from the `oi` macro.
-///
-/// @param name Symbol or expression from which this value originated
-/// @param value Value to print
-/// @param ... These parameters are unused
-static inline void oi_signed_(const char *name, struct oi_value_ value, ...) {
-  assert(name != NULL);
-  assert(strcmp(name, "") != 0);
-
-  oi_print_("%s == %" PRId64, value, name, value.signed_value);
-
-  // if this could be character data, print its equivalent
-  if (value.signed_value > 31 && value.signed_value < 127)
-    oi_print_("(%s == '%c')", value, name, (char)value.signed_value);
-}
-
 /// print an unsigned value for debugging
 ///
 /// This function is not expected to be called directly by users. It is only
@@ -270,12 +266,84 @@ static inline void oi_unsigned_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_("%s == %" PRIu64 ", 0x%" PRIx64, value, name, value.unsigned_value,
-            value.unsigned_value);
+  char stage1[41] = {0};
+  size_t offset1 = sizeof(stage1) - 2;
+  for (oi_uint_t_ u = value.unsigned_value;; --offset1) {
+    stage1[offset1] = '0' + u % 10;
+    u /= 10;
+    if (u == 0)
+      break;
+  }
+
+  char stage2[17] = {0};
+  size_t offset2 = sizeof(stage2) - 2;
+  for (oi_uint_t_ u = value.unsigned_value;; --offset2) {
+    const unsigned d = u % 16;
+    if (d < 10) {
+      stage2[offset2] = '0' + d;
+    } else {
+      stage2[offset2] = 'a' + (d - 10);
+    }
+    u /= 16;
+    if (u == 0)
+      break;
+  }
+
+  oi_print_("%s == %s, 0x%s", value, name, &stage1[offset1], &stage2[offset2]);
 
   // if this could be character data, print its equivalent
   if (value.unsigned_value > 31 && value.unsigned_value < 127)
     oi_print_("(%s == '%c')", value, name, (char)value.unsigned_value);
+}
+
+/// print a signed value for debugging
+///
+/// This function is not expected to be called directly by users. It is only
+/// expected to be called from the `oi` macro.
+///
+/// @param name Symbol or expression from which this value originated
+/// @param value Value to print
+/// @param ... These parameters are unused
+static inline void oi_signed_(const char *name, struct oi_value_ value, ...) {
+  assert(name != NULL);
+  assert(strcmp(name, "") != 0);
+
+  if (value.signed_value >= 0) {
+    struct oi_value_ u;
+    u.unsigned_value = (oi_uint_t_)value.signed_value;
+    oi_unsigned_(name, u);
+    return;
+  }
+
+  int is_intmin;
+  const char *intmin;
+  if (sizeof(oi_int_t_) == 8) {
+    is_intmin = value.signed_value == INT64_MIN;
+    intmin = "-9223372036854775808";
+  } else {
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#endif
+    is_intmin = (uint64_t)value.signed_value == 0 &&
+                ((oi_uint_t_)value.signed_value >> 64) == 0x8000000000000000;
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+    intmin = "-170141183460469231731687303715884105728";
+  }
+
+  if (is_intmin) {
+    oi_print_("%s == %s", value, name, intmin);
+    return;
+  }
+
+  char stage[41] = {0};
+  size_t offset = sizeof(stage) - 2;
+  for (oi_uint_t_ u = (oi_uint_t_)-value.signed_value; u > 0; --offset, u /= 10)
+    stage[offset] = '0' + u % 10;
+
+  oi_print_("%s == -%s", value, name, &stage[offset + 1]);
 }
 
 /// print a double value for debugging
