@@ -15,6 +15,8 @@
 #pragma once
 
 #include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -207,10 +209,41 @@ static inline __attribute__((format(printf, 1, 0))) void
 oi_vprint_(const char *format, va_list ap) {
   oi_printed_ = 1;
 
+  // figure out what stream we should print to
+  FILE *err = stderr;
+  {
+    const char *oi_file = getenv("OI_FILE");
+    if (oi_file != NULL) {
+      uintptr_t ptr = 0;
+      for (size_t i = 0; oi_file[i] != '\0'; ++i) {
+        ptr *= 16;
+        if (oi_file[i] >= '0' && oi_file[i] <= '9') {
+          ptr += oi_file[i] - '0';
+        } else if (oi_file[i] >= 'a' && oi_file[i] <= 'f') {
+          ptr += oi_file[i] - 'a' + 10;
+        } else if (oi_file[i] >= 'A' && oi_file[i] <= 'F') {
+          ptr += oi_file[i] - 'A' + 10;
+        } else {
+          fprintf(stderr, "failed to parse $OI_FILE=%s\n", oi_file);
+          abort();
+        }
+      }
+      err = (FILE *)ptr;
+    }
+  }
+
   int use_colour = 0;
 #ifdef __has_include
 #if __has_include(<unistd.h>)
-  use_colour = isatty(STDERR_FILENO);
+#if defined(__GNUC__) && !defined(__cplusplus)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#endif
+  extern int fileno(FILE *);
+#if defined(__GNUC__) && !defined(__cplusplus)
+#pragma GCC diagnostic pop
+#endif
+  use_colour = isatty(fileno(err));
 #endif
 #endif
 
@@ -222,16 +255,16 @@ oi_vprint_(const char *format, va_list ap) {
 #if defined(__GNUC__) && !defined(__cplusplus)
 #pragma GCC diagnostic pop
 #endif
-  flockfile(stderr);
+  flockfile(err);
 
   const time_t now = time(NULL);
   const struct tm *const now_tm = localtime(&now);
-  fprintf(stderr, "%s[OI %04d-%02d-%02d %02d:%02d] %s:%d: ",
+  fprintf(err, "%s[OI %04d-%02d-%02d %02d:%02d] %s:%d: ",
           use_colour ? "\033[33;1m" : "", now_tm->tm_year + 1900,
           now_tm->tm_mon + 1, now_tm->tm_mday, now_tm->tm_hour, now_tm->tm_sec,
           oi_filename_, oi_lineno_);
-  vfprintf(stderr, format, ap);
-  fprintf(stderr, "%s\n", use_colour ? "\033[0m" : "");
+  vfprintf(err, format, ap);
+  fprintf(err, "%s\n", use_colour ? "\033[0m" : "");
 
 #if defined(__GNUC__) && !defined(__cplusplus)
 #pragma GCC diagnostic push
@@ -241,7 +274,7 @@ oi_vprint_(const char *format, va_list ap) {
 #if defined(__GNUC__) && !defined(__cplusplus)
 #pragma GCC diagnostic pop
 #endif
-  funlockfile(stderr);
+  funlockfile(err);
 }
 
 /// do a debugging print
@@ -715,3 +748,68 @@ static inline __attribute__((always_inline)) void oi_bt_(const char *filename,
 ///
 /// If backtraces are unavailable, this prints an error and continues.
 #define oi_bt() oi_bt_(__FILE__, __LINE__)
+
+/// suppress stdout and stderr except for our own debugging prints
+///
+/// Sometimes you need to debug a particularly chatty program and do not care
+/// about its existing output. This function lets you discard everything except
+/// the output of `oi` calls.
+///
+/// This function is idempotent but is not thread-safe.
+static inline void oi_own(void) {
+
+  // have we already run?
+  if (getenv("OI_FILE") != NULL)
+    return;
+
+  // copy stderr
+  const int err = dup(STDERR_FILENO);
+  if (err < 0) {
+    oi("dup failed: %s", strerror(errno));
+    abort();
+  }
+#if defined(__GNUC__) && !defined(__cplusplus)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#endif
+  extern FILE *fdopen(int, const char *);
+#if defined(__GNUC__) && !defined(__cplusplus)
+#pragma GCC diagnostic pop
+#endif
+  FILE *const err_f = fdopen(err, "w");
+  if (err_f == NULL) {
+    oi("fdopen failed: %s", strerror(errno));
+    abort();
+  }
+
+  // teach `oi_print_` how to find the real stderr
+  char oi_file[17] = {0};
+  (void)snprintf(oi_file, sizeof(oi_file), "%" PRIxPTR, (uintptr_t)err_f);
+#if defined(__GNUC__) && !defined(__cplusplus)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#endif
+  extern int setenv(const char *, const char *, int);
+#if defined(__GNUC__) && !defined(__cplusplus)
+#pragma GCC diagnostic pop
+#endif
+  if (setenv("OI_FILE", oi_file, 1) < 0) {
+    oi("setenv failed: %s", strerror(errno));
+    abort();
+  }
+
+  // sinkhole stdout and stderr
+#ifndef O_CLOEXEC
+  const int O_CLOEXEC = 02000000;
+#endif
+  const int nul = open("/dev/null", O_WRONLY | O_CLOEXEC);
+  if (nul < 0) {
+    oi("open failed: %s", strerror(errno));
+    abort();
+  }
+  if (dup2(nul, STDOUT_FILENO) < 0 || dup2(nul, STDERR_FILENO) < 0) {
+    oi("dup2 failed: %s", strerror(errno));
+    abort();
+  }
+  (void)close(nul);
+}
