@@ -297,11 +297,13 @@ static inline void oi_unsigned_(const char *name, struct oi_value_ value, ...) {
       break;
   }
 
-  oi_print_("%s == %s, 0x%s", value, name, &stage1[offset1], &stage2[offset2]);
-
-  // if this could be character data, print its equivalent
+  // if this could be character data, derive its equivalent
+  char as_char[sizeof(", 'c'")] = {0};
   if (value.unsigned_value > 31 && value.unsigned_value < 127)
-    oi_print_("(%s == '%c')", value, name, (char)value.unsigned_value);
+    snprintf(as_char, sizeof(as_char), ", '%c'", (char)value.unsigned_value);
+
+  oi_print_("%s == %s, 0x%s%s", value, name, &stage1[offset1], &stage2[offset2],
+            as_char);
 }
 
 /// print a signed value for debugging
