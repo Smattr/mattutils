@@ -369,6 +369,7 @@ static inline void oi__(void) {}
       long long: oi_signed_,                                                   \
       unsigned char: oi_unsigned_,                                             \
       unsigned short: oi_unsigned_,                                            \
+      unsigned: oi_unsigned_,                                                  \
       unsigned long: oi_unsigned_,                                             \
       unsigned long long: oi_unsigned_,                                        \
       float: oi_double_,                                                       \
