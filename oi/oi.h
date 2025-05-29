@@ -125,6 +125,8 @@ static inline oi_value_ oi_make_value_(long long v) {
   return oi_make_signed_(v);
 }
 
+static inline oi_value_ oi_make_value_(bool v) { return oi_make_unsigned_(v); }
+
 static inline oi_value_ oi_make_value_(unsigned char v) {
   return oi_make_unsigned_(v);
 }
@@ -164,6 +166,7 @@ static inline oi_value_ oi_make_value_(const char *v) {
        int: oi_make_signed_,                                                   \
        long: oi_make_signed_,                                                  \
        long long: oi_make_signed_,                                             \
+       _Bool: oi_make_unsigned_,                                               \
        unsigned char: oi_make_unsigned_,                                       \
        unsigned short: oi_make_unsigned_,                                      \
        unsigned: oi_make_unsigned_,                                            \
@@ -422,6 +425,7 @@ static inline void oi__(void) {}
       int: oi_signed_,                                                         \
       long: oi_signed_,                                                        \
       long long: oi_signed_,                                                   \
+      _Bool: oi_unsigned_,                                                     \
       unsigned char: oi_unsigned_,                                             \
       unsigned short: oi_unsigned_,                                            \
       unsigned: oi_unsigned_,                                                  \
@@ -484,6 +488,10 @@ inline void oi_print_expr_<false>(const char *expr, long value, ...) {
 template <>
 inline void oi_print_expr_<false>(const char *expr, long long value, ...) {
   oi_signed_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, bool value, ...) {
+  oi_unsigned_(expr, oi_make_value_(value));
 }
 template <>
 inline void oi_print_expr_<false>(const char *expr, unsigned char value, ...) {
@@ -638,6 +646,17 @@ static inline __attribute__((always_inline)) void oi_bt_(const char *filename,
     long long x = 42;
     oi(x);
   }
+#ifdef __cplusplus
+  {
+    bool x = 1;
+    oi(x);
+  }
+#else
+  {
+    _Bool x = 1;
+    oi(x);
+  }
+#endif
   {
     unsigned char x = 42;
     oi(x);
