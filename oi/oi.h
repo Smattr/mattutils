@@ -61,7 +61,7 @@ struct oi_value_ {
   union {
     oi_int_t_ signed_value;
     oi_uint_t_ unsigned_value;
-    double double_value;
+    long double double_value;
     const char *char_ptr_value;
   };
 };
@@ -90,7 +90,7 @@ static inline struct oi_value_ oi_make_unsigned_(unsigned long long value) {
 ///
 /// This function is not expected to be called directly by users. It is only
 /// expected to be called from the `oi` macro.
-static inline struct oi_value_ oi_make_double_(double value) {
+static inline struct oi_value_ oi_make_double_(long double value) {
   struct oi_value_ v;
   v.double_value = value;
   return v;
@@ -149,6 +149,10 @@ static inline oi_value_ oi_make_value_(float v) { return oi_make_double_(v); }
 
 static inline oi_value_ oi_make_value_(double v) { return oi_make_double_(v); }
 
+static inline oi_value_ oi_make_value_(long double v) {
+  return oi_make_double_(v);
+}
+
 static inline oi_value_ oi_make_value_(const char *v) {
   return oi_make_char_ptr_(v);
 }
@@ -167,6 +171,7 @@ static inline oi_value_ oi_make_value_(const char *v) {
        unsigned long long: oi_make_unsigned_,                                  \
        float: oi_make_double_,                                                 \
        double: oi_make_double_,                                                \
+       long double: oi_make_double_,                                           \
        char *: oi_make_char_ptr_,                                              \
        const char *: oi_make_char_ptr_)(v))
 #endif
@@ -358,7 +363,7 @@ static inline void oi_double_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_("%s == %f", value, name, value.double_value);
+  oi_print_("%s == %Lf", value, name, value.double_value);
 }
 
 /// print a string value for debugging
@@ -424,6 +429,7 @@ static inline void oi__(void) {}
       unsigned long long: oi_unsigned_,                                        \
       float: oi_double_,                                                       \
       double: oi_double_,                                                      \
+      long double: oi_double_,                                                 \
       char *: oi_char_ptr_,                                                    \
       const char *: oi_char_ptr_)
 
@@ -506,6 +512,10 @@ inline void oi_print_expr_<false>(const char *expr, float value, ...) {
 }
 template <>
 inline void oi_print_expr_<false>(const char *expr, double value, ...) {
+  oi_double_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, long double value, ...) {
   oi_double_(expr, oi_make_value_(value));
 }
 template <>
@@ -654,6 +664,10 @@ static inline __attribute__((always_inline)) void oi_bt_(const char *filename,
   }
   {
     double x = 42;
+    oi(x);
+  }
+  {
+    long double x = 42;
     oi(x);
   }
   {
