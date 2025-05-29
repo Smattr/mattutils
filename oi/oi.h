@@ -224,17 +224,13 @@ oi_vprint_(const char *format, va_list ap) {
 /// This function is not expected to be called directly by users. It is only
 /// expected to be called from the `oi` macro.
 ///
-/// @param ignored This parameter is unused
 /// @param format A printf-style format string
-/// @param ignored2 This parameter is unused
+/// @param ignored This parameter is unused
 /// @param ... printf-style format arguments
-static inline __attribute__((format(printf, 2, 4))) void
-oi_print_(const char *ignored, const char *format, struct oi_value_ ignored2,
-          ...) {
-  (void)ignored;
-
+static inline __attribute__((format(printf, 1, 3))) void
+oi_print_(const char *format, struct oi_value_ ignored, ...) {
   va_list ap;
-  va_start(ap, ignored2);
+  va_start(ap, ignored);
 
   oi_vprint_(format, ap);
 
@@ -247,21 +243,17 @@ oi_print_(const char *ignored, const char *format, struct oi_value_ ignored2,
 /// expected to be called from the `oi` macro.
 ///
 /// @param name Symbol or expression from which this value originated
-/// @param ignored This parameter is unused
 /// @param value Value to print
 /// @param ... These parameters are unused
-static inline void oi_signed_(const char *name, const char *ignored,
-                              struct oi_value_ value, ...) {
-  (void)ignored;
-
+static inline void oi_signed_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_(NULL, "%s == %lld", value, name, value.signed_value);
+  oi_print_("%s == %lld", value, name, value.signed_value);
 
   // if this could be character data, print its equivalent
   if (value.signed_value > 31 && value.signed_value < 127)
-    oi_print_(NULL, "(%s == '%c')", value, name, (char)value.signed_value);
+    oi_print_("(%s == '%c')", value, name, (char)value.signed_value);
 }
 
 /// print an unsigned value for debugging
@@ -270,22 +262,18 @@ static inline void oi_signed_(const char *name, const char *ignored,
 /// expected to be called from the `oi` macro.
 ///
 /// @param name Symbol or expression from which this value originated
-/// @param ignored This parameter is unused
 /// @param value Value to print
 /// @param ... These parameters are unused
-static inline void oi_unsigned_(const char *name, const char *ignored,
-                                struct oi_value_ value, ...) {
-  (void)ignored;
-
+static inline void oi_unsigned_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_(NULL, "%s == %llu, 0x%llx", value, name, value.unsigned_value,
+  oi_print_("%s == %llu, 0x%llx", value, name, value.unsigned_value,
             value.unsigned_value);
 
   // if this could be character data, print its equivalent
   if (value.unsigned_value > 31 && value.unsigned_value < 127)
-    oi_print_(NULL, "(%s == '%c')", value, name, (char)value.unsigned_value);
+    oi_print_("(%s == '%c')", value, name, (char)value.unsigned_value);
 }
 
 /// print a double value for debugging
@@ -294,17 +282,13 @@ static inline void oi_unsigned_(const char *name, const char *ignored,
 /// expected to be called from the `oi` macro.
 ///
 /// @param name Symbol or expression from which this value originated
-/// @param ignored This parameter is unused
 /// @param value Value to print
 /// @param ... These parameters are unused
-static inline void oi_double_(const char *name, const char *ignored,
-                              struct oi_value_ value, ...) {
-  (void)ignored;
-
+static inline void oi_double_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_(NULL, "%s == %f", value, name, value.double_value);
+  oi_print_("%s == %f", value, name, value.double_value);
 }
 
 /// print a string value for debugging
@@ -313,17 +297,13 @@ static inline void oi_double_(const char *name, const char *ignored,
 /// expected to be called from the `oi` macro.
 ///
 /// @param name Symbol or expression from which this value originated
-/// @param ignored This parameter is unused
 /// @param value Value to print
 /// @param ... These parameters are unused
-static inline void oi_char_ptr_(const char *name, const char *ignored,
-                                struct oi_value_ value, ...) {
-  (void)ignored;
-
+static inline void oi_char_ptr_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_(NULL, "%s == \"%s\"", value, name, value.char_ptr_value);
+  oi_print_("%s == \"%s\"", value, name, value.char_ptr_value);
 }
 
 /// tear down from a debugging print
@@ -334,7 +314,7 @@ static inline void oi_close_(void) {
   if (oi_printed_ == 0) {
     struct oi_value_ ignored;
     ignored.signed_value = 0;
-    oi_print_(NULL, "here", ignored);
+    oi_print_("here", ignored);
   }
   oi_printed_ = 0;
 }
@@ -379,28 +359,28 @@ static inline void oi__(void) {}
 
 /// return a format string, if we were given one, else a stub substitute
 #ifdef __cplusplus
-template <typename T> static inline constexpr const char *oi_fmt_(T) {
-  return "unused";
+template <typename T>
+static inline constexpr const char *oi_fmt_expr_(T, const char *expr) {
+  return expr;
 }
-template <> inline constexpr const char *oi_fmt_(const char fmt[]) {
+template <>
+inline constexpr const char *oi_fmt_expr_(const char fmt[], const char *) {
   return fmt;
 }
 #else
-#define oi_fmt_(control)                                                       \
-  __builtin_choose_expr(                                                       \
-      __builtin_types_compatible_p(__typeof__(control), char[]), (control),    \
-      "unused")
+#define oi_fmt_expr_(fmt, expr)                                                \
+  __builtin_choose_expr(__builtin_types_compatible_p(__typeof__(fmt), char[]), \
+                        (fmt), (expr))
 #endif
 
 #ifdef __cplusplus
 /// call another `oi_*` function based on the template parameters
 template <bool do_print, typename T>
-static inline void oi_print_expr_(const char *expr, const char *fmt, T value,
-                                  ...);
+static inline void oi_print_expr_(const char *fmt_or_expr, T value, ...);
 
 template <>
-inline __attribute__((format(printf, 2, 4))) void
-oi_print_expr_<true>(const char *, const char *format, const char *value, ...) {
+inline __attribute__((format(printf, 1, 3))) void
+oi_print_expr_<true>(const char *format, const char *value, ...) {
   va_list ap;
   va_start(ap, value);
 
@@ -410,79 +390,67 @@ oi_print_expr_<true>(const char *, const char *format, const char *value, ...) {
 }
 
 template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  signed char value, ...) {
-  oi_signed_(expr, nullptr, oi_make_value_(value));
+inline void oi_print_expr_<false>(const char *expr, signed char value, ...) {
+  oi_signed_(expr, oi_make_value_(value));
 }
 template <>
-inline void oi_print_expr_<false>(const char *expr, const char *, short value,
+inline void oi_print_expr_<false>(const char *expr, short value, ...) {
+  oi_signed_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, int value, ...) {
+  oi_signed_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, long value, ...) {
+  oi_signed_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, long long value, ...) {
+  oi_signed_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, unsigned char value, ...) {
+  oi_unsigned_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, unsigned short value, ...) {
+  oi_unsigned_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, unsigned value, ...) {
+  oi_unsigned_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, unsigned long value, ...) {
+  oi_unsigned_(expr, oi_make_value_(value));
+}
+template <>
+inline void oi_print_expr_<false>(const char *expr, unsigned long long value,
                                   ...) {
-  oi_signed_(expr, nullptr, oi_make_value_(value));
+  oi_unsigned_(expr, oi_make_value_(value));
 }
 template <>
-inline void oi_print_expr_<false>(const char *expr, const char *, int value,
-                                  ...) {
-  oi_signed_(expr, nullptr, oi_make_value_(value));
+inline void oi_print_expr_<false>(const char *expr, float value, ...) {
+  oi_double_(expr, oi_make_value_(value));
 }
 template <>
-inline void oi_print_expr_<false>(const char *expr, const char *, long value,
-                                  ...) {
-  oi_signed_(expr, nullptr, oi_make_value_(value));
+inline void oi_print_expr_<false>(const char *expr, double value, ...) {
+  oi_double_(expr, oi_make_value_(value));
 }
 template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  long long value, ...) {
-  oi_signed_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  unsigned char value, ...) {
-  oi_unsigned_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  unsigned short value, ...) {
-  oi_unsigned_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  unsigned value, ...) {
-  oi_unsigned_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  unsigned long value, ...) {
-  oi_unsigned_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  unsigned long long value, ...) {
-  oi_unsigned_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *, float value,
-                                  ...) {
-  oi_double_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *, double value,
-                                  ...) {
-  oi_double_(expr, nullptr, oi_make_value_(value));
-}
-template <>
-inline void oi_print_expr_<false>(const char *expr, const char *,
-                                  const char *value, ...) {
-  oi_char_ptr_(expr, nullptr, oi_make_value_(value));
+inline void oi_print_expr_<false>(const char *expr, const char *value, ...) {
+  oi_char_ptr_(expr, oi_make_value_(value));
 }
 #endif
 
 #ifdef __cplusplus
 #define oi__(fmt, ...)                                                         \
-  oi_print_expr_<#fmt[0] == '"'>(#fmt, oi_fmt_(fmt), fmt, ##__VA_ARGS__)
+  oi_print_expr_<#fmt[0] == '"'>(oi_fmt_expr_(fmt, #fmt), fmt, ##__VA_ARGS__)
 #else
 #define oi__(fmt, ...)                                                         \
   ((#fmt[0] == '"' ? oi_print_ : oi_expr_(fmt))(                               \
-      #fmt, oi_fmt_(fmt), oi_make_value_(fmt), ##__VA_ARGS__))
+      oi_fmt_expr_(fmt, #fmt), oi_make_value_(fmt), ##__VA_ARGS__))
 #endif
 
 #ifdef __has_include
