@@ -763,22 +763,9 @@ static inline void oi_own(void) {
     return;
 
   // copy stderr
-  const int err = dup(STDERR_FILENO);
-  if (err < 0) {
-    oi("dup failed: %s", strerror(errno));
-    abort();
-  }
-#if defined(__GNUC__) && !defined(__cplusplus)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnested-externs"
-#endif
-  extern FILE *fdopen(int, const char *);
-#if defined(__GNUC__) && !defined(__cplusplus)
-#pragma GCC diagnostic pop
-#endif
-  FILE *const err_f = fdopen(err, "w");
+  FILE *const err_f = fopen("/dev/stderr", "w");
   if (err_f == NULL) {
-    oi("fdopen failed: %s", strerror(errno));
+    oi("fopen failed: %s", strerror(errno));
     abort();
   }
 
