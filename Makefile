@@ -50,6 +50,7 @@ default: \
   ${HOME}/bin/ifind \
   ${HOME}/bin/loc \
   ${HOME}/bin/meta_u \
+  ${HOME}/bin/oi \
   ${HOME}/bin/prefix \
   ${HOME}/bin/pyman \
   ${HOME}/bin/rerebase \
@@ -74,6 +75,11 @@ ${HOME}/bin/dif: dif.c
 	@printf ' [CC] %s\n' "$(notdir $@)"
 	${V}mkdir -p "$(dir $@)"
 	${V}${CC} ${CFLAGS} -o $@ $<
+
+${HOME}/bin/oi: oi/oi Makefile
+	@printf ' [LN] oi\n'
+	${V}mkdir -p "$(dir $@)"
+	${V}if [ ! -e "$@" ]; then ln -s $$(pwd)/$< $@; elif [ ! -L "$@" ]; then printf 'Warning: Skipping %s that already exists\n' "$@" >&2; fi
 
 ${HOME}/.%: config/.% Makefile
 	@printf ' [LN] %s\n' "$(notdir $@)"
