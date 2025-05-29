@@ -15,7 +15,9 @@
 #pragma once
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,8 +44,8 @@ static __thread int oi_lineno_;
 /// members is in use.
 struct oi_value_ {
   union {
-    long long signed_value;
-    unsigned long long unsigned_value;
+    int64_t signed_value;
+    uint64_t unsigned_value;
     double double_value;
     const char *char_ptr_value;
   };
@@ -249,7 +251,7 @@ static inline void oi_signed_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_("%s == %lld", value, name, value.signed_value);
+  oi_print_("%s == %" PRId64, value, name, value.signed_value);
 
   // if this could be character data, print its equivalent
   if (value.signed_value > 31 && value.signed_value < 127)
@@ -268,7 +270,7 @@ static inline void oi_unsigned_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
-  oi_print_("%s == %llu, 0x%llx", value, name, value.unsigned_value,
+  oi_print_("%s == %" PRIu64 ", 0x%" PRIx64, value, name, value.unsigned_value,
             value.unsigned_value);
 
   // if this could be character data, print its equivalent
