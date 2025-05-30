@@ -404,6 +404,34 @@ static inline void oi_char_ptr_(const char *name, struct oi_value_ value, ...) {
   assert(name != NULL);
   assert(strcmp(name, "") != 0);
 
+  // if the string contains non-ASCII characters, dump its bytes in hex
+  // beforehand in case printing it corrupts the terminal
+  int non_ascii = 0;
+  for (size_t i = 0; value.char_ptr_value[i] != '\0'; ++i)
+    non_ascii |= (unsigned char)value.char_ptr_value[i] >> 7;
+  if (non_ascii) {
+    oi_print_("%s == {", value, name);
+    char buffer[81] = {' ', ' '};
+    size_t offset = 2;
+    for (size_t i = 0; value.char_ptr_value[i] != '\0'; ++i) {
+      const unsigned char c = (unsigned char)value.char_ptr_value[i];
+      if (c > 31 && c < 127) {
+        snprintf(&buffer[offset], sizeof(buffer) - offset, "'%c', ", (char)c);
+        offset += sizeof("'a', ") - 1;
+      } else {
+        snprintf(&buffer[offset], sizeof(buffer) - offset, "0x%02x, ",
+                 (unsigned)c);
+        offset += sizeof("0xff, ") - 1;
+      }
+      if (value.char_ptr_value[i + 1] == '\0' ||
+          sizeof(buffer) - offset < sizeof("0xff, ")) {
+        oi_print_("%s", value, buffer);
+        offset = 2;
+      }
+    }
+    oi_print_("}", value);
+  }
+
   oi_print_("%s == \"%s\"", value, name, value.char_ptr_value);
 }
 
