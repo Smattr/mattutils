@@ -215,20 +215,8 @@ oi_vprint_(const char *format, va_list ap) {
     const char *oi_file = getenv("OI_FILE");
     if (oi_file != NULL) {
       uintptr_t ptr = 0;
-      for (size_t i = 0; oi_file[i] != '\0'; ++i) {
-        ptr *= 16;
-        if (oi_file[i] >= '0' && oi_file[i] <= '9') {
-          ptr += oi_file[i] - '0';
-        } else if (oi_file[i] >= 'a' && oi_file[i] <= 'f') {
-          ptr += oi_file[i] - 'a' + 10;
-        } else if (oi_file[i] >= 'A' && oi_file[i] <= 'F') {
-          ptr += oi_file[i] - 'A' + 10;
-        } else {
-          fprintf(stderr, "failed to parse $OI_FILE=%s\n", oi_file);
-          abort();
-        }
-      }
-      err = (FILE *)ptr;
+      if (sscanf(oi_file, "%" PRIxPTR, &ptr) == 1)
+        err = (FILE *)ptr;
     }
   }
 
