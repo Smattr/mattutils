@@ -816,3 +816,17 @@ static inline void oi_own(void) {
   }
   (void)close(nul);
 }
+
+/// stub to trigger compiler failure within `oi_assert`
+static inline __attribute__((error("assertion failed"))) void
+oi_assert_fail_(const char *message) {
+  (void)message;
+}
+
+/// static/dynamic assertion, based on whether the expression is compile-time
+///
+/// @param expr Expression to test
+/// @param msg Message to show on failure
+#define oi_assert(expr, msg)                                                   \
+  ((__builtin_constant_p(expr) && !(expr)) ? oi_assert_fail_(msg)              \
+                                           : assert((expr) && (msg)))
