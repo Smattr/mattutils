@@ -13,7 +13,7 @@ from typing import List
 def main(args: List[str]) -> int:
     """entry point"""
 
-    oi_h = Path(__file__).parent / "oi.h"
+    oi_h = Path(__file__).resolve().parent / "oi.h"
 
     # if this looks like a compiler, teach it to pre-include our instrumentation
     if Path(args[1]).name in ("cc", "gcc", "clang", "c++", "g++", "clang++"):
