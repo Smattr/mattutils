@@ -122,6 +122,39 @@ def test_rename_ignore():
     ), "rename lines were not suppressed"
 
 
+@pytest.mark.parametrize("similarity", (42, 100))
+def test_similarity_ignore(similarity: int):
+    """does `dif` ignore “similarity …” lines?"""
+
+    # a diff that indicates a rename with similarity
+    diff = textwrap.dedent(
+        f"""\
+    diff --git foo quux
+    similarity index {similarity}%
+    rename from foo
+    rename to quux
+    index a168ae3..e3c2802 100644
+    --- foo
+    +++ quux
+    @@ -1,4 +1,4 @@
+    -hello
+    +world
+     bar
+     baz
+     baz
+    """
+    )
+
+    # run this through `dif`
+    proc = pexpect.spawn("dif", timeout=1, echo=False)
+    proc.send(diff)
+    proc.sendeof()
+
+    # did we see a “similarity …” line?
+    did_not_see = proc.expect(["similarity index", pexpect.EOF])
+    assert did_not_see, "similarity index was retained"
+
+
 def test_unicode_prefix(tmp_path: Path):
     """are non-ASCII characters shown correctly when their prefix matches?"""
 
