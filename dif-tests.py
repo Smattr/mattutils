@@ -99,7 +99,7 @@ def test_plus_plus(tmp_path: Path):
     proc.expect(re.compile(r"^\[32m++", flags=re.MULTILINE))
 
 
-def test_rename_ignore(tmp_path: Path):
+def test_rename_ignore():
     """does `dif` ignore “rename …” lines?"""
 
     # a diff that indicates a rename
