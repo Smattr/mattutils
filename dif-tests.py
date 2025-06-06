@@ -122,6 +122,37 @@ def test_rename_ignore():
     ), "rename lines were not suppressed"
 
 
+def test_moved_ignore():
+    """does `dif` output “… moved and …” lines?"""
+
+    # a diff that indicates a rename with modification
+    diff = textwrap.dedent(
+        f"""\
+    diff --git foo quux
+    rename from foo
+    rename to quux
+    index a168ae3..e3c2802 100644
+    --- foo
+    +++ quux
+    @@ -1,4 +1,4 @@
+    -hello
+    +world
+     bar
+     baz
+     baz
+    """
+    )
+
+    # run this through `dif`
+    proc = pexpect.spawn("dif", timeout=1, echo=False)
+    proc.send(diff)
+    proc.sendeof()
+
+    # did we see a “… moved and …” line?
+    did_not_see = proc.expect(["moved and", pexpect.EOF])
+    assert did_not_see, "“moved and” was included"
+
+
 @pytest.mark.parametrize("similarity", (42, 100))
 def test_similarity_ignore(similarity: int):
     """does `dif` ignore “similarity …” lines?"""
