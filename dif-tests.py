@@ -13,7 +13,6 @@ import pexpect
 import pytest
 
 
-@pytest.mark.xfail(strict=True)
 def test_create_with_space():
     """can `dif` handle a file with a space in the name being created?"""
     diff = textwrap.dedent(
@@ -94,7 +93,6 @@ def test_moved():
     assert proc.signalstatus is None, "`dif` crashed when processing move"
 
 
-@pytest.mark.xfail(strict=True)
 def test_no_git_diff_header(tmp_path: Path):
     """does `dif` correctly highlight something not coming from `git`?"""
 

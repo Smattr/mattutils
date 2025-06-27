@@ -318,15 +318,10 @@ static void lines_free(lines_t *lines) {
   *lines = (lines_t){0};
 }
 
-/// the type of change a diff hunk represents
-typedef enum { ADDED, MODIFIED, DELETED } transition_t;
-
 /// diff lines that have been accrued but not yet output
 typedef struct {
-  char *heading;     ///< last “diff --git …” line we saw
-  transition_t mode; ///< what kind of change is this hunk?
-  lines_t neg;       ///< “deleted” lines
-  lines_t pos;       ///< “added” lines
+  lines_t neg; ///< “deleted” lines
+  lines_t pos; ///< “added” lines
 } pending_t;
 
 /// is this a white space character we expect to encounter in a code line?
@@ -535,15 +530,154 @@ static bool startswith(const char *s, const char *prefix) {
   return strncmp(s, prefix, strlen(prefix)) == 0;
 }
 
+/// information gleaned from a diff chunk header that will eventually be output
+/// as “from → to”
+typedef struct {
+  char *from; ///< from file path
+  char *to;   ///< to file path
+} header_t;
+
+/// locale independent `isdigit`
+static bool isdigit_(int c) { return c >= '0' && c <= '9'; }
+
+/// locale independent `isspace`
+static bool isspace_(int c) { return strchr("\t\n\v\f\r ", c) != NULL; }
+
+/// extract a path from a diff “rename …”/“--- …”/“+++ …” line
+///
+/// Diff header lines referencing paths are expected to (1) possibly end in a
+/// newline character or other white space and (2) possibly have a trailing
+/// timestamp.
+///
+/// The return value is heap-allocated and the caller is expected to free this.
+///
+/// \param trailer Partial diff header line content to extract from
+/// \return The extracted path
+static char *make_path(const char *trailer) {
+  ASSERT(trailer != NULL);
+
+  size_t extent = strlen(trailer);
+
+  // strip trailing spaces
+  while (extent > 0 && isspace_(trailer[extent - 1]))
+    --extent;
+
+  // try to recognise a timestamp at the end of the string
+  do {
+    size_t tentative = extent;
+
+    // e.g. “ -0800”
+    if (tentative < 6)
+      break;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (trailer[tentative - 1] != '-' && trailer[tentative - 1] != '+')
+      break;
+    --tentative;
+    if (trailer[tentative - 1] != ' ')
+      break;
+    --tentative;
+
+    // e.g. “23:30:39.942229878”
+    while (tentative > 0 && isdigit_(trailer[tentative - 1]))
+      --tentative;
+    if (tentative > 0 || trailer[tentative - 1] == '.')
+      --tentative;
+    if (tentative < 9)
+      break;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (trailer[tentative - 1] != ':')
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (trailer[tentative - 1] != ':')
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (trailer[tentative - 1] != ' ')
+      break;
+    --tentative;
+
+    // e.g. “2002-02-21”
+    if (tentative < 10)
+      break;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (trailer[tentative - 1] != '-')
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (trailer[tentative - 1] != '-')
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+    if (!isdigit_(trailer[tentative - 1]))
+      break;
+    --tentative;
+
+    // strip space between path and timestamp
+    while (tentative > 0 && isspace_(trailer[tentative - 1]))
+      --tentative;
+
+    if (tentative == 0)
+      break;
+
+    extent = tentative;
+  } while (0);
+
+  return strndup(trailer, extent);
+}
+
 /// write a diff-so-fancy style section header
 ///
-/// \param mode Type of change being made to the upcoming file
-/// \param heading The “diff --git …” line responsible for this header
+/// \param header 'From' and 'to' file paths to write
 /// \param sink Output to write to
 /// \return 0 on success or an errno on failure
-static int write_header(transition_t mode, const char *heading, FILE *sink) {
-  ASSERT(heading != NULL);
-  ASSERT(startswith(heading, "diff --git "));
+static int write_header(const header_t header, FILE *sink) {
+  ASSERT(header.from != NULL);
+  ASSERT(header.to != NULL);
   ASSERT(sink != NULL);
 
   // learn the width of the terminal
@@ -555,47 +689,42 @@ static int write_header(transition_t mode, const char *heading, FILE *sink) {
     width = ws.ws_col;
   }
 
-  // determine the path(s) to the file being changed
-  const char *const file_pair = &heading[strlen("diff --git ")];
-  const size_t file_pair_len = strlen(file_pair);
-  ASSERT(file_pair[file_pair_len - 1] == '\n' &&
-         "heading not \"diff --git …\\n\"");
-  const char *const space = strchr(file_pair, ' ');
-  ASSERT(space != NULL && "no ' ' in file pair section of \"diff --git …\"");
-
-  const char *const from = file_pair;
-  const size_t from_len = (size_t)(space - file_pair);
-  const char *const to = space + 1;
-  const size_t to_len = file_pair_len - from_len - 2;
-
-  // if the file was moved, we may have two different paths
-  const bool was_moved = from_len != to_len || strncmp(from, to, from_len) != 0;
+  // the type of change this header represents
+  enum { ADDED, MODIFIED, MOVED, DELETED } mode = MODIFIED;
+  if (!streq(header.from, header.to)) {
+    const char NUL[] = "/dev/null";
+    if (streq(header.from, NUL) && !streq(header.to, NUL)) {
+      mode = ADDED;
+    } else if (!streq(header.from, NUL) && streq(header.to, NUL)) {
+      mode = DELETED;
+    } else {
+      mode = MOVED;
+    }
+  }
 
   size_t j;
   if (mode == ADDED) {
-    ASSERT(!was_moved);
     if (fputs("\033[32;7madded: \033[1m", sink) < 0)
       return EIO;
     j = strlen("added: ");
-  } else if (mode == MODIFIED) {
+  } else if (mode == MODIFIED || mode == MOVED) {
     if (fputs("\033[33;7mmodified: \033[1m", sink) < 0)
       return EIO;
     j = strlen("modified: ");
   } else {
-    ASSERT(!was_moved);
     if (fputs("\033[31;7mdeleted: \033[1m", sink) < 0)
       return EIO;
     j = strlen("deleted: ");
   }
 
-  if (fprintf(sink, "%.*s", (int)from_len, from) < 0)
+  if (fputs(header.from, sink) < 0)
     return EIO;
-  j += from_len;
+  j += strlen(header.from);
 
-  if (was_moved) {
-    if (fprintf(sink, " → %.*s", (int)to_len, to) < 0)
+  if (mode == MOVED) {
+    if (fprintf(sink, " → %s", header.to) < 0)
       return EIO;
-    j += 3 + to_len;
+    j += 3 + strlen(header.to);
   }
 
   for (; j < width; ++j) {
@@ -616,6 +745,7 @@ int main(int argc, char **argv) {
   FILE *out = stdout;
   char *buffer = NULL;
   size_t buffer_size = 0;
+  header_t header = {0};
   pending_t pending = {0};
   int rc = EXIT_SUCCESS;
 
@@ -640,7 +770,15 @@ int main(int argc, char **argv) {
   }
   diff.out = -1;
 
-  for (bool prelude = true;;) {
+  // We consider a diff to be made up of three different sections:
+  //   1. The “prelude” (commit hash, author, commit message, …)
+  //   2. “Headers” (Per-file Git command line, index lines, …)
+  //   3. “Context” (the diff hunks)
+  // The `section` variable tracks a state machine. We start off in the prelude
+  // and, once leaving it, can never return to it. The header and context states
+  // can be transitioned between in both directions to account for multiple
+  // files within the same diff.
+  for (enum {PRELUDE, HEADER, CONTEXT} section = PRELUDE;;) {
 
     errno = 0;
     if (getline(&buffer, &buffer_size, in) < 0) {
@@ -665,11 +803,34 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    // are we exiting the prelude and into the diff context?
-    if (prelude) {
-      static const char *const STARTERS[] = {"diff ", "index ", "+++ ", "--- "};
-      for (size_t i = 0; i < sizeof(STARTERS) / sizeof(STARTERS[0]); ++i)
-        prelude &= !startswith(buffer, STARTERS[i]);
+    // are we entering a different section?
+    {
+      static const char *const HEADERS[] = {"diff ",     "index ",
+                                            "new file ", "deleted file ",
+                                            "rename ",   "similarity index ",
+                                            "+++ ",      "--- "};
+      if (section == PRELUDE) {
+        for (size_t i = 0; i < sizeof(HEADERS) / sizeof(HEADERS[0]); ++i) {
+          if (startswith(buffer, HEADERS[i])) {
+            section = HEADER;
+            break;
+          }
+        }
+      } else if (section == HEADER) {
+        bool is_header = false;
+        for (size_t i = 0; i < sizeof(HEADERS) / sizeof(HEADERS[0]); ++i)
+          is_header |= startswith(buffer, HEADERS[i]);
+        if (!is_header)
+          section = CONTEXT;
+      } else if (section == CONTEXT) {
+        // exclude “+++ …” and “--- …” which could be false positives here
+        bool is_header = false;
+        for (size_t i = 0; i < sizeof(HEADERS) / sizeof(HEADERS[0]); ++i)
+          is_header |= startswith(buffer, HEADERS[i]) && HEADERS[i][0] != '+' &&
+                       HEADERS[i][0] != '-';
+        if (is_header)
+          section = HEADER;
+      }
     }
 
     // Do we need to start less? We start it here so as to avoid running
@@ -692,37 +853,104 @@ int main(int argc, char **argv) {
       less.in = -1;
     }
 
-    // accumulate this line if we can later output it with more contextual hints
-    if (!prelude) {
-      if (buffer[0] == '-' && !startswith(buffer, "--- ") &&
-          pending.pos.n_line == 0) {
-        // a negative line that may have a later matching positive line
-        const int r = lines_append(&pending.neg, buffer);
-        if (r != 0) {
-          fprintf(stderr, "failed to accumulate negative line: %s\n",
-                  strerror(r));
-          rc = EXIT_FAILURE;
-          goto done;
+    // discard diff leader
+    if (section == HEADER && startswith(buffer, "diff "))
+      continue;
+
+    // discard index and similarity lines
+    if (section == HEADER && startswith(buffer, "index "))
+      continue;
+    if (section == HEADER && startswith(buffer, "similarity "))
+      continue;
+
+    // discard mode lines that we can infer from “+++ …”/“--- …”
+    if (section == HEADER && startswith(buffer, "new file "))
+      continue;
+    if (section == HEADER && startswith(buffer, "deleted file "))
+      continue;
+
+    // we need to note “rename …” lines because Git emits pure moves using them
+    // with no accompanying “--- …”, “+++ …”
+    if (section == HEADER && startswith(buffer, "rename from ")) {
+      const char *const from = &buffer[strlen("rename from ")];
+      // flush any previously accrued pure move
+      if (header.from != NULL) {
+        if (header.to == NULL) {
+          fprintf(stderr, "warning: no 'to' path for 'from' path %s\n",
+                  header.from);
+        } else {
+          const int r = write_header(header, out);
+          if (r != 0) {
+            fprintf(stderr, "failed to write header: %s\n", strerror(r));
+            rc = EXIT_FAILURE;
+            goto done;
+          }
         }
-        buffer = NULL;
-        buffer_size = 0;
-        continue;
-      } else if (buffer[0] == '+' && !startswith(buffer, "+++ ")) {
-        // a positive line that may have an earlier matching negative line
-        const int r = lines_append(&pending.pos, buffer);
-        if (r != 0) {
-          fprintf(stderr, "failed to accumulate positive line: %s\n",
-                  strerror(r));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-        buffer = NULL;
-        buffer_size = 0;
-        continue;
-      } else if (startswith(buffer, "rename ")) {
-        // ignore notes about renames that we can infer from the diff header
+        free(header.from);
+        free(header.to);
+        header = (header_t){0};
+      }
+
+      header.from = make_path(from);
+      if (header.from == NULL) {
+        fprintf(stderr, "out of memory\n");
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+      continue;
+    }
+    if (section == HEADER && startswith(buffer, "rename to ")) {
+      const char *const to = &buffer[strlen("rename to ")];
+      if (header.from == NULL) {
+        fprintf(stderr, "warning: no 'from' path for 'to' path %s\n", to);
         continue;
       }
+      if (header.to != NULL) {
+        fprintf(stderr,
+                "warning duplicate 'to' paths %s and %s for 'from' path %s\n",
+                header.to, to, header.from);
+        continue;
+      }
+
+      header.to = make_path(to);
+      if (header.to == NULL) {
+        fprintf(stderr, "out of memory\n");
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+
+      // do not write this immediately because there may be a (duplicate) “+++
+      // …” coming up
+
+      continue;
+    }
+
+    // accumulate this line if we can later output it with more contextual hints
+    if (section == CONTEXT && buffer[0] == '-' && pending.pos.n_line == 0) {
+      // a negative line that may have a later matching positive line
+      const int r = lines_append(&pending.neg, buffer);
+      if (r != 0) {
+        fprintf(stderr, "failed to accumulate negative line: %s\n",
+                strerror(r));
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+      buffer = NULL;
+      buffer_size = 0;
+      continue;
+    }
+    if (section == CONTEXT && buffer[0] == '+') {
+      // a positive line that may have an earlier matching negative line
+      const int r = lines_append(&pending.pos, buffer);
+      if (r != 0) {
+        fprintf(stderr, "failed to accumulate positive line: %s\n",
+                strerror(r));
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+      buffer = NULL;
+      buffer_size = 0;
+      continue;
     }
 
     // output any preceding lines to the one we are about to write
@@ -735,53 +963,84 @@ int main(int argc, char **argv) {
       }
     }
 
-    // if this is a diff leader, save it for later
-    if (startswith(buffer, "diff --git ")) {
-      free(pending.heading);
-      pending.heading = buffer;
-      pending.mode = MODIFIED;
-      buffer = NULL;
-      buffer_size = 0;
-      continue;
-    }
+    // parse diff header
+    if (section == HEADER && startswith(buffer, "--- ")) {
+      const char *const from = &buffer[strlen("--- ")];
+      if (header.from != NULL) {
+        // flush any previously accrued pure move
+        if (!streq(header.from, from)) {
+          if (header.to == NULL) {
+            fprintf(stderr, "warning: no 'to' path for 'from' path %s\n",
+                    header.from);
+          } else {
+            const int r = write_header(header, out);
+            if (r != 0) {
+              fprintf(stderr, "failed to write header: %s\n", strerror(r));
+              rc = EXIT_FAILURE;
+              goto done;
+            }
+          }
+        } else {
+          continue;
+        }
+        free(header.from);
+        free(header.to);
+        header = (header_t){0};
+      }
 
-    // if we see a mode line, update what kind of change this is
-    if (startswith(buffer, "new file ")) {
-      pending.mode = ADDED;
-      continue;
-    }
-    if (startswith(buffer, "deleted file ")) {
-      pending.mode = DELETED;
-      continue;
-    }
-
-    // if we see an index line or a pure move, flush the heading
-    if ((startswith(buffer, "index ") ||
-         streq(buffer, "similarity index 100%\n")) &&
-        pending.heading != NULL) {
-      const int r = write_header(pending.mode, pending.heading, out);
-      if (r != 0) {
-        fprintf(stderr, "failed to write header: %s\n", strerror(r));
+      header.from = make_path(from);
+      if (header.from == NULL) {
+        fprintf(stderr, "out of memory\n");
         rc = EXIT_FAILURE;
         goto done;
       }
       continue;
     }
+    if (section == HEADER && startswith(buffer, "+++ ")) {
+      const char *const to = &buffer[strlen("+++ ")];
+      if (header.from == NULL) {
+        fprintf(stderr, "warning: no 'from' path for 'to' path %s\n", to);
+        continue;
+      }
 
-    // suppress the diff leader lines following the command
-    if (startswith(buffer, "+++ "))
+      if (header.to == NULL) {
+        header.to = make_path(to);
+        if (header.to == NULL) {
+          fprintf(stderr, "out of memory\n");
+          rc = EXIT_FAILURE;
+          goto done;
+        }
+      } else if (!streq(header.to, to)) {
+        fprintf(stderr,
+                "warning duplicate 'to' paths %s and %s for 'from' path %s\n",
+                header.to, to, header.from);
+      }
+      const int r = write_header(header, out);
+      if (r != 0) {
+        fprintf(stderr, "failed to write header: %s\n", strerror(r));
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+      free(header.from);
+      free(header.to);
+      header = (header_t){0};
       continue;
-    if (startswith(buffer, "--- "))
-      continue;
-
-    // suppress similarity lines
-    if (startswith(buffer, "similarity "))
-      continue;
+    }
 
     // output our current line
-    const int r = flush_line(!prelude, buffer, NULL, out);
+    const int r = flush_line(section == CONTEXT, buffer, NULL, out);
     if (r != 0) {
       fprintf(stderr, "failed to write line: %s\n", strerror(r));
+      rc = EXIT_FAILURE;
+      goto done;
+    }
+  }
+
+  // output any trailing pure move we buffered
+  if (header.from != NULL && header.to != NULL) {
+    const int r = write_header(header, out);
+    if (r != 0) {
+      fprintf(stderr, "failed to write header: %s\n", strerror(r));
       rc = EXIT_FAILURE;
       goto done;
     }
@@ -800,7 +1059,8 @@ int main(int argc, char **argv) {
 done:
   lines_free(&pending.pos);
   lines_free(&pending.neg);
-  free(pending.heading);
+  free(header.from);
+  free(header.to);
   free(buffer);
 
   // close our pipe to prompt `diff` to exit
