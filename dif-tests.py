@@ -150,7 +150,7 @@ def test_moved_ignore():
 
     # a diff that indicates a rename with modification
     diff = textwrap.dedent(
-        f"""\
+        """\
     diff --git foo quux
     rename from foo
     rename to quux
