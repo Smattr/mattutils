@@ -145,7 +145,6 @@ def test_rename_ignore():
     assert did_not_see, "rename lines were not suppressed"
 
 
-@pytest.mark.xfail(strict=True)
 def test_rename_retain():
     """does `dif` retain “rename …” lines when piped?"""
 

@@ -492,11 +492,10 @@ static int flush_line(bool colourise, const char *line, const char *pair,
 
 /// write out diff lines
 ///
-/// \param colourise Add ANSI colour to the output?
 /// \param pending Negative and positive lines to write
 /// \param sink Output to write to
 /// \return 0 on success or an errno on failure
-static int flush_lines(bool colourise, pending_t *pending, FILE *sink) {
+static int flush_lines(pending_t *pending, FILE *sink) {
   ASSERT(pending != NULL);
   ASSERT(sink != NULL);
 
@@ -504,7 +503,7 @@ static int flush_lines(bool colourise, pending_t *pending, FILE *sink) {
     const char *pair = NULL;
     if (pending->neg.n_line == pending->pos.n_line)
       pair = pending->pos.line[i];
-    const int r = flush_line(colourise, pending->neg.line[i], pair, sink);
+    const int r = flush_line(true, pending->neg.line[i], pair, sink);
     if (r != 0)
       return r;
   }
@@ -513,7 +512,7 @@ static int flush_lines(bool colourise, pending_t *pending, FILE *sink) {
     const char *pair = NULL;
     if (pending->neg.n_line == pending->pos.n_line)
       pair = pending->neg.line[i];
-    const int r = flush_line(colourise, pending->pos.line[i], pair, sink);
+    const int r = flush_line(true, pending->pos.line[i], pair, sink);
     if (r != 0)
       return r;
   }
@@ -651,6 +650,15 @@ int main(int argc, char **argv) {
 
     decolourise(buffer);
 
+    if (!add_colour) {
+      if (fputs(buffer, out) < 0) {
+        fprintf(stderr, "failed to write line: %s\n", strerror(EIO));
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+      continue;
+    }
+
     // are we exiting the prelude and into the diff context?
     if (prelude) {
       static const char *const STARTERS[] = {"diff ", "index ", "+++ ", "--- "};
@@ -658,27 +666,24 @@ int main(int argc, char **argv) {
         prelude &= !startswith(buffer, STARTERS[i]);
     }
 
-    if (add_colour) {
-
-      // Do we need to start less? We start it here so as to avoid running
-      // it (and clearing the screen) if the diff is empty.
-      if (less.pid == 0) {
-        const int r = run_less(&less);
-        if (r != 0) {
-          fprintf(stderr, "failed to run less: %s\n", strerror(errno));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-
-        // wrap output in `FILE *` to avoid dealing with EINTR etc
-        out = fdopen(less.in, "w");
-        if (out == NULL) {
-          fprintf(stderr, "failed to fdopen: %s\n", strerror(errno));
-          rc = EXIT_FAILURE;
-          goto done;
-        }
-        less.in = -1;
+    // Do we need to start less? We start it here so as to avoid running
+    // it (and clearing the screen) if the diff is empty.
+    if (less.pid == 0) {
+      const int r = run_less(&less);
+      if (r != 0) {
+        fprintf(stderr, "failed to run less: %s\n", strerror(errno));
+        rc = EXIT_FAILURE;
+        goto done;
       }
+
+      // wrap output in `FILE *` to avoid dealing with EINTR etc
+      out = fdopen(less.in, "w");
+      if (out == NULL) {
+        fprintf(stderr, "failed to fdopen: %s\n", strerror(errno));
+        rc = EXIT_FAILURE;
+        goto done;
+      }
+      less.in = -1;
     }
 
     // accumulate this line if we can later output it with more contextual hints
@@ -716,7 +721,7 @@ int main(int argc, char **argv) {
 
     // output any preceding lines to the one we are about to write
     {
-      const int r = flush_lines(add_colour, &pending, out);
+      const int r = flush_lines(&pending, out);
       if (r != 0) {
         fprintf(stderr, "failed to flush lines: %s\n", strerror(r));
         rc = EXIT_FAILURE;
@@ -725,7 +730,7 @@ int main(int argc, char **argv) {
     }
 
     // if this is a diff leader, save it for later
-    if (add_colour && startswith(buffer, "diff --git ")) {
+    if (startswith(buffer, "diff --git ")) {
       free(pending.heading);
       pending.heading = buffer;
       pending.mode = MODIFIED;
@@ -735,18 +740,17 @@ int main(int argc, char **argv) {
     }
 
     // if we see a mode line, update what kind of change this is
-    if (add_colour && startswith(buffer, "new file ")) {
+    if (startswith(buffer, "new file ")) {
       pending.mode = ADDED;
       continue;
     }
-    if (add_colour && startswith(buffer, "deleted file ")) {
+    if (startswith(buffer, "deleted file ")) {
       pending.mode = DELETED;
       continue;
     }
 
     // if we see an index line or a pure move, flush the heading
-    if (add_colour &&
-        (startswith(buffer, "index ") ||
+    if ((startswith(buffer, "index ") ||
          strcmp(buffer, "similarity index 100%\n") == 0) &&
         pending.heading != NULL) {
       const int r = write_header(pending.mode, pending.heading, out);
@@ -758,20 +762,18 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    if (add_colour) {
-      // suppress the diff leader lines following the command
-      if (startswith(buffer, "+++ "))
-        continue;
-      if (startswith(buffer, "--- "))
-        continue;
+    // suppress the diff leader lines following the command
+    if (startswith(buffer, "+++ "))
+      continue;
+    if (startswith(buffer, "--- "))
+      continue;
 
-      // suppress similarity lines
-      if (startswith(buffer, "similarity "))
-        continue;
-    }
+    // suppress similarity lines
+    if (startswith(buffer, "similarity "))
+      continue;
 
     // output our current line
-    const int r = flush_line(!prelude && add_colour, buffer, NULL, out);
+    const int r = flush_line(!prelude, buffer, NULL, out);
     if (r != 0) {
       fprintf(stderr, "failed to write line: %s\n", strerror(r));
       rc = EXIT_FAILURE;
@@ -781,7 +783,7 @@ int main(int argc, char **argv) {
 
   // output any trailing lines we buffered
   {
-    const int r = flush_lines(add_colour, &pending, out);
+    const int r = flush_lines(&pending, out);
     if (r != 0) {
       fprintf(stderr, "failed to flush lines: %s\n", strerror(r));
       rc = EXIT_FAILURE;
