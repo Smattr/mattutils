@@ -123,7 +123,31 @@ def test_plus_plus(tmp_path: Path):
 
 
 def test_rename_ignore():
-    """does `dif` ignore “rename …” lines?"""
+    """does `dif` ignore “rename …” lines when not piped?"""
+
+    # a diff that indicates a rename
+    diff = textwrap.dedent(
+        """\
+    diff --git a b
+    similarity index 100%
+    rename from a
+    rename to b
+    """
+    )
+
+    # run this through `dif`
+    proc = pexpect.spawn("dif", timeout=1, echo=False)
+    proc.send(diff)
+    proc.sendeof()
+
+    # did we see a rename line?
+    did_not_see = proc.expect(["rename", pexpect.EOF])
+    assert did_not_see, "rename lines were not suppressed"
+
+
+@pytest.mark.xfail(strict=True)
+def test_rename_retain():
+    """does `dif` retain “rename …” lines when piped?"""
 
     # a diff that indicates a rename
     diff = textwrap.dedent(
@@ -141,8 +165,8 @@ def test_rename_ignore():
     )
 
     assert (
-        re.search(r"\brename\b", proc.stdout) is None
-    ), "rename lines were not suppressed"
+        re.search(r"\brename\b", proc.stdout) is not None
+    ), "rename lines were not retained"
 
 
 def test_moved_ignore():
