@@ -104,8 +104,9 @@ def test_no_git_diff_header(tmp_path: Path):
     b = tmp_path / "b"
     b.write_text("bar\n", encoding="utf-8")
 
-    proc = pexpect.spawn("dif", [str(a), str(b)], encoding="utf-8")
-    proc.expect(re.compile(f"{a} → {b}"))
+    proc = pexpect.spawn("dif", [str(a), str(b)], timeout=1, echo=False)
+    did_not_see = proc.expect([re.compile(f"{a} → {b}"), pexpect.EOF])
+    assert not did_not_see, "missing git diff header was not correctly handled"
 
 
 def test_plus_plus(tmp_path: Path):
