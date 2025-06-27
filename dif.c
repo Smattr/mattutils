@@ -523,6 +523,12 @@ static int flush_lines(pending_t *pending, FILE *sink) {
   return 0;
 }
 
+static bool streq(const char *a, const char *b) {
+  ASSERT(a != NULL);
+  ASSERT(b != NULL);
+  return strcmp(a, b) == 0;
+}
+
 static bool startswith(const char *s, const char *prefix) {
   ASSERT(s != NULL);
   ASSERT(prefix != NULL);
@@ -751,7 +757,7 @@ int main(int argc, char **argv) {
 
     // if we see an index line or a pure move, flush the heading
     if ((startswith(buffer, "index ") ||
-         strcmp(buffer, "similarity index 100%\n") == 0) &&
+         streq(buffer, "similarity index 100%\n")) &&
         pending.heading != NULL) {
       const int r = write_header(pending.mode, pending.heading, out);
       if (r != 0) {
