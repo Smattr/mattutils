@@ -110,7 +110,7 @@ def test_no_git_diff_header(tmp_path: Path):
         encoding="utf-8",
         dimensions=(20, 1000),
     )
-    did_not_see = proc.expect([re.compile(f"{a} → {b}"), pexpect.EOF])
+    did_not_see = proc.expect_exact([f"{a} → {b}", pexpect.EOF])
     assert not did_not_see, "missing git diff header was not correctly handled"
 
 
@@ -147,7 +147,7 @@ def test_rename_ignore():
     proc.sendeof()
 
     # did we see a rename line?
-    did_not_see = proc.expect(["rename", pexpect.EOF])
+    did_not_see = proc.expect_exact(["rename", pexpect.EOF])
     assert did_not_see, "rename lines were not suppressed"
 
 
@@ -169,9 +169,7 @@ def test_rename_retain():
         ["dif"], input=diff, stdout=subprocess.PIPE, check=True, text=True
     )
 
-    assert (
-        re.search(r"\brename\b", proc.stdout) is not None
-    ), "rename lines were not retained"
+    assert "rename" in proc.stdout, "rename lines were not retained"
 
 
 def test_moved_ignore():
@@ -201,7 +199,7 @@ def test_moved_ignore():
     proc.sendeof()
 
     # did we see a “… moved and …” line?
-    did_not_see = proc.expect(["moved and", pexpect.EOF])
+    did_not_see = proc.expect_exact(["moved and", pexpect.EOF])
     assert did_not_see, "“moved and” was included"
 
 
@@ -234,7 +232,7 @@ def test_similarity_ignore(similarity: int):
     proc.sendeof()
 
     # did we see a “similarity …” line?
-    did_not_see = proc.expect(["similarity index", pexpect.EOF])
+    did_not_see = proc.expect_exact(["similarity index", pexpect.EOF])
     assert did_not_see, "similarity index was retained"
 
 
