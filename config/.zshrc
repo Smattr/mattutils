@@ -174,7 +174,20 @@ function reboot_prompt {
     fi
 }
 
-export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | sed "s/^[ \\t]*//" | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)$(reboot_prompt)]'
+function session_prompt {
+  if [ "${XDG_SESSION_TYPE:-}" = "tty" ]; then
+    printf '%s 🗗 T' "%{${fg[yellow]}%}"
+  elif [ "${XDG_SESSION_TYPE:-}" = "x11" ]; then
+    printf '%s 🗗 X' "%{${fg[magenta]}%}"
+  elif [ "${XDG_SESSION_TYPE:-}" = "wayland" ]; then
+    printf '%s 🗗 W' "%{${fg[cyan]}%}"
+  else
+    printf '%s 🗗 ?' "%{${fg[red]}%}"
+  fi
+  printf '%s' "%{${fg_no_bold[default]}%}"
+}
+
+export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | sed "s/^[ \\t]*//" | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)$(reboot_prompt)$(session_prompt)]'
 
 # Reload scripts
 r() {
