@@ -16,7 +16,7 @@ from typing import List
 def run(args: List[str]):
     env = os.environ.copy()
     env["FILTER_BRANCH_SQUELCH_WARNING"] = "1"
-    print(f"+ {shlex.join(str(x) for x in args)}")
+    print(f"+ env FILTER_BRANCH_SQUELCH_WARNING=1 {shlex.join(str(x) for x in args)}")
     sp.check_call(args, env=env)
 
 
