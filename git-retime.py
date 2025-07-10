@@ -55,7 +55,7 @@ def main(args: List[str]) -> int:
         return -1
 
     # if the user did not give us a base, figure it out from upstream
-    if options.onto is None:
+    if options.onto is None and len(options.ref) < 2:
         show = call(["git", "remote", "show", options.remote])
         default = re.search(r"^\s*HEAD branch: (.*)$", show, flags=re.MULTILINE)
         if default is None:
