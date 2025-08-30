@@ -42,6 +42,7 @@ default: \
   ${HOME}/bin/fwdmail.py \
   ${HOME}/bin/generate-passwd \
   ${HOME}/bin/g \
+  ${HOME}/bin/gg \
   ${HOME}/bin/git-cleanup.py \
   ${HOME}/bin/git-edit.py \
   ${HOME}/bin/git-increment.py \

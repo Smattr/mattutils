@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if [ $# -eq 0 ]; then
+  printf 'usage: %s <term>\n' "$0" >&2
+  exit 1
+fi
+
+echo hello
+
+term=$1
+shift
+g "\<${term}\>" "$@"
