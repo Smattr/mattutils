@@ -778,7 +778,8 @@ int main(int argc, char **argv) {
   // and, once leaving it, can never return to it. The header and context states
   // can be transitioned between in both directions to account for multiple
   // files within the same diff.
-  for (enum {PRELUDE, HEADER, CONTEXT} section = PRELUDE;;) {
+  typedef enum { PRELUDE, HEADER, CONTEXT } section_t;
+  for (section_t section = PRELUDE;;) {
 
     errno = 0;
     if (getline(&buffer, &buffer_size, in) < 0) {
