@@ -15,6 +15,32 @@ import io
 import os
 import subprocess
 import sys
+from pathlib import Path
+
+
+def type_in(s: str) -> int:
+    """type the given string"""
+
+    # choose a typing assistant
+    if os.environ.get("XDG_SESSION_TYPE") == "x11":
+        dotool = "xdotool"  # X11
+    else:
+        raise NotImplementedError("no Wayland support")
+
+    args = [dotool, "key"]
+    xkeys = {
+        "\n": "KP_Enter",
+        "-": "KP_Subtract",
+        "_": "underscore",
+        "=": "KP_Equal",
+        "+": "KP_Add",
+        ".": "KP_Decimal",
+        "/": "KP_Divide",
+    }
+    for char in s:
+        args += [xkeys.get(char, char)]
+
+    return subprocess.call(args)
 
 
 def main(args: list[str]) -> int:
@@ -34,22 +60,12 @@ def main(args: list[str]) -> int:
     encoded = io.BytesIO()
     base64.encode(options.source, encoded)
 
-    # choose a typing assistant
-    if os.environ.get("XDG_SESSION_TYPE") == "x11":
-        dotool = "xdotool"  # X11
-    else:
-        dotool = "ydotool"  # Wayland
-
     # send the encoded content to the active window
-    args = [dotool, "key"]
-    for char in encoded.getvalue().decode("utf-8"):
-        if char == "\n":
-            args += ["Return"]
-        elif char == "=":
-            args += ["equal"]
-        else:
-            args += [char]
-    return subprocess.call(args)
+    ret = type_in(encoded.getvalue().decode("utf-8"))
+
+    subprocess.run(["notify-send", Path(__file__).name, "Done!"], check=True)
+
+    return ret
 
 
 if __name__ == "__main__":

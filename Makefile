@@ -49,6 +49,7 @@ default: \
   ${HOME}/bin/git-retime.py \
   ${HOME}/bin/git-reup.py \
   ${HOME}/bin/ifind \
+  ${HOME}/bin/keyin.py \
   ${HOME}/bin/loc \
   ${HOME}/bin/meta_u \
   ${HOME}/bin/oi \
