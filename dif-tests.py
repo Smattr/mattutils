@@ -13,6 +13,28 @@ import pexpect
 import pytest
 
 
+@pytest.mark.xfail(strict=True)
+def test_create_name():
+    """creation should not claim the added file was “/dev/null”"""
+    diff = textwrap.dedent(
+        """\
+    diff --git hello world hello world
+    new file mode 100644
+    index 0000000..ce01362
+    --- /dev/null
+    +++ hello world
+    @@ -0,0 +1 @@
+    +foo bar
+    """
+    )
+
+    proc = pexpect.spawn("dif", timeout=1, echo=False)
+    proc.send(diff)
+    proc.sendeof()
+    did_not_see = proc.expect_exact(["/dev/null", pexpect.EOF])
+    assert did_not_see, "added file claimed to be /dev/null"
+
+
 def test_create_with_space():
     """can `dif` handle a file with a space in the name being created?"""
     diff = textwrap.dedent(
