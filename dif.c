@@ -717,9 +717,16 @@ static int write_header(const header_t header, FILE *sink) {
     j = strlen("deleted: ");
   }
 
-  if (fputs(header.from, sink) < 0)
-    return EIO;
-  j += strlen(header.from);
+  if (mode == ADDED) {
+    ASSERT(streq(header.from, "/dev/null"));
+    if (fputs(header.to, sink) < 0)
+      return EIO;
+    j += strlen(header.to);
+  } else {
+    if (fputs(header.from, sink) < 0)
+      return EIO;
+    j += strlen(header.from);
+  }
 
   if (mode == MOVED) {
     if (fprintf(sink, " → %s", header.to) < 0)

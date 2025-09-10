@@ -13,7 +13,6 @@ import pexpect
 import pytest
 
 
-@pytest.mark.xfail(strict=True)
 def test_create_name():
     """creation should not claim the added file was “/dev/null”"""
     diff = textwrap.dedent(
