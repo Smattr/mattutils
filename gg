@@ -5,8 +5,6 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-echo hello
-
 term=$1
 shift
 g "\<${term}\>" "$@"
