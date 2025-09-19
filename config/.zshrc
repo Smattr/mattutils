@@ -176,13 +176,13 @@ function reboot_prompt {
 
 function session_prompt {
   if [ "${XDG_SESSION_TYPE:-}" = "tty" ]; then
-    printf '%s 🗗 T' "%{${fg[yellow]}%}"
+    printf '%s ◨ T' "%{${fg[yellow]}%}"
   elif [ "${XDG_SESSION_TYPE:-}" = "x11" ]; then
-    printf '%s 🗗 X' "%{${fg[magenta]}%}"
+    printf '%s ◨ X' "%{${fg[magenta]}%}"
   elif [ "${XDG_SESSION_TYPE:-}" = "wayland" ]; then
-    printf '%s 🗗 W' "%{${fg[cyan]}%}"
+    printf '%s ◨ W' "%{${fg[cyan]}%}"
   else
-    printf '%s 🗗 ?' "%{${fg[red]}%}"
+    printf '%s ◨ ?' "%{${fg[red]}%}"
   fi
   printf '%s' "%{${fg_no_bold[default]}%}"
 }
