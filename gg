@@ -7,4 +7,9 @@ fi
 
 term=$1
 shift
-g "\<${term}\>" "$@"
+# account for preference ladder in `g` and regex syntax differences
+if command -v rg &>/dev/null; then
+  g "\b${term}\b" "$@"
+else
+  g "\<${term}\>" "$@"
+fi
