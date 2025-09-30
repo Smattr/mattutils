@@ -18,9 +18,7 @@ fi
 
 # Preference 2: The Silver Searcher
 if command -v ag &>/dev/null; then
-  if ag --version &>/dev/null; then
-    exec ag "$@"
-  fi
+  exec ag --group --color --pager less "$@"
 fi
 
 # Preference 3: Ack
