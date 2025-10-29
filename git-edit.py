@@ -18,12 +18,12 @@ import sys
 from typing import List
 
 
-def run(args: List[str]):
+def run(*args: str):
     print(f"+ {shlex.join(str(x) for x in args)}")
     sp.check_call(args)
 
 
-def call(args: List[str]):
+def call(*args: str):
     print(f"+ {shlex.join(str(x) for x in args)}")
     return sp.check_output(args, universal_newlines=True).strip()
 
@@ -37,11 +37,11 @@ def main(args: List[str]) -> int:
     options = parser.parse_args(args[1:])
 
     # check this is actually a Git repository
-    run(["git", "rev-parse", "HEAD"])
+    run("git", "rev-parse", "HEAD")
 
     # if the user did not give us a base, figure it out from upstream
     if options.onto is None:
-        show = call(["git", "remote", "show", options.remote])
+        show = call("git", "remote", "show", options.remote)
         default = re.search(r"^\s*HEAD branch: (.*)$", show, flags=re.MULTILINE)
         if default is None:
             sys.stderr.write("could not figure out default branch name\n")
@@ -49,10 +49,10 @@ def main(args: List[str]) -> int:
         options.onto = default.group(1)
 
     # determine the point at which we branched off the base
-    merge_base = call(["git", "merge-base", f"{options.remote}/{options.onto}", "HEAD"])
+    merge_base = call("git", "merge-base", f"{options.remote}/{options.onto}", "HEAD")
 
     # run a rebase, assuming we want to use `rerebase`
-    run(["git", "re", "--interactive", merge_base])
+    run("git", "re", "--interactive", merge_base)
 
     return 0
 
