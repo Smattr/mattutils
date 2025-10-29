@@ -13,14 +13,14 @@ import sys
 from typing import List
 
 
-def run(args: List[str]):
+def run(*args: str):
     env = os.environ.copy()
     env["FILTER_BRANCH_SQUELCH_WARNING"] = "1"
     print(f"+ env FILTER_BRANCH_SQUELCH_WARNING=1 {shlex.join(str(x) for x in args)}")
     sp.check_call(args, env=env)
 
 
-def call(args: List[str]):
+def call(*args: str):
     print(f"+ {shlex.join(str(x) for x in args)}")
     return sp.check_output(args, universal_newlines=True)
 
@@ -46,17 +46,17 @@ def main(args: List[str]) -> int:
         return -1
 
     # check this is actually a Git repository
-    run(["git", "rev-parse", "HEAD"])
+    run("git", "rev-parse", "HEAD")
 
     # is the working directory clean?
-    changes = call(["git", "status", "--short", "--ignore-submodules"])
+    changes = call("git", "status", "--short", "--ignore-submodules")
     if re.search(r"^.[^\?]", changes, flags=re.MULTILINE) is not None:
         sys.stderr.write("changes in working directory; aborting\n")
         return -1
 
     # if the user did not give us a base, figure it out from upstream
     if options.onto is None and len(options.ref) < 2:
-        show = call(["git", "remote", "show", options.remote])
+        show = call("git", "remote", "show", options.remote)
         default = re.search(r"^\s*HEAD branch: (.*)$", show, flags=re.MULTILINE)
         if default is None:
             sys.stderr.write("could not figure out default branch name\n")
@@ -73,10 +73,10 @@ def main(args: List[str]) -> int:
     if len(options.ref) == 2:
         base = options.ref[0]
     else:
-        base = call(["git", "merge-base", "--", options.onto, head]).strip()
+        base = call("git", "merge-base", "--", options.onto, head).strip()
 
     # get current timestamp in the right format
-    now = call(["date", "--rfc-email"]).strip()
+    now = call("date", "--rfc-email").strip()
 
     cmd = [
         "git",
@@ -90,7 +90,7 @@ def main(args: List[str]) -> int:
     if options.dry_run:
         print(f"would run: {shlex.join(str(c) for c in cmd)}")
     else:
-        run(cmd)
+        run(*cmd)
 
     return 0
 
