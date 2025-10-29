@@ -18,12 +18,12 @@ import sys
 from typing import List
 
 
-def run(args: List[str]):
+def run(*args: str):
     print(f"+ {shlex.join(str(x) for x in args)}")
     sp.check_call(args)
 
 
-def call(args: List[str]):
+def call(*args: str):
     print(f"+ {shlex.join(str(x) for x in args)}")
     return sp.check_output(args, universal_newlines=True).strip()
 
@@ -37,10 +37,10 @@ def main(args: List[str]) -> int:
     options = parser.parse_args(args[1:])
 
     # check this is actually a Git repository
-    run(["git", "rev-parse", "HEAD"])
+    run("git", "rev-parse", "HEAD")
 
     # is the working directory clean?
-    changes = call(["git", "status", "--short", "--ignore-submodules"])
+    changes = call("git", "status", "--short", "--ignore-submodules")
     if re.search(r"^.[^\?]", changes, flags=re.MULTILINE) is not None:
         sys.stderr.write("changes in working directory; aborting\n")
         return -1
@@ -51,7 +51,7 @@ def main(args: List[str]) -> int:
     options.branch = options.branch.split(":", maxsplit=1)[-1]
 
     # check this branch exists upstream
-    upstream = call(["git", "ls-remote", options.remote, options.branch])
+    upstream = call("git", "ls-remote", options.remote, options.branch)
     if len(upstream.strip()) == 0:
         sys.stderr.write(
             f"\033[31;1mWARNING:\033[0m {options.branch} does not exist upstream\n"
@@ -64,7 +64,7 @@ def main(args: List[str]) -> int:
     # find the latest local branch for this upstream branch
     local_branch = options.branch
     try:
-        local_commit = call(["git", "rev-parse", local_branch])
+        local_commit = call("git", "rev-parse", local_branch)
     except sp.CalledProcessError:
         sys.stderr.write(f"branch {local_branch} does not exist\n")
         return 1
@@ -72,7 +72,7 @@ def main(args: List[str]) -> int:
     while True:
         candidate = f"{options.branch}-{counter}"
         try:
-            local_commit = call(["git", "rev-parse", candidate])
+            local_commit = call("git", "rev-parse", candidate)
         except sp.CalledProcessError:
             break
         local_branch = candidate
@@ -88,7 +88,7 @@ def main(args: List[str]) -> int:
 
     # move to it and do the increment
     new = f"{options.branch}-{counter}"
-    run(["git", "checkout", "-b", new, local_branch])
+    run("git", "checkout", "-b", new, local_branch)
 
     return 0
 
