@@ -22,34 +22,34 @@ import sys
 from typing import List
 
 
-def run(args: List[str]):
+def run(*args: str):
     print(f"+ {shlex.join(str(x) for x in args)}")
     sp.check_call(args)
 
 
-def call(args: List[str]):
+def call(*args: str):
     print(f"+ {shlex.join(str(x) for x in args)}")
     return sp.check_output(args, universal_newlines=True)
 
 
 def force_delete(branch: str):
-    run(["git", "branch", "--delete", "--force", branch])
+    run("git", "branch", "--delete", "--force", branch)
 
 
 def delete(branch: str, remote: str, upstream: str):
 
     # move to the branch to delete
-    run(["git", "checkout", "--detach", branch])
+    run("git", "checkout", "--detach", branch)
 
     # rebase onto main
-    run(["git", "pull", "--rebase", remote, upstream])
+    run("git", "pull", "--rebase", remote, upstream)
 
     # check where this moved our pointer to
-    us = call(["git", "rev-parse", "HEAD"])
-    them = call(["git", "rev-parse", f"{remote}/{upstream}"])
+    us = call("git", "rev-parse", "HEAD")
+    them = call("git", "rev-parse", f"{remote}/{upstream}")
 
     # move to main
-    run(["git", "checkout", f"{remote}/{upstream}"])
+    run("git", "checkout", f"{remote}/{upstream}")
 
     # if rebasing left no commits in addition to main, we can delete the target
     if us == them:
@@ -88,17 +88,17 @@ def main(args: List[str]) -> int:
     options = parser.parse_args(args[1:])
 
     # check this is actually a Git repository
-    run(["git", "rev-parse", "HEAD"])
+    run("git", "rev-parse", "HEAD")
 
     # is the working directory clean?
-    changes = call(["git", "status", "--short", "--ignore-submodules"])
+    changes = call("git", "status", "--short", "--ignore-submodules")
     if re.search(r"^.[^\?]", changes, flags=re.MULTILINE) is not None:
         sys.stderr.write("changes in working directory; aborting\n")
         return -1
 
     # if the user did not give us a base, figure it out from upstream
     if options.onto is None:
-        show = call(["git", "remote", "show", options.remote])
+        show = call("git", "remote", "show", options.remote)
         default = re.search(r"^\s*HEAD branch: (.*)$", show, flags=re.MULTILINE)
         if default is None:
             sys.stderr.write("could not figure out default branch name\n")
@@ -113,7 +113,7 @@ def main(args: List[str]) -> int:
 
     # find the branch(es) we are aiming to remove
     victims: List[str] = []
-    branches = call(["git", "branch"])
+    branches = call("git", "branch")
     for line in branches.split("\n"):
         branch = line.lstrip(" *")
         if branch.startswith(options.branch):
