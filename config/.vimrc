@@ -31,7 +31,7 @@ imap <silent> <Down> <C-o>gj
 imap <silent> <Up> <C-o>gk
 nmap <silent> <Down> gj
 nmap <silent> <Up> gk
-imap <silent> <End> <C-o>g<End>
+imap <silent> <End> <C-o>g$
 imap <silent> <Home> <C-o>g<Home>
 nmap <silent> <End> g<End>
 nmap <silent> <Home> g<Home>
