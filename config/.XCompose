@@ -170,6 +170,10 @@
 <Multi_key> <b> <slash> : "╱"
 <Multi_key> <b> <backslash> : "╲"
 <Multi_key> <b> <x> : "╳"
+<Multi_key> <b> <bracketleft> : "▏"
+<Multi_key> <b> <bracketright> : "▕"
+<Multi_key> <b> <underscore> <underscore> : "▁"
+<Multi_key> <b> <asciitilde> : "▔"
 
 # arrow heads
 <Multi_key> <b> <asciicircum> : "▲"
