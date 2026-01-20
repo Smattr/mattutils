@@ -187,6 +187,7 @@ function session_prompt {
   printf '%s' "%{${fg_no_bold[default]}%}"
 }
 
+export ZLE_RPROMPT_INDENT=0
 export RPROMPT=$'[%{${fg[red]}%}$(jobs | wc -l | sed "s/^[ \\t]*//" | grep -v "^0")%{${fg_no_bold[default]}%}%*$(vcs_prompt)$(reboot_prompt)$(session_prompt)]'
 
 # Reload scripts
