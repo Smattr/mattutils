@@ -51,6 +51,7 @@ default: \
   ${HOME}/bin/keyin.py \
   ${HOME}/bin/loc \
   ${HOME}/bin/meta_u \
+  ${HOME}/bin/no \
   ${HOME}/bin/oi \
   ${HOME}/bin/prefix \
   ${HOME}/bin/pyman \

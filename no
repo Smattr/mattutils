@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# sandbox an untrusted command
+#
+# This is intended to constrain:
+#   • no file system writes
+#   • no network communication
+
+if [ $# -eq 0 ]; then
+  printf 'usage: %s command args...\n' "$0" >&2
+  exit 1
+fi
+
+if ! command -v bwrap &>/dev/null; then
+  printf 'bwrap not found\n' >&2
+  exit 1
+fi
+
+set -x
+
+bwrap --die-with-parent --ro-bind / / --dev /dev --proc /proc --unshare-all -- \
+  "$@"
