@@ -33,7 +33,7 @@
   old = "git bi old"
 
   # Create a new temporary branch and check it out.
-  tmp = "!f() { { command -v uuidgen >/dev/null 2>/dev/null || { printf \"uuidgen not found\\n\" >&2; exit 1; }; } && git checkout -b $(git config github.username)/$(uuidgen); }; f"
+  tmp = "!f() { { command -v uuidgen >/dev/null 2>/dev/null || { printf \"uuidgen not found\\n\" >&2; exit 1; }; } && git checkout -b $(git config tmp.prefix || git config github.username)/$(uuidgen); }; f"
 
   # Work around duplicated 'git's (http://caiustheory.com/git-git-git-git-git/).
   git = "!exec git"
