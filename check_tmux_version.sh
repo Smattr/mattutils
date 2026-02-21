@@ -8,12 +8,6 @@ export TMUX_BIN="${TMUX_BIN:-tmux}"
 
 TMUX_VERSION=$(${TMUX_BIN} -V | cut -d' ' -f 2)
 
-if [ $(awk 'BEGIN{ print ("'${TMUX_VERSION}'">="1.9") }') -eq 1 ]; then
-    tmux source-file ${HOME}/.tmux-new-pane_current_path.conf
-else
-    tmux source-file ${HOME}/.tmux-old-pane_current_path.conf
-fi
-
 if [ $(awk 'BEGIN{ print ("'${TMUX_VERSION}'">="2.4") }') -eq 1 ]; then
     tmux source-file ${HOME}/.tmux-new-vi-copy.conf
 else
