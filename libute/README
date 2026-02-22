@@ -1,0 +1,11 @@
+C utility library
+─────────────────
+This is less a proper “library” and more a grab bag of useful things I find
+myself repeatedly implementing. Symbols are not namespace-prefixed in the way a
+library would usually be structured, so you probably want to copy anything you
+want into your own project and rename the symbols.
+
+Only Clang/GCC on Linux are supported. Compatibility with other environments is
+best effort.
+
+Everything in this library is in the public domain. Use it any way you wish.
