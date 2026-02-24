@@ -6,10 +6,11 @@
 #include "test.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <ute/attr.h>
 #include <ute/int128.h>
 
 static char *buffer;
-static void free_(void *arg __attribute__((unused))) { free(buffer); }
+static void free_(void *arg UNUSED) { free(buffer); }
 static void fclose_(void *f) { (void)fclose(f); }
 
 TEST("printing INT128_MAX") {
