@@ -24,9 +24,7 @@ extern "C" {
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
 
-#define INT128_MIN                                                             \
-  ((int128_t)(UINT64_C(0xffffffffffffffff) |                                   \
-              ((uint128_t)UINT64_C(0xffffffffffffffff) << 64)))
+#define INT128_MIN ((int128_t)((uint128_t)1 << 127))
 #define INT128_MAX                                                             \
   ((int128_t)(UINT64_C(0xffffffffffffffff) |                                   \
               ((uint128_t)UINT64_C(0x7fffffffffffffff) << 64)))
