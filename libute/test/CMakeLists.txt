@@ -8,7 +8,9 @@ add_executable(test
   src/main.c
   src/test-print-int128-max.c
   src/test-print-int128-min.c
+  src/test-print-int128-small.c
   src/test-print-uint128-max.c
+  src/test-print-uint128-small.c
 )
 
 # enable `open_memstream`
