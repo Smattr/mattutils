@@ -4,7 +4,6 @@
 /// All content in this file is in the public domain. Use it any way you wish.
 
 #include "test.h"
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ute/int128.h>
