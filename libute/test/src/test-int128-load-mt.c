@@ -9,21 +9,6 @@
 #include <stdint.h>
 #include <ute/int128.h>
 
-#if USE_PTHREADS
-#include <pthread.h>
-typedef pthread_t thread_t;
-#define THREAD_CREATE(thread, start, arg)                                      \
-  pthread_create((thread), NULL, (start), (arg))
-#define THREAD_JOIN(thread, retval) pthread_join((thread), (retval))
-#define THREAD_RET void *
-#else
-#include <threads.h>
-typedef thrd_t thread_t;
-#define THREAD_CREATE(thread, start, arg) thrd_create((thread), (start), (arg))
-#define THREAD_JOIN(thread, retval) thrd_join((thread), (retval))
-#define THREAD_RET int
-#endif
-
 typedef struct {
   int128_t *target;
   int128_t expected;

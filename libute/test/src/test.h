@@ -158,3 +158,35 @@ void run_cleanups(void);
     run_cleanups();                                                            \
     abort();                                                                   \
   } while (0)
+
+////////////////////////////////////////////////////////////////////////////////
+// multi-threading abstractions
+////////////////////////////////////////////////////////////////////////////////
+
+#if USE_PTHREADS
+#include <pthread.h>
+
+typedef pthread_t thread_t;
+
+#define THREAD_CREATE(thread, start, arg)                                      \
+  pthread_create((thread), NULL, (start), (arg))
+
+#define THREAD_JOIN(thread, retval) pthread_join((thread), (retval))
+
+/// return type of thread entry point
+#define THREAD_RET void *
+
+#else
+#include <threads.h>
+
+typedef thrd_t thread_t;
+
+#define THREAD_CREATE(thread, start, arg)                                      \
+  (thrd_create((thread), (start), (arg)) != thrd_success)
+
+#define THREAD_JOIN(thread, retval)                                            \
+  (thrd_join((thread), (retval)) != thrd_success)
+
+/// return type of thread entry point
+#define THREAD_RET int
+#endif
