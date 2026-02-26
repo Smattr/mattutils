@@ -62,6 +62,37 @@ int128_t int128_atomic_load(int128_t *src);
 /// @param src Value to write
 void int128_atomic_store(int128_t *dst, int128_t src);
 
+/// atomically compare-and-swap a 128-bit signed integer
+///
+/// This function is lock-free. It performs a strong (no spurious failures)
+/// compare-and-swap with (at least) acquire-release semantics.
+///
+/// Semantically this atomically performs:
+///
+///   bool result = *dst == *expected;
+///   *expected = *dst;
+///   if (result) {
+///     *dst = desired;
+///   }
+///   return result;
+///
+/// @param dst Address to swap with
+/// @param expected [in,out] Expected old value; actual old value on return
+/// @param desired Value to try to write
+/// @return True if the swap succeeded
+bool int128_atomic_cas(int128_t *dst, int128_t *expected, int128_t desired);
+
+/// atomically compare-and-swap a 128-bit signed integer
+///
+/// This function has the same semantics as `int128_atomic_cas_n` but takes
+/// `expected` by value for callers who do not need the read old value.
+///
+/// @param dst Address to swap with
+/// @param expected Expected old value
+/// @param desired Value to try to write
+/// @return True if the swap succeeded
+bool int128_atomic_cas_n(int128_t *dst, int128_t expected, int128_t desired);
+
 /// atomically read and write a 128-bit signed integer
 ///
 /// This function is lock-free. It performs the exchange with (at least)

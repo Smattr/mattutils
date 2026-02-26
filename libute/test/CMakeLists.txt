@@ -6,6 +6,10 @@
 add_executable(test
   src/cleanup.c
   src/main.c
+  src/test-int128-cas.c
+  src/test-int128-cas-fail.c
+  src/test-int128-cas-fail-mt.c
+  src/test-int128-cas-mt.c
   src/test-int128-load.c
   src/test-int128-load-mt.c
   src/test-int128-store.c

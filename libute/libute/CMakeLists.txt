@@ -4,6 +4,8 @@
 ## All content in this file is in the public domain. Use it any way you wish.
 
 add_library(libute
+  src/int128_atomic_cas.c
+  src/int128_atomic_cas_n.c
   src/int128_atomic_load.c
   src/int128_atomic_store.c
   src/int128_atomic_xchg.c
