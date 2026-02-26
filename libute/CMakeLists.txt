@@ -78,5 +78,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" OR
   endif()
 endif()
 
+find_package(Threads REQUIRED)
+
 add_subdirectory(libute)
 add_subdirectory(test)

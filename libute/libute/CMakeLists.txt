@@ -4,12 +4,18 @@
 ## All content in this file is in the public domain. Use it any way you wish.
 
 add_library(libute
+  src/int128_atomic_load.c
   src/int128_put.c
   src/uint128_put.c
 )
 
 if(APPLE)
   target_compile_options(libute PRIVATE -fno-common)
+endif()
+
+CHECK_C_COMPILER_FLAG(-mcx16 HAS_MCX16)
+if(HAS_MCX16)
+  target_compile_options(libute PRIVATE -mcx16)
 endif()
 
 target_include_directories(libute

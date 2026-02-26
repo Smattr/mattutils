@@ -33,6 +33,23 @@ typedef unsigned __int128 uint128_t;
    ((uint128_t)UINT64_C(0xffffffffffffffff) << 64))
 
 ///////////////////////////////////////////////////////////////////////////////
+// atomics                                                                   //
+///////////////////////////////////////////////////////////////////////////////
+
+/// atomically read a 128-bit signed integer from memory
+///
+/// This function is lock-free. It performs the read with (at least) acquire
+/// semantics.
+///
+/// Semantically this atomically performs:
+///
+///   return *src;
+///
+/// @param src Address to read from
+/// @return Loaded value
+int128_t int128_atomic_load(int128_t *src);
+
+///////////////////////////////////////////////////////////////////////////////
 // I/O                                                                       //
 ///////////////////////////////////////////////////////////////////////////////
 
