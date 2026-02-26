@@ -8,6 +8,8 @@ add_executable(test
   src/main.c
   src/test-int128-load.c
   src/test-int128-load-mt.c
+  src/test-int128-xchg.c
+  src/test-int128-xchg-mt.c
   src/test-print-int128-max.c
   src/test-print-int128-min.c
   src/test-print-int128-small.c
