@@ -11,6 +11,7 @@ add_library(libute
   src/int128_atomic_xchg.c
   src/int128_put.c
   src/uint128_put.c
+  src/putb.c
 )
 
 if(APPLE)
