@@ -15,6 +15,7 @@ typedef struct {
 } state_t;
 
 static THREAD_RET entry(void *arg) {
+  assert(arg != NULL);
   state_t *const s = arg;
 
   const int128_t actual = int128_atomic_load(s->target);
