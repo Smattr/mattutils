@@ -49,6 +49,19 @@ typedef unsigned __int128 uint128_t;
 /// @return Loaded value
 int128_t int128_atomic_load(int128_t *src);
 
+/// atomically write a 128-bit signed integer to memory
+///
+/// This function is lock-free. It performs the write with (at least) release
+/// semantics.
+///
+/// Semantically this atomically performs:
+///
+///   *dst = src;
+///
+/// @param dst Location to write to
+/// @param src Value to write
+void int128_atomic_store(int128_t *dst, int128_t src);
+
 /// atomically read and write a 128-bit signed integer
 ///
 /// This function is lock-free. It performs the exchange with (at least)
