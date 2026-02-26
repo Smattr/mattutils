@@ -45,7 +45,7 @@ static void run(int128_t *target) {
 
 TEST("int128_atomic_load multi-threaded") {
   run(&(int128_t){0});
-  run(&(int128_t){-1});
+  run(&(int128_t){1});
   run(&(int128_t){42});
   run(&(int128_t){-42});
   run(&(int128_t){-1});
