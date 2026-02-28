@@ -37,7 +37,7 @@ TEST("int128_atomic_xchg single-threaded") {
   }
 
   {
-    int128_t x = -0;
+    int128_t x = 0;
     int128_t x2 = int128_atomic_xchg(&x, -42);
     ASSERT(x == -42);
     ASSERT(x2 == 0);
