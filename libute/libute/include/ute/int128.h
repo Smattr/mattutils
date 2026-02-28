@@ -109,6 +109,79 @@ bool int128_atomic_cas_n(int128_t *dst, int128_t expected, int128_t desired);
 /// @return Original value read from `dst`
 int128_t int128_atomic_xchg(int128_t *dst, int128_t src);
 
+/// atomically read a 128-bit unsigned integer from memory
+///
+/// This function is lock-free. It performs the read with (at least) acquire
+/// semantics.
+///
+/// Semantically this atomically performs:
+///
+///   return *src;
+///
+/// @param src Address to read from
+/// @return Loaded value
+uint128_t uint128_atomic_load(uint128_t *src);
+
+/// atomically write a 128-bit unsigned integer to memory
+///
+/// This function is lock-free. It performs the write with (at least) release
+/// semantics.
+///
+/// Semantically this atomically performs:
+///
+///   *dst = src;
+///
+/// @param dst Location to write to
+/// @param src Value to write
+void uint128_atomic_store(uint128_t *dst, uint128_t src);
+
+/// atomically compare-and-swap a 128-bit unsigned integer
+///
+/// This function is lock-free. It performs a strong (no spurious failures)
+/// compare-and-swap with (at least) acquire-release semantics.
+///
+/// Semantically this atomically performs:
+///
+///   bool result = *dst == *expected;
+///   *expected = *dst;
+///   if (result) {
+///     *dst = desired;
+///   }
+///   return result;
+///
+/// @param dst Address to swap with
+/// @param expected [in,out] Expected old value; actual old value on return
+/// @param desired Value to try to write
+/// @return True if the swap succeeded
+bool uint128_atomic_cas(uint128_t *dst, uint128_t *expected, uint128_t desired);
+
+/// atomically compare-and-swap a 128-bit unsigned integer
+///
+/// This function has the same semantics as `uint128_atomic_cas_n` but takes
+/// `expected` by value for callers who do not need the read old value.
+///
+/// @param dst Address to swap with
+/// @param expected Expected old value
+/// @param desired Value to try to write
+/// @return True if the swap succeeded
+bool uint128_atomic_cas_n(uint128_t *dst, uint128_t expected, uint128_t desired);
+
+/// atomically read and write a 128-bit unsigned integer
+///
+/// This function is lock-free. It performs the exchange with (at least)
+/// acquire-release semantics.
+///
+/// Semantically this atomically performs:
+///
+///   int128_t old = *dst;
+///   *dst = src;
+///   return old;
+///
+/// @param dst Location to read and write
+/// @param src Value to write to `dst`
+/// @return Original value read from `dst`
+uint128_t uint128_atomic_xchg(uint128_t *dst, uint128_t src);
+
 ///////////////////////////////////////////////////////////////////////////////
 // I/O                                                                       //
 ///////////////////////////////////////////////////////////////////////////////

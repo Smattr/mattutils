@@ -22,6 +22,16 @@ add_executable(test
   src/test-print-uint128-max.c
   src/test-print-uint128-small.c
   src/test-putb.c
+  src/test-uint128-cas.c
+  src/test-uint128-cas-fail.c
+  src/test-uint128-cas-fail-mt.c
+  src/test-uint128-cas-mt.c
+  src/test-uint128-load.c
+  src/test-uint128-load-mt.c
+  src/test-uint128-store.c
+  src/test-uint128-store-mt.c
+  src/test-uint128-xchg.c
+  src/test-uint128-xchg-mt.c
 )
 
 # enable `open_memstream`

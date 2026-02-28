@@ -10,6 +10,11 @@ add_library(libute
   src/int128_atomic_store.c
   src/int128_atomic_xchg.c
   src/int128_put.c
+  src/uint128_atomic_cas.c
+  src/uint128_atomic_cas_n.c
+  src/uint128_atomic_load.c
+  src/uint128_atomic_store.c
+  src/uint128_atomic_xchg.c
   src/uint128_put.c
   src/putb.c
 )
