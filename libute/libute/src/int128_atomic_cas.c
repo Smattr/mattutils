@@ -3,10 +3,10 @@
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include <ute/int128.h>
-#include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <ute/int128.h>
 
 #ifndef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_16
 #error "__sync built-ins unavailable for 128-bit values"

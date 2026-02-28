@@ -3,11 +3,11 @@
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include <ute/print.h>
-#include <limits.h>
 #include <assert.h>
-#include <stdio.h>
+#include <limits.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <ute/print.h>
 
 int putb(const void *data, size_t size, FILE *stream) {
   assert(data != NULL || size == 0);

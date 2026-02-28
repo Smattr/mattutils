@@ -3,10 +3,10 @@
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include <ute/int128.h>
-#include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <ute/int128.h>
 
 bool int128_atomic_cas_n(int128_t *dst, int128_t expected, int128_t desired) {
   assert(dst != NULL);
