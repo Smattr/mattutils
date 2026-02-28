@@ -1,4 +1,7 @@
-/// @file 
+/// @file
+/// @brief Atomically read a 128-bit signed integer
+///
+/// All content in this file is in the public domain. Use it any way you wish.
 
 #include <ute/int128.h>
 #include <assert.h>
