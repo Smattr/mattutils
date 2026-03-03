@@ -4,6 +4,7 @@
 ## All content in this file is in the public domain. Use it any way you wish.
 
 add_library(libute
+  src/asp.c
   src/dword_atomic_cas.c
   src/dword_atomic_cas_n.c
   src/dword_atomic_load.c
