@@ -192,3 +192,58 @@ TEST("atomic shared pointer counter reallocate, multi-threaded") {
   const sp_t null = {0};
   sp_store(&ptr, null);
 }
+
+static THREAD_RET write_entry(void *arg) {
+  assert(arg != NULL);
+  state_t *const s = arg;
+
+  // ignore the current value of the pointer, and write our own
+  _Atomic size_t *const p = malloc(sizeof(*p));
+  ASSERT_NOT_NULL(p);
+  atomic_store_explicit(p, s->thread_id, memory_order_release);
+  const sp_t new = sp_new(p, free);
+  ASSERT_NOT_NULL(new.ptr);
+  sp_store(s->ptr, new);
+
+  return 0;
+}
+
+/// rather than trying to cooperate, have all threads race each other to write
+///
+/// The failure mode of this test case will typically be ASan observing memory
+/// leaks if we have the reference counting semantics wrong.
+TEST("atomic shared pointer counter overwrite, multi-threaded") {
+
+  asp_t ptr = 0;
+
+  // a zero-initialized pointer should be null
+  {
+    const sp_t sp = sp_acq(&ptr);
+    ASSERT_EQ(sp.ptr, NULL);
+    sp_rel(sp);
+  }
+
+  thread_t t[100];
+  state_t s[sizeof(t) / sizeof(t[0])];
+
+  // setup states first to avoid racing our reads of `target` with the test
+  // case’s writes
+  for (size_t i = 0; i < sizeof(s) / sizeof(s[0]); ++i)
+    s[i] = (state_t){.thread_id = i, .ptr = &ptr};
+
+  for (size_t i = 0; i < sizeof(t) / sizeof(t[0]); ++i) {
+    const int r = THREAD_CREATE(&t[i], write_entry, &s[i]);
+    ASSERT_EQ(r, 0);
+  }
+
+  for (size_t i = 0; i < sizeof(t) / sizeof(t[0]); ++i) {
+    THREAD_RET ret = 0;
+    const int r = THREAD_JOIN(t[i], &ret);
+    ASSERT_EQ(r, 0);
+    ASSERT_EQ(ret, (THREAD_RET){0});
+  }
+
+  // free the shared pointer by overwriting the last reference to it with null
+  const sp_t null = {0};
+  sp_store(&ptr, null);
+}
