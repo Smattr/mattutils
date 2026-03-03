@@ -1,6 +1,9 @@
 /// @file
 /// @brief Atomics on 2-pointer-wide scalars
 ///
+/// How widely available are double-width atomics? It seems, almost everywhere.
+///   https://timur.audio/dwcas-in-c
+///
 /// All content in this file is in the public domain. Use it any way you wish.
 
 #pragma once
