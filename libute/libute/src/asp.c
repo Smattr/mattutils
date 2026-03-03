@@ -149,9 +149,6 @@ sp_t sp_acq(asp_t *asp) {
     }
     ++impl.load_count;
     const dword_t new = impl2asp(impl);
-    // XXX: It is not clear to me why Timur Doumler’s code uses a weak CAS
-    // here. This is a case where we need to loop on failure, seemingly
-    // motivating a strong CAS. We choose to the latter.
     if (dword_atomic_cas(asp, &old, new)) {
       old = new;
       break;
