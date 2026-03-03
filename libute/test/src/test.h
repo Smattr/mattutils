@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +22,7 @@ extern test_case_t *test_cases;
 #define _JOIN(x, y) x##y
 #define JOIN(x, y) _JOIN(x, y)
 
-extern bool has_assertion_;
+extern atomic_flag has_assertion_;
 
 /// an action to be run on (success or fail) exit in a test case
 typedef struct cleanup_ {
@@ -74,7 +75,7 @@ void run_cleanups(void);
 
 #define ASSERT_(a, a_name, op, b, b_name)                                      \
   do {                                                                         \
-    has_assertion_ = true;                                                     \
+    atomic_flag_test_and_set_explicit(&has_assertion_, memory_order_release);  \
     __typeof__(a) _a = (a);                                                    \
     __typeof__(b) _b = (b);                                                    \
     if (!(_a op _b)) {                                                         \
@@ -101,7 +102,7 @@ void run_cleanups(void);
 
 #define ASSERT(expr)                                                           \
   do {                                                                         \
-    has_assertion_ = true;                                                     \
+    atomic_flag_test_and_set_explicit(&has_assertion_, memory_order_release);  \
     if (!(expr)) {                                                             \
       fprintf(stderr, "failed\n    %s:%d: assertion “%s” failed\n", __FILE__,  \
               __LINE__, #expr);                                                \
@@ -118,7 +119,7 @@ void run_cleanups(void);
 
 #define ASSERT_STREQ(a, b)                                                     \
   do {                                                                         \
-    has_assertion_ = true;                                                     \
+    atomic_flag_test_and_set_explicit(&has_assertion_, memory_order_release);  \
     const char *_a = (a);                                                      \
     const char *_b = (b);                                                      \
     if (strcmp(_a, _b) != 0) {                                                 \
@@ -135,7 +136,7 @@ void run_cleanups(void);
 
 #define ASSERT_STRNE(a, b)                                                     \
   do {                                                                         \
-    has_assertion_ = true;                                                     \
+    atomic_flag_test_and_set_explicit(&has_assertion_, memory_order_release);  \
     const char *_a = (a);                                                      \
     const char *_b = (b);                                                      \
     if (strcmp(_a, _b) == 0) {                                                 \

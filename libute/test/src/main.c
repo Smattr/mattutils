@@ -5,6 +5,7 @@
 
 #include "test.h"
 #include <errno.h>
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +15,7 @@
 
 test_case_t *test_cases;
 
-bool has_assertion_;
+atomic_flag has_assertion_;
 
 int main(int argc, char **argv) {
 
@@ -46,7 +47,8 @@ int main(int argc, char **argv) {
       if (pid == 0) {
         p->function();
         run_cleanups();
-        if (!has_assertion_) {
+        if (!atomic_flag_test_and_set_explicit(&has_assertion_,
+                                               memory_order_acquire)) {
           fprintf(stderr, "failed\n    no assertions were executed\n");
           fflush(stderr);
           abort();
