@@ -141,7 +141,7 @@ struct sp_ctrl {
 /// increment the reference count of a shared pointer
 ///
 /// @param ctrl Control block to operate on
-/// @param by Number of reference to add
+/// @param by Number of references to add
 static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
   assert(by <= UHALF_MAX && "overflow");
