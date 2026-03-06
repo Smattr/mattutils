@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ute/attr.h>
-#include <ute/print.h>
+#include <ute/io.h>
 
 static char *buffer;
 static void free_(void *arg UNUSED) { free(buffer); }

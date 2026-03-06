@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <ute/print.h>
+#include <ute/io.h>
 
 int putb(const void *data, size_t size, FILE *stream) {
   assert(data != NULL || size == 0);
