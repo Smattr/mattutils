@@ -132,6 +132,18 @@ typedef struct {
   ihalf_t loads;
 } rc_t;
 
+static rc_t rc_load(_Atomic rc_t *src) {
+  assert(src != NULL);
+  return atomic_load_explicit(src, memory_order_acquire);
+}
+
+static bool rc_cas(_Atomic rc_t *dst, rc_t *expected, rc_t desired) {
+  assert(dst != NULL);
+  assert(expected != NULL);
+  return atomic_compare_exchange_strong_explicit(
+      dst, expected, desired, memory_order_acq_rel, memory_order_acquire);
+}
+
 struct sp_ctrl {
   void *value;          ///< the managed underlying pointer
   void (*dtor)(void *); ///< optional user-supplied destructor
@@ -149,8 +161,7 @@ static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
   for (rc_t old = {0};;) {
     assert(old.refs + by <= UHALF_MAX);
     const rc_t new = {.refs = old.refs + (uhalf_t)by, .loads = old.loads};
-    if (atomic_compare_exchange_strong_explicit(
-            &ctrl->rc, &old, new, memory_order_acq_rel, memory_order_acquire))
+    if (rc_cas(&ctrl->rc, &old, new))
       break;
   }
 }
@@ -163,13 +174,11 @@ static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
   assert(by <= (size_t)IHALF_MAX && "overflow");
 
-  rc_t old = atomic_load_explicit(&ctrl->rc, memory_order_acquire);
-  while (true) {
+  for (rc_t old = rc_load(&ctrl->rc);;) {
     assert(old.refs > 0 && "changing load count while not holding a reference");
     assert(IHALF_MAX - (ihalf_t)by >= old.loads && "overflow");
     const rc_t new = {.refs = old.refs, .loads = old.loads + (ihalf_t)by};
-    if (atomic_compare_exchange_strong_explicit(
-            &ctrl->rc, &old, new, memory_order_acq_rel, memory_order_acquire))
+    if (rc_cas(&ctrl->rc, &old, new))
       break;
   }
 }
@@ -180,12 +189,11 @@ static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
 static void dec_ref(sp_ctrl_t *ctrl) {
   assert(ctrl != NULL);
 
-  rc_t old = atomic_load_explicit(&ctrl->rc, memory_order_acquire);
+  rc_t old = rc_load(&ctrl->rc);
   while (true) {
     assert(old.refs > 0 && "dropping a reference that was not held");
     const rc_t new = {.refs = old.refs - 1, .loads = old.loads};
-    if (atomic_compare_exchange_strong_explicit(
-            &ctrl->rc, &old, new, memory_order_acq_rel, memory_order_acquire))
+    if (rc_cas(&ctrl->rc, &old, new))
       break;
   }
 
@@ -203,13 +211,11 @@ static void dec_ref(sp_ctrl_t *ctrl) {
 static void dec_load_ref(sp_ctrl_t *ctrl) {
   assert(ctrl != NULL);
 
-  rc_t old = atomic_load_explicit(&ctrl->rc, memory_order_acquire);
-  while (true) {
+  for (rc_t old = rc_load(&ctrl->rc);;) {
     assert(old.refs > 0 && "changing load count while not holding a reference");
     assert(old.loads > IHALF_MIN && "overflow");
     const rc_t new = {.refs = old.refs, .loads = old.loads - 1};
-    if (atomic_compare_exchange_strong_explicit(
-            &ctrl->rc, &old, new, memory_order_acq_rel, memory_order_acquire))
+    if (rc_cas(&ctrl->rc, &old, new))
       break;
   }
 }
