@@ -51,9 +51,9 @@
 ///     https://devblogs.microsoft.com/oldnewthing/20230818-00/?p=108619
 
 #include <assert.h>
+#include <limits.h>
 #include <stdatomic.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -81,73 +81,31 @@
   } while (0)
 #endif
 
-#ifndef __SIZEOF_POINTER__
-#error "sizeof pointer not available"
-#endif
-
-/// signed and unsigned half words
-#if __SIZEOF_POINTER__ == 8
-typedef int32_t ihalf_t;
-typedef uint32_t uhalf_t;
-#define IHALF_MAX INT32_MAX
-#define IHALF_MIN INT32_MIN
-#define UHALF_MAX UINT32_MAX
-#elif __SIZEOF_POINTER__ == 4
-typedef int16_t ihalf_t;
-typedef uint16_t uhalf_t;
-#define IHALF_MAX INT16_MAX
-#define IHALF_MIN INT16_MIN
-#define UHALF_MAX UINT16_MAX
-#error "unimplemented"
-#endif
-
-/// reference count of a control block
+/// factor for separating reference count and load count
 ///
-/// This is split into two counts that must be operated on atomically together.
-/// It is only permitted to change `loads` when you hold a reference, thus
-/// preventing `refs` to go to 0 during this. Nothing explicitly enforces this.
+/// The reference count for a shared pointer (`sp_ctrl_t.ref_count`) is actually
+/// split into two “fields”:
 ///
-/// The reference count is only logically 0 (allowing clean up) when _both_
-/// `refs` and `loads` are 0.
+///   0                                            sizeof(size_t) * CHAR_BIT - 1
+///   ├─────────────────────────────┬─────────────────────────────┤
+///   │ outstanding shared pointers │      propagated loads       │
+///   └─────────────────────────────┴─────────────────────────────┘
 ///
-/// The overflow assertions later in this file should be impossible to trigger
-/// in practice because they require ≥IHALF_MAX threads operating on the same
-/// shared pointer.
-typedef struct {
-  /// number of outstanding live references to this control block
-  ///
-  /// This is effectively the number of live shared pointers to the pointer this
-  /// count is associated with.
-  uhalf_t refs;
+/// `LOAD_SCALE` is the factor we need to multiple a count by for it to land in
+/// the upper half:
+///
+///   ┌─────────────────────────────┬─────────────────────────────┐
+///   │ 00000…                      │ 10000…                      │
+///   └─────────────────────────────┴─────────────────────────────┘
+static const size_t LOAD_SCALE = (size_t)1 << (sizeof(size_t) * CHAR_BIT / 2);
 
-  /// number of live loads of this control block that will be unable to roll
-  /// back
-  ///
-  /// When loading an atomic shared pointer, the load count is first incremented
-  /// and then later decremented. If this counter is relocated, making the
-  /// roll back decrement not possible, the residual load counter value will be
-  /// relocated to here. Note that this value is signed because the order in
-  /// which the decrementer and relocater run is unconstrained; this can go
-  /// negative.
-  ihalf_t loads;
-} rc_t;
-
-static rc_t rc_load(_Atomic rc_t *src) {
-  assert(src != NULL);
-  return atomic_load_explicit(src, memory_order_acquire);
-}
-
-static bool rc_cas(_Atomic rc_t *dst, rc_t *expected, rc_t desired) {
-  assert(dst != NULL);
-  assert(expected != NULL);
-  return atomic_compare_exchange_strong_explicit(
-      dst, expected, desired, memory_order_acq_rel, memory_order_acquire);
-}
+/// AND mask for extracting lower half of `sp_ctrl_t.ref_count`
+static const size_t REFS_MASK = LOAD_SCALE - 1;
 
 struct sp_ctrl {
-  void *value;          ///< the managed underlying pointer
-  void (*dtor)(void *); ///< optional user-supplied destructor
-  _Atomic rc_t rc;      ///< outstanding references
+  void *value;              ///< the managed underlying pointer
+  void (*dtor)(void *);     ///< optional user-supplied destructor
+  _Atomic size_t ref_count; ///< outstanding references
 };
 
 /// increment the reference count of a shared pointer
@@ -156,14 +114,9 @@ struct sp_ctrl {
 /// @param by Number of references to add
 static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
-  assert(by <= UHALF_MAX && "overflow");
+  assert(by < LOAD_SCALE && "overflow");
 
-  for (rc_t old = {0};;) {
-    assert(old.refs + by <= UHALF_MAX);
-    const rc_t new = {.refs = old.refs + (uhalf_t)by, .loads = old.loads};
-    if (rc_cas(&ctrl->rc, &old, new))
-      break;
-  }
+  (void)atomic_fetch_add_explicit(&ctrl->ref_count, by, memory_order_acq_rel);
 }
 
 /// propagate an increment of the load count of a shared pointer
@@ -172,15 +125,12 @@ static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
 /// @param by Number of loads to add
 static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
-  assert(by <= (size_t)IHALF_MAX && "overflow");
+  assert(by < LOAD_SCALE && "overflow");
 
-  for (rc_t old = rc_load(&ctrl->rc);;) {
-    assert(old.refs > 0 && "changing load count while not holding a reference");
-    assert(IHALF_MAX - (ihalf_t)by >= old.loads && "overflow");
-    const rc_t new = {.refs = old.refs, .loads = old.loads + (ihalf_t)by};
-    if (rc_cas(&ctrl->rc, &old, new))
-      break;
-  }
+  const size_t old __attribute__((unused)) = atomic_fetch_add_explicit(
+      &ctrl->ref_count, by * LOAD_SCALE, memory_order_acq_rel);
+  assert((old & REFS_MASK) > 0 &&
+         "changing load count while not holding a reference");
 }
 
 /// decrement the reference count of a shared pointer by 1
@@ -189,16 +139,12 @@ static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
 static void dec_ref(sp_ctrl_t *ctrl) {
   assert(ctrl != NULL);
 
-  rc_t old = rc_load(&ctrl->rc);
-  while (true) {
-    assert(old.refs > 0 && "dropping a reference that was not held");
-    const rc_t new = {.refs = old.refs - 1, .loads = old.loads};
-    if (rc_cas(&ctrl->rc, &old, new))
-      break;
-  }
+  const size_t old =
+      atomic_fetch_sub_explicit(&ctrl->ref_count, 1, memory_order_acq_rel);
+  assert((old & REFS_MASK) > 0 && "dropping a reference that was not held");
 
   // if we just dropped the last reference, clean up
-  if (old.refs == 1 && old.loads == 0) {
+  if (old == 1) {
     if (ctrl->dtor != NULL)
       ctrl->dtor(ctrl->value);
     free(ctrl);
@@ -211,13 +157,10 @@ static void dec_ref(sp_ctrl_t *ctrl) {
 static void dec_load_ref(sp_ctrl_t *ctrl) {
   assert(ctrl != NULL);
 
-  for (rc_t old = rc_load(&ctrl->rc);;) {
-    assert(old.refs > 0 && "changing load count while not holding a reference");
-    assert(old.loads > IHALF_MIN && "overflow");
-    const rc_t new = {.refs = old.refs, .loads = old.loads - 1};
-    if (rc_cas(&ctrl->rc, &old, new))
-      break;
-  }
+  const size_t old __attribute__((unused)) = atomic_fetch_sub_explicit(
+      &ctrl->ref_count, LOAD_SCALE, memory_order_acq_rel);
+  assert((old & REFS_MASK) > 0 &&
+         "changing load count while not holding a reference");
 }
 
 /// exposed implementation of an atomic shared pointer
@@ -282,6 +225,7 @@ sp_t sp_acq(asp_t *asp) {
       return (sp_t){0};
     }
     ++impl.load_count;
+    assert(impl.load_count < LOAD_SCALE && "future overflow");
     const dword_t new = impl2asp(impl);
     if (dword_atomic_cas(asp, &old, new)) {
       old = new;
