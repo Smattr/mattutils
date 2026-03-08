@@ -396,6 +396,14 @@ ruleset tid: tid_t do
     undefine tls[tid].sp_store;
     undefine tls[tid].pc;
   end;
+
+  rule "dereference pointer"
+    isundefined(tls[tid].pc) &
+    !isundefined(tls[tid].sp.ptr) & tls[tid].sp.ptr != 0 ==>
+  begin
+    assert sp_ctrls_allocated[tls[tid].sp.impl]
+      "live shared pointer uses freed control block";
+  end;
 end;
 
 invariant
@@ -410,12 +418,6 @@ invariant
   forall tid: tid_t do
     !isundefined(tls[tid].sp.ptr) & tls[tid].sp.ptr != 0 ->
       !isundefined(tls[tid].sp.impl)
-  end;
-
-invariant
-  "live shared pointers do not use freed control blocks"
-  forall tid: tid_t do
-    !isundefined(tls[tid].sp.impl) -> sp_ctrls_allocated[tls[tid].sp.impl]
   end;
 
 invariant
