@@ -40,6 +40,11 @@
 /// history of this file), but this requirement is non-obvious and seems to have
 /// been arrived at independently by multiple authors including yours truly.
 ///
+/// This load count can also underflow (below 0) during correct operation. The
+/// reasoning for why this underflow is allowed and why propagating this
+/// underflowed value (that can then lead to a reference count _overflow_) is
+/// correct is subtle. Again, see the commit history of this file.
+///
 /// The asp.h API is phrased such that it is agnostic to how exactly the
 /// “shared” part of “shared pointer” is achieved. We choose to use reference
 /// counting. But in theory, if you are creative enough, you could implement
@@ -125,7 +130,6 @@ static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
 /// @param by Number of loads to add
 static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
-  assert(by < LOAD_SCALE && "overflow");
 
   const size_t old __attribute__((unused)) = atomic_fetch_add_explicit(
       &ctrl->ref_count, by * LOAD_SCALE, memory_order_acq_rel);
@@ -225,7 +229,6 @@ sp_t sp_acq(asp_t *asp) {
       return (sp_t){0};
     }
     ++impl.load_count;
-    assert(impl.load_count < LOAD_SCALE && "future overflow");
     const dword_t new = impl2asp(impl);
     if (dword_atomic_cas(asp, &old, new)) {
       old = new;
@@ -244,8 +247,6 @@ sp_t sp_acq(asp_t *asp) {
 
   // undo our increment of the load count
   while (true) {
-    assert(impl.load_count > 0 &&
-           "sp_acq decremented a load for a control block it was not using");
     --impl.load_count;
     const dword_t new = impl2asp(impl);
     if (dword_atomic_cas(asp, &old, new))
@@ -291,7 +292,7 @@ void sp_store(asp_t *dst, sp_t src) {
   const asp_impl_t old_impl = asp2impl(old);
   if (old_impl.ctrl != NULL) {
     // TODO: is it valid to fuse these two atomics?
-    if (old_impl.load_count > 0)
+    if (old_impl.load_count * LOAD_SCALE != 0)
       inc_load_ref(old_impl.ctrl, old_impl.load_count);
     DELAY3();
     // drop a reference for `dst` we just overwrote
