@@ -208,7 +208,12 @@ end;
 ruleset tid: tid_t do
   ruleset value: ptr_t do
     rule "sp_new"
-      isundefined(tls[tid].pc) & isundefined(tls[tid].sp.ptr) ==>
+      -- we are idle and do not have a shared pointer
+      isundefined(tls[tid].pc) & isundefined(tls[tid].sp.ptr) &
+      -- the shared pointer we are constructing does not alias the asp global
+      (isundefined(asp.ctrl) | sp_ctrls[asp.ctrl].value != value) &
+      -- the shared pointer we are constructing does not alias anyone else’s
+      forall peer: tid_t do isundefined(tls[peer].sp.ptr) | tls[peer].sp.ptr != value end ==>
       var ctrl: nullable_sp_ctrl_ptr_t;
     begin
       -- “a null pointer needs no bookkeeping”
