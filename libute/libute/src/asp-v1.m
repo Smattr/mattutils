@@ -425,5 +425,5 @@ invariant
   forall ctrl: sp_ctrl_ptr_t do
     sp_ctrls_allocated[ctrl] -> exists tid: tid_t do
       !isundefined(tls[tid].sp.impl) & ctrl = tls[tid].sp.impl
-    end
+    end | (!isundefined(asp.ctrl) & asp.ctrl = ctrl)
   end;
