@@ -268,8 +268,7 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L2 ==>
   begin
     -- “…incrementing the reference count”
-    sp_ctrls[tls[tid].sp_acq.old.ctrl].ref_count :=
-      sp_ctrls[tls[tid].sp_acq.old.ctrl].ref_count + 1;
+    inc_ref(tls[tid].sp_acq.old.ctrl, 1);
     tls[tid].pc := SP_ACQ_L3;
   end;
 
