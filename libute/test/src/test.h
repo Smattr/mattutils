@@ -79,6 +79,7 @@ void run_cleanups(void);
     __typeof__(a) _a = (a);                                                    \
     __typeof__(b) _b = (b);                                                    \
     if (!(_a op _b)) {                                                         \
+      flockfile(stderr);                                                       \
       fprintf(stderr, "failed\n    %s:%d: assertion “%s %s %s” failed\n",      \
               __FILE__, __LINE__, #a_name, #op, #b_name);                      \
       fprintf(stderr, "      %s = ", #a_name);                                 \
@@ -88,6 +89,7 @@ void run_cleanups(void);
       fprintf(stderr, PRINT_FMT(_b), _b);                                      \
       fprintf(stderr, "\n");                                                   \
       fflush(stderr);                                                          \
+      funlockfile(stderr);                                                     \
       run_cleanups();                                                          \
       abort();                                                                 \
     }                                                                          \
@@ -123,12 +125,14 @@ void run_cleanups(void);
     const char *_a = (a);                                                      \
     const char *_b = (b);                                                      \
     if (strcmp(_a, _b) != 0) {                                                 \
+      flockfile(stderr);                                                       \
       fprintf(stderr,                                                          \
               "failed\n    %s:%d: assertion “strcmp(%s, %s) == 0” failed\n",   \
               __FILE__, __LINE__, #a, #b);                                     \
       fprintf(stderr, "      %s = \"%s\"\n", #a, _a);                          \
       fprintf(stderr, "      %s = \"%s\"\n", #b, _b);                          \
       fflush(stderr);                                                          \
+      funlockfile(stderr);                                                     \
       run_cleanups();                                                          \
       abort();                                                                 \
     }                                                                          \
@@ -140,12 +144,14 @@ void run_cleanups(void);
     const char *_a = (a);                                                      \
     const char *_b = (b);                                                      \
     if (strcmp(_a, _b) == 0) {                                                 \
+      flockfile(stderr);                                                       \
       fprintf(stderr,                                                          \
               "failed\n    %s:%d: assertion “strcmp(%s, %s) != 0” failed\n",   \
               __FILE__, __LINE__, #a, #b);                                     \
       fprintf(stderr, "      %s = \"%s\"\n", #a, _a);                          \
       fprintf(stderr, "      %s = \"%s\"\n", #b, _b);                          \
       fflush(stderr);                                                          \
+      funlockfile(stderr);                                                     \
       run_cleanups();                                                          \
       abort();                                                                 \
     }                                                                          \
@@ -153,9 +159,11 @@ void run_cleanups(void);
 
 #define FAIL(...)                                                              \
   do {                                                                         \
+    flockfile(stderr);                                                         \
     fprintf(stderr, "failed\n    ");                                           \
     fprintf(stderr, __VA_ARGS__);                                              \
     fflush(stderr);                                                            \
+    funlockfile(stderr);                                                       \
     run_cleanups();                                                            \
     abort();                                                                   \
   } while (0)
