@@ -32,6 +32,7 @@ add_executable(test
   src/test-uint128-load.c
   src/test-uint128-load-mt.c
   src/test-uint128-store.c
+  src/test-uint128-store-load-tear.c
   src/test-uint128-store-mt.c
   src/test-uint128-xchg.c
   src/test-uint128-xchg-mt.c
