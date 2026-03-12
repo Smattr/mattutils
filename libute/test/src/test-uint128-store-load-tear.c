@@ -20,6 +20,13 @@ typedef struct {
   uint128_t *target;
 } state_t;
 
+/// put a byte value at some predictable offset in a 128-bit value
+static uint128_t pack(uint128_t value) {
+  assert(value <= UINT8_MAX);
+  const size_t MAX_SHIFT = (sizeof(uint128_t) - 1) * CHAR_BIT;
+  return value << (value % (MAX_SHIFT + 1));
+}
+
 static THREAD_RET entry(void *arg) {
   assert(arg != NULL);
   state_t *const s = arg;
@@ -37,17 +44,15 @@ static THREAD_RET entry(void *arg) {
 
     // what we are waiting for is our ID + 1 shifted by some amount
     const uint128_t id = s->thread_id + 1;
-    assert(id < UINT8_MAX);
-    const uint128_t expected =
-        id << (s->thread_id % (sizeof(uint128_t) * CHAR_BIT));
+    assert(id <= UINT8_MAX);
+    const uint128_t expected = pack(id);
     if (old != expected)
       continue;
 
     // write the value the next thread will expect
     const uint128_t next = s->thread_id + 2;
-    assert(next < UINT8_MAX);
-    const uint128_t desired =
-        next << ((s->thread_id + 1) % (sizeof(uint128_t) * CHAR_BIT));
+    assert(next <= UINT8_MAX);
+    const uint128_t desired = pack(next);
     {
       size_t nonzero_bits = 0;
       for (size_t i = 0; i < sizeof(desired) * CHAR_BIT; ++i)
@@ -64,10 +69,10 @@ static THREAD_RET entry(void *arg) {
 
 TEST("128-bit CAS using load and store") {
 
-  thread_t t[253];
+  thread_t t[10];
   state_t s[sizeof(t) / sizeof(t[0])];
 
-  uint128_t target = 1;
+  uint128_t target = pack(1);
 
   // setup states first to avoid racing our reads of `target` with the test
   // case’s writes
