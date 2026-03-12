@@ -78,7 +78,7 @@ static THREAD_RET entry(void *arg) {
 
 TEST("128-bit CAS using load and store") {
 
-  thread_t t[10];
+  thread_t t[254];
   state_t s[sizeof(t) / sizeof(t[0])];
 
   uint128_t target = pack(1);
