@@ -23,8 +23,7 @@ typedef struct {
 /// put a byte value at some predictable offset in a 128-bit value
 static uint128_t pack(uint128_t value) {
   assert(value <= UINT8_MAX);
-  const size_t MAX_SHIFT = (sizeof(uint128_t) - 1) * CHAR_BIT;
-  return value << (value % (MAX_SHIFT + 1));
+  return value << (value % sizeof(uint128_t) * CHAR_BIT);
 }
 
 static THREAD_RET entry(void *arg) {
@@ -42,10 +41,20 @@ static THREAD_RET entry(void *arg) {
       ASSERT_LE(nonzero_bits, CHAR_BIT); // no torn reads/writes
     }
 
+    // we should see either what we are looking for or a lower ID
+    bool ok = false;
+    for (size_t i = 0; i <= s->thread_id; ++i) {
+      const uint128_t id = i + 1;
+      ok |= old == pack(id);
+    }
+    ASSERT(ok);
+
     // what we are waiting for is our ID + 1 shifted by some amount
     const uint128_t id = s->thread_id + 1;
     assert(id <= UINT8_MAX);
     const uint128_t expected = pack(id);
+    for (size_t i = 0; i < s->thread_id; ++i)
+      assert(expected != pack(i + 1) && "threads share packed value");
     if (old != expected)
       continue;
 
