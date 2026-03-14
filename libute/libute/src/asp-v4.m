@@ -1,0 +1,502 @@
+/** @file
+ * @brief Murphi model of asp.c
+ *
+ * This model documents the code as it was at commit
+ * 1ae95c0f8e46bd43e8547698ca52f4658bb97b23.
+ *
+ * To run a Murphi model, you can use a tool like Rumur. This uses ~25GB and
+ * runs in ~38m on my laptop.
+ * https://github.com/smattr/rumur
+ */
+
+-- number of threads to model
+const N_THREAD: 3;
+
+const LOAD_SCALE: 8;
+
+const REFS_MASK: LOAD_SCALE - 1;
+
+-- type of a counter value
+const COUNT_MAX: LOAD_SCALE * LOAD_SCALE - 1;
+type count_t: 0..COUNT_MAX;
+
+-- thread identifier
+type tid_t: scalarset(N_THREAD);
+
+-- pointers
+type ptr_t: 0..3;
+
+/*******************************************************************************
+ * shared pointer control blocks                                               *
+ ******************************************************************************/
+
+-- a control block itself
+type sp_ctrl_t: record
+  value: ptr_t;
+  -- ignore dtor
+  ref_count: count_t;
+end;
+
+-- pointer to a sp_ctrl_t
+type sp_ctrl_ptr_t: 1..N_THREAD;
+
+type nullable_sp_ctrl_ptr_t: 0..N_THREAD;
+
+/*******************************************************************************
+ * shared pointers                                                             *
+ ******************************************************************************/
+
+type sp_t: record
+  ptr: ptr_t;
+  impl: sp_ctrl_ptr_t;
+end;
+
+/*******************************************************************************
+ * atomic shared pointers                                                      *
+ ******************************************************************************/
+
+type asp_t: record
+  ctrl: sp_ctrl_ptr_t;
+  load_count: count_t;
+end;
+
+/*******************************************************************************
+ * thread-local storage                                                        *
+ ******************************************************************************/
+
+-- sp_acq stack frame
+type sp_acq_t: record
+  old: asp_t;
+  new: asp_t;
+  sp_ptr: ptr_t;
+end;
+
+-- sp_rel stack frame
+type sp_rel_t: record
+  old_count: count_t;
+end;
+
+-- sp_store stack frame
+type sp_store_t: record
+  new: asp_t;
+  old: asp_t;
+  old_count: count_t;
+end;
+
+-- program counter location
+type pc_t: enum {
+  SP_ACQ_L1,   -- sp_acq, asp.c:227
+  SP_ACQ_L2,   -- sp_acq, asp.c:245
+  SP_ACQ_L3,   -- sp_acq, asp.c:246
+  SP_ACQ_L4,   -- sp_acq, asp.c:250
+  SP_ACQ_L5,   -- sp_acq, asp.c:255
+  SP_REL_L1,   -- dec_ref, asp.c:151
+  SP_STORE_L1, -- sp_store, asp.c:293
+  SP_STORE_L2, -- sp_store, asp.c:299
+  SP_STORE_L3  -- dec_ref, asp.c:151
+};
+
+-- thread-local storage
+type tls_t: record
+  pc: pc_t;
+  sp: sp_t; -- currently live sp this thread has
+  sp_acq: sp_acq_t;
+  sp_rel: sp_rel_t;
+  sp_store: sp_store_t;
+end;
+
+/******************************************************************************/
+
+var sp_ctrls_allocated: array[sp_ctrl_ptr_t] of boolean;
+var sp_ctrls: array[sp_ctrl_ptr_t] of sp_ctrl_t;
+
+-- assume we have a single global asp
+var asp: asp_t;
+
+var tls: array[tid_t] of tls_t;
+
+/******************************************************************************/
+
+--- how many values in the type count_t?
+function countof_count(): 0..COUNT_MAX + 1;
+  var r: 0..COUNT_MAX + 1;
+begin
+  r := 0;
+  for c: count_t do
+    r := r + 1;
+  end;
+  return r;
+end;
+
+-- how many 1 bits in x?
+function popcount(x: 0..COUNT_MAX + 1): count_t;
+  var r: count_t;
+  var t: 0..COUNT_MAX + 1;
+begin
+  t := x;
+  r := 0;
+  while t != 0 do
+    if (t & 1) = 1 then
+      r := r + 1;
+    end;
+    t := t >> 1;
+  end;
+  return r;
+end;
+
+function calloc_sp_ctrl(): nullable_sp_ctrl_ptr_t;
+begin
+  for i: sp_ctrl_ptr_t do
+    if !sp_ctrls_allocated[i] then
+      sp_ctrls_allocated[i] := true;
+      undefine sp_ctrls[i].value;
+      sp_ctrls[i].ref_count := 0;
+      return i;
+    end;
+  end;
+  return 0;
+end;
+
+function free_sp_ctrl(p: sp_ctrl_ptr_t);
+begin
+  if isundefined(p) then
+    return;
+  end;
+  assert sp_ctrls_allocated[p] "double free";
+  sp_ctrls_allocated[p] := false;
+  undefine sp_ctrls[p];
+end;
+
+-- add 2 counts with wrap semantics
+function add(lhs: count_t; rhs: count_t): count_t;
+begin
+  return (lhs + rhs) % (COUNT_MAX + 1);
+end;
+
+-- subtract 2 counts with wrap semantics
+function sub(lhs: count_t; rhs: count_t): count_t;
+begin
+  if lhs >= rhs then
+    return lhs - rhs;
+  end;
+  return COUNT_MAX + 1 - (rhs - lhs);
+end;
+
+-- multiply 2 counts with wrap semantics
+function mul(lhs: count_t; rhs: count_t): count_t;
+  var r: count_t;
+begin
+  -- this is an extremely inefficient way of achieving this, but I did not come
+  -- up with anything better on the spot
+  r := 0;
+  for i: count_t do
+    if i < rhs then
+      r := (r + lhs) % (COUNT_MAX + 1);
+    end;
+  end;
+  return r;
+end;
+
+function inc_ref(ctrl: sp_ctrl_ptr_t; by_: count_t);
+begin
+  assert !isundefined(ctrl);
+  assert by_ < LOAD_SCALE "overflow";
+  sp_ctrls[ctrl].ref_count := add(sp_ctrls[ctrl].ref_count, by_);
+end;
+
+function inc_load_ref(ctrl: sp_ctrl_ptr_t; by_: count_t);
+begin
+  assert !isundefined(ctrl);
+  assert (sp_ctrls[ctrl].ref_count & REFS_MASK) > 0
+    "changing load count while not holding a reference";
+  sp_ctrls[ctrl].ref_count := add(sp_ctrls[ctrl].ref_count, mul(by_, LOAD_SCALE));
+end;
+
+function dec_ref_1(ctrl: sp_ctrl_ptr_t): count_t;
+  var old: count_t;
+begin
+  assert !isundefined(ctrl);
+  old := sp_ctrls[ctrl].ref_count;
+  sp_ctrls[ctrl].ref_count := sp_ctrls[ctrl].ref_count - 1;
+  assert (old & REFS_MASK) > 0 "dropping a reference that was not held";
+  return old;
+end;
+
+function dec_ref_2(ctrl: sp_ctrl_ptr_t; old: count_t);
+begin
+  assert !isundefined(ctrl);
+  -- “if we just dropped the last reference, clean up”
+  if old = 1 then
+    free_sp_ctrl(ctrl);
+  end;
+end;
+
+function dec_load_ref(ctrl: sp_ctrl_ptr_t);
+begin
+  assert !isundefined(ctrl);
+  assert (sp_ctrls[ctrl].ref_count & REFS_MASK) > 0
+    "changing load count while not holding a reference";
+  sp_ctrls[ctrl].ref_count := sub(sp_ctrls[ctrl].ref_count, LOAD_SCALE);
+end;
+
+function asp_cas(var expected: asp_t; desired: asp_t): boolean;
+  var rc: boolean;
+begin
+  rc := true;
+  if isundefined(asp.ctrl) then
+    if !isundefined(expected.ctrl) then
+      rc := false;
+    end;
+  elsif isundefined(expected.ctrl) then
+    rc := false;
+  elsif asp.ctrl != expected.ctrl then
+    rc := false;
+  end;
+  if isundefined(asp.load_count) then
+    if !isundefined(expected.load_count) then
+      rc := false;
+    end;
+  elsif isundefined(expected.load_count) then
+    rc := false;
+  elsif asp.load_count != expected.load_count then
+    rc := false;
+  end;
+  expected := asp;
+  if rc then
+    asp := desired;
+  end;
+  return rc;
+end;
+
+function asp_xchg(src: asp_t): asp_t;
+  var old: asp_t;
+begin
+  old := asp;
+  asp := src;
+  return old;
+end;
+
+startstate begin
+  for ctrl: sp_ctrl_ptr_t do
+    sp_ctrls_allocated[ctrl] := false;
+  end;
+end;
+
+ruleset tid: tid_t do
+  ruleset value: ptr_t do
+    rule "sp_new"
+      -- we are idle and do not have a shared pointer
+      isundefined(tls[tid].pc) & isundefined(tls[tid].sp.ptr) &
+      -- the shared pointer we are constructing does not alias the asp global
+      (isundefined(asp.ctrl) | sp_ctrls[asp.ctrl].value != value) &
+      -- the shared pointer we are constructing does not alias anyone else’s
+      forall peer: tid_t do isundefined(tls[peer].sp.ptr) | tls[peer].sp.ptr != value end ==>
+      var ctrl: nullable_sp_ctrl_ptr_t;
+    begin
+      -- “a null pointer needs no bookkeeping”
+      if value = 0 then
+        tls[tid].sp.ptr := 0;
+        undefine tls[tid].sp.impl;
+        return;
+      end;
+
+      ctrl := calloc_sp_ctrl();
+      if ctrl = 0 then
+        return;
+      end;
+
+      sp_ctrls[ctrl].value := value;
+      inc_ref(ctrl, 1);
+
+      tls[tid].sp.ptr := value;
+      tls[tid].sp.impl := ctrl;
+    end;
+  end;
+
+  rule "sp_acq (1 / 6)"
+    isundefined(tls[tid].pc) & isundefined(tls[tid].sp.ptr) ==>
+  begin
+    -- “load the implementation…”
+    tls[tid].sp_acq.old := asp;
+    tls[tid].pc := SP_ACQ_L1;
+  end;
+
+  rule "sp_acq (2 / 6)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L1 ==>
+  begin
+    if isundefined(tls[tid].sp_acq.old.ctrl) then
+      -- “the target pointer is null; no need to ref count”
+      undefine tls[tid].sp;
+      undefine tls[tid].sp_acq;
+      undefine tls[tid].pc;
+      return;
+    end;
+    tls[tid].sp_acq.new := tls[tid].sp_acq.old;
+    tls[tid].sp_acq.new.load_count := add(tls[tid].sp_acq.new.load_count, 1);
+    if asp_cas(tls[tid].sp_acq.old, tls[tid].sp_acq.new) then
+      tls[tid].sp_acq.old := tls[tid].sp_acq.new;
+      assert !isundefined(tls[tid].sp_acq.old.ctrl)
+        "non-null pointer has no control block";
+      tls[tid].pc := SP_ACQ_L2;
+    end;
+  end;
+
+  rule "sp_acq (3 / 6)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L2 ==>
+  begin
+    -- “…incrementing the reference count”
+    inc_ref(tls[tid].sp_acq.old.ctrl, 1);
+    tls[tid].pc := SP_ACQ_L3;
+  end;
+
+  rule "sp_acq (4 / 6)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L3 ==>
+  begin
+    -- “load the target pointer…”
+    -- Do a funny increment loop here to simulate something like torn reads
+    if isundefined(tls[tid].sp_acq.sp_ptr) then
+      tls[tid].sp_acq.sp_ptr := 1;
+    else
+      tls[tid].sp_acq.sp_ptr := tls[tid].sp_acq.sp_ptr + 1;
+    end;
+    if tls[tid].sp_acq.sp_ptr < sp_ctrls[tls[tid].sp_acq.old.ctrl].value then
+      return;
+    end;
+    tls[tid].sp.ptr := tls[tid].sp_acq.sp_ptr;
+    tls[tid].sp.impl := tls[tid].sp_acq.old.ctrl;
+    tls[tid].pc := SP_ACQ_L4;
+  end;
+
+  rule "sp_acq (5 / 6)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L4 ==>
+  begin
+    -- “undo our increment of the load count”
+    tls[tid].sp_acq.new := tls[tid].sp_acq.old;
+    tls[tid].sp_acq.new.load_count := sub(tls[tid].sp_acq.new.load_count, 1);
+    if asp_cas(tls[tid].sp_acq.old, tls[tid].sp_acq.new) then
+      undefine tls[tid].sp_acq;
+      undefine tls[tid].pc;
+      return;
+    end;
+    tls[tid].pc := SP_ACQ_L5;
+  end;
+
+  rule "sp_acq (6 / 6)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L5 ==>
+    var updated: asp_t;
+  begin
+    if isundefined(tls[tid].sp_acq.old.ctrl) |
+       tls[tid].sp_acq.new.ctrl != tls[tid].sp_acq.old.ctrl then
+      dec_load_ref(tls[tid].sp_acq.new.ctrl);
+      undefine tls[tid].sp_acq;
+      undefine tls[tid].pc;
+      return;
+    end;
+    tls[tid].pc := SP_ACQ_L4;
+  end;
+
+  rule "sp_rel (1 / 2)"
+    isundefined(tls[tid].pc) & !isundefined(tls[tid].sp.ptr) ==>
+  begin
+    -- “if the target pointer was null, it was not reference counted”
+    if tls[tid].sp.ptr = 0 then
+      assert isundefined(tls[tid].sp.impl)
+        "null pointer with non-null control block";
+      undefine tls[tid].sp;
+      return;
+    end;
+
+    assert !isundefined(tls[tid].sp.impl)
+      "non-null pointer with no control block";
+    tls[tid].sp_rel.old_count := dec_ref_1(tls[tid].sp.impl);
+    tls[tid].pc := SP_REL_L1;
+  end;
+
+  rule "sp_rel (2 / 2)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_REL_L1 ==>
+  begin
+    dec_ref_2(tls[tid].sp.impl, tls[tid].sp_rel.old_count);
+    undefine tls[tid].sp;
+    undefine tls[tid].sp_rel;
+    undefine tls[tid].pc;
+  end;
+
+  rule "sp_store (1 / 4)"
+    isundefined(tls[tid].pc) & !isundefined(tls[tid].sp.ptr) ==>
+  begin
+    if isundefined(tls[tid].sp.impl) then
+      undefine tls[tid].sp_store.new.ctrl;
+    else
+      tls[tid].sp_store.new.ctrl := tls[tid].sp.impl;
+    end;
+    tls[tid].sp_store.new.load_count := 0;
+    tls[tid].sp_store.old := asp_xchg(tls[tid].sp_store.new);
+    tls[tid].pc := SP_STORE_L1;
+  end;
+
+  rule "sp_store (2 / 4)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_STORE_L1 ==>
+  begin
+    if !isundefined(tls[tid].sp_store.old.ctrl) then
+      if mul(tls[tid].sp_store.old.load_count, LOAD_SCALE) != 0 then
+        inc_load_ref(tls[tid].sp_store.old.ctrl, tls[tid].sp_store.old.load_count);
+      end;
+      tls[tid].pc := SP_STORE_L2;
+    else
+      undefine tls[tid].sp;
+      undefine tls[tid].sp_store;
+      undefine tls[tid].pc;
+    end;
+  end;
+
+  rule "sp_store (3 / 4)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_STORE_L2 ==>
+  begin
+    tls[tid].sp_store.old_count := dec_ref_1(tls[tid].sp_store.old.ctrl);
+    tls[tid].pc := SP_STORE_L3;
+  end;
+
+  rule "sp_store (4 / 4)"
+    !isundefined(tls[tid].pc) & tls[tid].pc = SP_STORE_L3 ==>
+  begin
+    dec_ref_2(tls[tid].sp_store.old.ctrl, tls[tid].sp_store.old_count);
+    undefine tls[tid].sp;
+    undefine tls[tid].sp_store;
+    undefine tls[tid].pc;
+  end;
+
+  rule "dereference pointer"
+    isundefined(tls[tid].pc) &
+    !isundefined(tls[tid].sp.ptr) & tls[tid].sp.ptr != 0 ==>
+  begin
+    assert sp_ctrls_allocated[tls[tid].sp.impl]
+      "live shared pointer uses freed control block";
+  end;
+end;
+
+invariant
+  "null pointers have no control block"
+  forall tid: tid_t do
+    !isundefined(tls[tid].sp.ptr) & tls[tid].sp.ptr = 0 ->
+      isundefined(tls[tid].sp.impl)
+  end;
+
+invariant
+  "non-null pointers have a control block"
+  forall tid: tid_t do
+    !isundefined(tls[tid].sp.ptr) & tls[tid].sp.ptr != 0 ->
+      !isundefined(tls[tid].sp.impl)
+  end;
+
+invariant
+  "no memory leaks of control blocks"
+  forall tid: tid_t do isundefined(tls[tid].pc) end -> -- all threads idle
+    forall ctrl: sp_ctrl_ptr_t do
+      sp_ctrls_allocated[ctrl] -> exists tid: tid_t do
+        !isundefined(tls[tid].sp.impl) & ctrl = tls[tid].sp.impl
+      end | (!isundefined(asp.ctrl) & asp.ctrl = ctrl)
+    end;
+
+invariant
+  "counter is power-of-2 sized"
+  popcount(countof_count()) = 1;
