@@ -21,8 +21,10 @@ bool uint128_atomic_cas(uint128_t *dst, uint128_t *expected,
   // to native instructions. So we resort to a __sync built-in. See:
   //   • https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80878
   //   • https://gcc.gnu.org/pipermail/gcc-help/2017-June.txt
-  const uint128_t old = __sync_val_compare_and_swap(dst, *expected, desired);
-  const bool ret = old == *expected;
+  const uint128_t expectation = *expected;
+  const uint128_t old = __sync_val_compare_and_swap(dst, expectation, desired);
+  if (old == expectation)
+    return true;
   *expected = old;
-  return ret;
+  return false;
 }
