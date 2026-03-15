@@ -7,8 +7,29 @@
 #include <stddef.h>
 #include <ute/int128.h>
 
+#ifdef __has_include
+#if __has_include(<immintrin.h>)
+#include <immintrin.h>
+#endif
+#endif
+
 void int128_atomic_store(int128_t *dst, int128_t src) {
   assert(dst != NULL);
+
+#ifdef __has_include
+#if __has_include(<immintrin.h>)
+#ifdef __SSE2__
+  // A 128-bit AVX store is atomic. However _mm_store_si128 does not reliably
+  // lower to a MOVDQA. Thankfully a volatile store seems to reliably do this.
+  {
+    typedef __m128i __attribute__((may_alias)) avx128_t;
+
+    volatile avx128_t *d = (avx128_t *)dst;
+    *d = (__m128i)src;
+  }
+#endif
+#endif
+#endif
 
   // On 128-bit scalars, the __atomic built-ins and C11 atomics are not lowered
   // to native instructions. So we resort to an xchg.
