@@ -63,6 +63,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <ute/asp.h>
+#include <ute/attr.h>
 #include <ute/dword.h>
 
 // uncomment one or more of these to debug unlikely thread interleavings
@@ -129,7 +130,7 @@ static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
 ///
 /// @param ctrl Control block to operate on
 /// @param by Number of loads to add
-static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
+UNUSED static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
   assert(by > 0 && "redundant inc_load_ref");
 
@@ -167,6 +168,35 @@ static void dec_load_ref(sp_ctrl_t *ctrl) {
       &ctrl->ref_count, LOAD_SCALE, memory_order_acq_rel);
   assert((old & REFS_MASK) > 0 &&
          "changing load count while not holding a reference");
+}
+
+/// propagate an increment of the load count and decrement the ref count
+///
+/// This essentially performs a fused:
+///
+///   inc_load_ref(ctrl, load_by);
+///   dec_ref(ctrl);
+///
+/// @param ctrl Control block to operate on
+/// @param load_by Loads to propagate to the load count
+UNUSED static void inc_and_dec(sp_ctrl_t *ctrl, size_t load_by) {
+  assert(ctrl != NULL);
+  assert(load_by > 0 && "redundant inc_and_dec");
+
+  // combine an increment by `load_by` of the load count and a decrement of the
+  // ref count
+  const size_t addend = load_by * LOAD_SCALE - 1;
+
+  const size_t old =
+      atomic_fetch_add_explicit(&ctrl->ref_count, addend, memory_order_acq_rel);
+  assert((old & REFS_MASK) > 0 && "dropping a reference that was not held");
+
+  // if we just dropped the last reference, clean up
+  if (old + load_by * LOAD_SCALE == 1) {
+    if (ctrl->dtor != NULL)
+      ctrl->dtor(ctrl->value);
+    free(ctrl);
+  }
 }
 
 /// exposed implementation of an atomic shared pointer
@@ -293,11 +323,22 @@ void sp_store(asp_t *dst, sp_t src) {
 
   const asp_impl_t old_impl = asp2impl(old);
   if (old_impl.ctrl != NULL) {
-    // TODO: is it valid to fuse these two atomics?
+#if 1
+    // as an optimisation, we can fuse what would otherwise be two separate
+    // atomics in the other branch of this #if
+    if (old_impl.load_count * LOAD_SCALE == 0) {
+      // drop a reference for `dst` we just overwrote
+      dec_ref(old_impl.ctrl);
+    } else {
+      // propagate load count while also dropping a reference for `dst`
+      inc_and_dec(old_impl.ctrl, old_impl.load_count);
+    }
+#else
     if (old_impl.load_count * LOAD_SCALE != 0)
       inc_load_ref(old_impl.ctrl, old_impl.load_count);
     DELAY3();
     // drop a reference for `dst` we just overwrote
     dec_ref(old_impl.ctrl);
+#endif
   }
 }
