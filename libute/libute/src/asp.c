@@ -119,6 +119,7 @@ struct sp_ctrl {
 /// @param by Number of references to add
 static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
+  assert(by > 0 && "redundant inc_ref");
   assert(by < LOAD_SCALE && "overflow");
 
   (void)atomic_fetch_add_explicit(&ctrl->ref_count, by, memory_order_acq_rel);
@@ -130,6 +131,7 @@ static void inc_ref(sp_ctrl_t *ctrl, size_t by) {
 /// @param by Number of loads to add
 static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
+  assert(by > 0 && "redundant inc_load_ref");
 
   const size_t old __attribute__((unused)) = atomic_fetch_add_explicit(
       &ctrl->ref_count, by * LOAD_SCALE, memory_order_acq_rel);
