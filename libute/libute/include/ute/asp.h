@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <ute/dword.h>
 
 #ifdef __cplusplus
@@ -78,6 +79,30 @@ void sp_rel(sp_t sp);
 /// @param dst Pointer to overwrite
 /// @param src Pointer value to store
 void sp_store(asp_t *dst, sp_t src);
+
+/// atomically compare-and-swap a shared pointer
+///
+/// `expected` is consumed (`sp_rel` is called on it) regardless of whether the
+/// CAS succeeds or fails. It is assumed that any caller wanting to retry a
+/// failed CAS will have to acquire a new (different) `expected` before
+/// recalling this function. Note that this means, in contrast to many CAS APIs,
+/// there is no way for the caller to directly learn the value that was read on
+/// failure.
+///
+/// `desired` is consumed iff the CAS succeeds.
+///
+/// Note that by requiring an `sp_t` for `expected` instead of a raw pointer,
+/// we implicitly rule out an ABA problem by the caller having to prove they
+/// have an outstanding live pointer to the expected value. Without this, it
+/// would be possible for someone else to deallocate the expected value and its
+/// control block and then reallocate something new with coincidentally the same
+/// addresses.
+///
+/// @param dst Pointer to overwrite on success
+/// @param expected Expected previous value of `dst`
+/// @param desired New value to set `dst` to
+/// @return True if the CAS succeeded
+bool sp_cas(asp_t *dst, sp_t expected, sp_t desired);
 
 #ifdef __cplusplus
 }

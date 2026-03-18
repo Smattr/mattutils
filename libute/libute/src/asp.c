@@ -342,3 +342,51 @@ void sp_store(asp_t *dst, sp_t src) {
 #endif
   }
 }
+
+bool sp_cas(asp_t *dst, sp_t expected, sp_t desired) {
+  assert(dst != NULL);
+
+  const asp_impl_t new_impl = {.ctrl = desired.impl};
+  const dword_t new = impl2asp(new_impl);
+  bool ret;
+
+  for (asp_impl_t old_impl = {.ctrl = expected.impl};;) {
+    dword_t old = impl2asp(old_impl);
+
+    // try to swap in our desired value
+    ret = dword_atomic_cas(dst, &old, new);
+    old_impl = asp2impl(old);
+
+    if (ret) {
+      // replicate load propagation logic from `sp_store`
+      if (old_impl.ctrl != NULL) {
+#if 1
+        // as an optimisation, we can fuse what would otherwise be two separate
+        // atomics in the other branch of this #if
+        if (old_impl.load_count * LOAD_SCALE == 0) {
+          // drop a reference for `dst` we just overwrote
+          dec_ref(old_impl.ctrl);
+        } else {
+          // propagate load count while also dropping a reference for `dst`
+          inc_and_dec(old_impl.ctrl, old_impl.load_count);
+        }
+#else
+        if (old_impl.load_count * LOAD_SCALE != 0)
+          inc_load_ref(old_impl.ctrl, old_impl.load_count);
+        DELAY3();
+        // drop a reference for `dst` we just overwrote
+        dec_ref(old_impl.ctrl);
+#endif
+      }
+      break;
+    }
+
+    // does `dst` hold a different pointer than `expected`?
+    if (old_impl.ctrl != expected.impl)
+      break;
+  }
+
+  sp_rel(expected);
+
+  return ret;
+}
