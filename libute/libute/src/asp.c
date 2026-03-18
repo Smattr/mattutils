@@ -202,7 +202,7 @@ UNUSED static void inc_and_dec(sp_ctrl_t *ctrl, size_t load_by) {
 /// exposed implementation of an atomic shared pointer
 ///
 /// External callers see atomic shared pointers as `atomic_dword_t`s. But we
-/// operate on them as `sp_impl_t`s.
+/// operate on them as `asp_impl_t`s.
 typedef struct {
   sp_ctrl_t *ctrl;   ///< control block, only relevant for non-null pointers
   size_t load_count; ///< number of outstanding control block loads
