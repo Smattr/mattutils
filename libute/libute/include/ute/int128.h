@@ -70,9 +70,10 @@ void int128_atomic_store(int128_t *dst, int128_t src);
 /// Semantically this atomically performs:
 ///
 ///   bool result = *dst == *expected;
-///   *expected = *dst;
 ///   if (result) {
 ///     *dst = desired;
+///   } else {
+///     *expected = *dst;
 ///   }
 ///   return result;
 ///
@@ -143,9 +144,10 @@ void uint128_atomic_store(uint128_t *dst, uint128_t src);
 /// Semantically this atomically performs:
 ///
 ///   bool result = *dst == *expected;
-///   *expected = *dst;
 ///   if (result) {
 ///     *dst = desired;
+///   } else {
+///     *expected = *dst;
 ///   }
 ///   return result;
 ///

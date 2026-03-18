@@ -74,9 +74,10 @@ void dword_atomic_store(atomic_dword_t *dst, dword_t src);
 /// Semantically this atomically performs:
 ///
 ///   bool result = *dst == *expected;
-///   *expected = *dst;
 ///   if (result) {
 ///     *dst = desired;
+///   } else {
+///     *expected = *dst;
 ///   }
 ///   return result;
 ///
