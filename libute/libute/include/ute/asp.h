@@ -66,6 +66,8 @@ sp_t sp_acq(asp_t *asp);
 /// If calling this function releases the last live `sp_t` to the underlying
 /// pointer, the destructor will be called and the metadata freed.
 ///
+/// Calling this on a null shared pointer is a no-op.
+///
 /// @param sp Pointer to release
 void sp_rel(sp_t sp);
 
