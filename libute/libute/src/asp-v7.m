@@ -24,7 +24,7 @@ type count_t: 0..COUNT_MAX;
 type tid_t: scalarset(N_THREAD);
 
 -- pointers
-type ptr_t: 0..3;
+type ptr_t: scalarset(3);
 
 /*******************************************************************************
  * shared pointer control blocks                                               *
@@ -68,7 +68,6 @@ end;
 type sp_acq_t: record
   old: asp_t;
   new: asp_t;
-  sp_ptr: ptr_t;
 end;
 
 -- sp_rel stack frame
@@ -320,12 +319,8 @@ ruleset tid: tid_t do
       end ==>
       var ctrl: nullable_sp_ctrl_ptr_t;
     begin
-      -- “a null pointer needs no bookkeeping”
-      if value = 0 then
-        tls[tid].sp[0].ptr := 0;
-        undefine tls[tid].sp[0].impl;
-        return;
-      end;
+      -- omit null pointer construction, as all threads effectively start with
+      -- them
 
       ctrl := calloc_sp_ctrl();
       if ctrl = 0 then
@@ -380,16 +375,7 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L3 ==>
   begin
     -- “load the target pointer…”
-    -- Do a funny increment loop here to simulate something like torn reads
-    if isundefined(tls[tid].sp_acq.sp_ptr) then
-      tls[tid].sp_acq.sp_ptr := 1;
-    else
-      tls[tid].sp_acq.sp_ptr := tls[tid].sp_acq.sp_ptr + 1;
-    end;
-    if tls[tid].sp_acq.sp_ptr < sp_ctrls[tls[tid].sp_acq.old.ctrl].value then
-      return;
-    end;
-    tls[tid].sp[0].ptr := tls[tid].sp_acq.sp_ptr;
+    tls[tid].sp[0].ptr := sp_ctrls[tls[tid].sp_acq.old.ctrl].value;
     tls[tid].sp[0].impl := tls[tid].sp_acq.old.ctrl;
     tls[tid].pc := SP_ACQ_L4;
   end;
@@ -425,13 +411,7 @@ ruleset tid: tid_t do
   rule "sp_rel (1 / 2)"
     isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[0].ptr) ==>
   begin
-    -- “if the target pointer was null, it was not reference counted”
-    if tls[tid].sp[0].ptr = 0 then
-      assert isundefined(tls[tid].sp[0].impl)
-        "null pointer with non-null control block";
-      undefine tls[tid].sp[0];
-      return;
-    end;
+    -- omit null pointer release
 
     assert !isundefined(tls[tid].sp[0].impl)
       "non-null pointer with no control block";
@@ -449,8 +429,7 @@ ruleset tid: tid_t do
   end;
 
   rule "sp_store (1 / 3)"
-    isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[0].ptr) &
-    isundefined(tls[tid].sp[1].ptr) ==>
+    isundefined(tls[tid].pc) & isundefined(tls[tid].sp[1].ptr) ==>
   begin
     if isundefined(tls[tid].sp[0].impl) then
       undefine tls[tid].sp_store.new.ctrl;
@@ -568,8 +547,7 @@ ruleset tid: tid_t do
 
   ruleset i: 0..N_SP - 1 do
     rule "dereference pointer"
-      isundefined(tls[tid].pc) &
-      !isundefined(tls[tid].sp[i].ptr) & tls[tid].sp[i].ptr != 0 ==>
+      isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[i].ptr) ==>
     begin
       assert sp_ctrls_allocated[tls[tid].sp[i].impl]
         "live shared pointer uses freed control block";
@@ -581,8 +559,7 @@ invariant
   "null pointers have no control block"
   forall tid: tid_t do
     forall i: 0..N_SP - 1 do
-      !isundefined(tls[tid].sp[i].ptr) & tls[tid].sp[i].ptr = 0 ->
-        isundefined(tls[tid].sp[i].impl)
+      isundefined(tls[tid].sp[i].ptr) -> isundefined(tls[tid].sp[i].impl)
     end
   end;
 
@@ -590,8 +567,7 @@ invariant
   "non-null pointers have a control block"
   forall tid: tid_t do
     forall i: 0..N_SP - 1 do
-      !isundefined(tls[tid].sp[i].ptr) & tls[tid].sp[i].ptr != 0 ->
-        !isundefined(tls[tid].sp[i].impl)
+      !isundefined(tls[tid].sp[i].ptr) -> !isundefined(tls[tid].sp[i].impl)
     end
   end;
 
