@@ -66,7 +66,6 @@ end;
 
 -- sp_acq stack frame
 type sp_acq_t: record
-  i: 0..N_SP - 1;
   old: asp_t;
   new: asp_t;
   sp_ptr: ptr_t;
@@ -74,13 +73,11 @@ end;
 
 -- sp_rel stack frame
 type sp_rel_t: record
-  i: 0..N_SP - 1;
   old_count: count_t;
 end;
 
 -- sp_store stack frame
 type sp_store_t: record
-  i: 0..N_SP - 1;
   new: asp_t;
   old: asp_t;
   old_count: count_t;
@@ -309,20 +306,24 @@ startstate begin
 end;
 
 ruleset tid: tid_t do
-  ruleset value: ptr_t; i: 0..N_SP - 1 do
+  ruleset value: ptr_t do
     rule "sp_new"
       -- we are idle and do not have a shared pointer
-      isundefined(tls[tid].pc) & isundefined(tls[tid].sp[i].ptr) &
+      isundefined(tls[tid].pc) & isundefined(tls[tid].sp[0].ptr) &
       -- the shared pointer we are constructing does not alias the asp global
       (isundefined(asp.ctrl) | sp_ctrls[asp.ctrl].value != value) &
       -- the shared pointer we are constructing does not alias anyone else’s
-      forall peer: tid_t do isundefined(tls[peer].sp[i].ptr) | tls[peer].sp[i].ptr != value end ==>
+      forall peer: tid_t do
+        forall i: 0..N_SP - 1 do
+          isundefined(tls[peer].sp[i].ptr) | tls[peer].sp[i].ptr != value
+        end
+      end ==>
       var ctrl: nullable_sp_ctrl_ptr_t;
     begin
       -- “a null pointer needs no bookkeeping”
       if value = 0 then
-        tls[tid].sp[i].ptr := 0;
-        undefine tls[tid].sp[i].impl;
+        tls[tid].sp[0].ptr := 0;
+        undefine tls[tid].sp[0].impl;
         return;
       end;
 
@@ -334,20 +335,17 @@ ruleset tid: tid_t do
       sp_ctrls[ctrl].value := value;
       inc_ref(ctrl, 1);
 
-      tls[tid].sp[i].ptr := value;
-      tls[tid].sp[i].impl := ctrl;
+      tls[tid].sp[0].ptr := value;
+      tls[tid].sp[0].impl := ctrl;
     end;
   end;
 
-  ruleset i: 0..N_SP - 1 do
-    rule "sp_acq (1 / 6)"
-      isundefined(tls[tid].pc) & isundefined(tls[tid].sp[i].ptr) ==>
-    begin
-      -- “load the implementation…”
-      tls[tid].sp_acq.old := asp;
-      tls[tid].sp_acq.i := i;
-      tls[tid].pc := SP_ACQ_L1;
-    end;
+  rule "sp_acq (1 / 6)"
+    isundefined(tls[tid].pc) & isundefined(tls[tid].sp[0].ptr) ==>
+  begin
+    -- “load the implementation…”
+    tls[tid].sp_acq.old := asp;
+    tls[tid].pc := SP_ACQ_L1;
   end;
 
   rule "sp_acq (2 / 6)"
@@ -355,7 +353,7 @@ ruleset tid: tid_t do
   begin
     if isundefined(tls[tid].sp_acq.old.ctrl) then
       -- “the target pointer is null; no need to ref count”
-      undefine tls[tid].sp[tls[tid].sp_acq.i];
+      undefine tls[tid].sp[0];
       undefine tls[tid].sp_acq;
       undefine tls[tid].pc;
       return;
@@ -391,8 +389,8 @@ ruleset tid: tid_t do
     if tls[tid].sp_acq.sp_ptr < sp_ctrls[tls[tid].sp_acq.old.ctrl].value then
       return;
     end;
-    tls[tid].sp[tls[tid].sp_acq.i].ptr := tls[tid].sp_acq.sp_ptr;
-    tls[tid].sp[tls[tid].sp_acq.i].impl := tls[tid].sp_acq.old.ctrl;
+    tls[tid].sp[0].ptr := tls[tid].sp_acq.sp_ptr;
+    tls[tid].sp[0].impl := tls[tid].sp_acq.old.ctrl;
     tls[tid].pc := SP_ACQ_L4;
   end;
 
@@ -424,49 +422,44 @@ ruleset tid: tid_t do
     tls[tid].pc := SP_ACQ_L4;
   end;
 
-  ruleset i: 0..N_SP - 1 do
-    rule "sp_rel (1 / 2)"
-      isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[i].ptr) ==>
-    begin
-      -- “if the target pointer was null, it was not reference counted”
-      if tls[tid].sp[i].ptr = 0 then
-        assert isundefined(tls[tid].sp[i].impl)
-          "null pointer with non-null control block";
-        undefine tls[tid].sp[i];
-        return;
-      end;
-
-      assert !isundefined(tls[tid].sp[i].impl)
-        "non-null pointer with no control block";
-      tls[tid].sp_rel.old_count := dec_ref_1(tls[tid].sp[i].impl);
-      tls[tid].sp_rel.i := i;
-      tls[tid].pc := SP_REL_L1;
+  rule "sp_rel (1 / 2)"
+    isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[0].ptr) ==>
+  begin
+    -- “if the target pointer was null, it was not reference counted”
+    if tls[tid].sp[0].ptr = 0 then
+      assert isundefined(tls[tid].sp[0].impl)
+        "null pointer with non-null control block";
+      undefine tls[tid].sp[0];
+      return;
     end;
+
+    assert !isundefined(tls[tid].sp[0].impl)
+      "non-null pointer with no control block";
+    tls[tid].sp_rel.old_count := dec_ref_1(tls[tid].sp[0].impl);
+    tls[tid].pc := SP_REL_L1;
   end;
 
   rule "sp_rel (2 / 2)"
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_REL_L1 ==>
   begin
-    dec_ref_2(tls[tid].sp[tls[tid].sp_rel.i].impl, tls[tid].sp_rel.old_count);
-    undefine tls[tid].sp[tls[tid].sp_rel.i];
+    dec_ref_2(tls[tid].sp[0].impl, tls[tid].sp_rel.old_count);
+    undefine tls[tid].sp[0];
     undefine tls[tid].sp_rel;
     undefine tls[tid].pc;
   end;
 
-  ruleset i: 0..N_SP - 1 do
-    rule "sp_store (1 / 3)"
-      isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[i].ptr) ==>
-    begin
-      if isundefined(tls[tid].sp[i].impl) then
-        undefine tls[tid].sp_store.new.ctrl;
-      else
-        tls[tid].sp_store.new.ctrl := tls[tid].sp[i].impl;
-      end;
-      tls[tid].sp_store.new.load_count := 0;
-      tls[tid].sp_store.old := asp_xchg(tls[tid].sp_store.new);
-      tls[tid].sp_store.i := i;
-      tls[tid].pc := SP_STORE_L1;
+  rule "sp_store (1 / 3)"
+    isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[0].ptr) &
+    isundefined(tls[tid].sp[1].ptr) ==>
+  begin
+    if isundefined(tls[tid].sp[0].impl) then
+      undefine tls[tid].sp_store.new.ctrl;
+    else
+      tls[tid].sp_store.new.ctrl := tls[tid].sp[0].impl;
     end;
+    tls[tid].sp_store.new.load_count := 0;
+    tls[tid].sp_store.old := asp_xchg(tls[tid].sp_store.new);
+    tls[tid].pc := SP_STORE_L1;
   end;
 
   rule "sp_store (2 / 3)"
@@ -481,7 +474,7 @@ ruleset tid: tid_t do
       end;
       tls[tid].pc := SP_STORE_L2;
     else
-      undefine tls[tid].sp[tls[tid].sp_store.i];
+      undefine tls[tid].sp[0];
       undefine tls[tid].sp_store;
       undefine tls[tid].pc;
     end;
@@ -491,7 +484,7 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_STORE_L2 ==>
   begin
     dec_ref_2(tls[tid].sp_store.old.ctrl, tls[tid].sp_store.old_count);
-    undefine tls[tid].sp[tls[tid].sp_store.i];
+    undefine tls[tid].sp[0];
     undefine tls[tid].sp_store;
     undefine tls[tid].pc;
   end;
@@ -562,6 +555,15 @@ ruleset tid: tid_t do
     -- behaviours of the implementation.
     undefine tls[tid].sp_cas;
     undefine tls[tid].pc;
+  end;
+
+  rule "swap pointers"
+    isundefined(tls[tid].pc) ==>
+    var tmp: sp_t;
+  begin
+    tmp := tls[tid].sp[0];
+    tls[tid].sp[0] := tls[tid].sp[1];
+    tls[tid].sp[1] := tmp;
   end;
 
   ruleset i: 0..N_SP - 1 do
