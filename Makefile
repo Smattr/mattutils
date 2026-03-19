@@ -21,9 +21,7 @@ default: \
   ${HOME}/.mplayer \
   ${HOME}/.screenrc \
   ${HOME}/.tmux.conf \
-  ${HOME}/.tmux-new-pane_current_path.conf \
   ${HOME}/.tmux-new-vi-copy.conf \
-  ${HOME}/.tmux-old-pane_current_path.conf \
   ${HOME}/.tmux-old-vi-copy.conf \
   ${HOME}/.tmux-tpm.conf \
   ${HOME}/.vimrc \
