@@ -69,7 +69,7 @@ def main(args):
         commit = run(["git", "rev-parse", "HEAD"], workdir)
         metadata.write_text(
             f"built from {commit} of https://github.com/smattr/{options.project}",
-            encoding="utf-8"
+            encoding="utf-8",
         )
         run(["sudo", "mv", metadata, f"/opt/{options.project}/metadata.txt"])
 
