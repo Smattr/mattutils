@@ -544,15 +544,6 @@ ruleset tid: tid_t do
     tls[tid].sp[0] := tls[tid].sp[1];
     tls[tid].sp[1] := tmp;
   end;
-
-  ruleset i: 0..N_SP - 1 do
-    rule "dereference pointer"
-      isundefined(tls[tid].pc) & !isundefined(tls[tid].sp[i].ptr) ==>
-    begin
-      assert sp_ctrls_allocated[tls[tid].sp[i].impl]
-        "live shared pointer uses freed control block";
-    end;
-  end;
 end;
 
 invariant
@@ -583,3 +574,11 @@ invariant
 invariant
   "counter is power-of-2 sized"
   popcount(countof_count()) = 1;
+
+invariant
+  "live shared pointers do not use freed control blocks"
+  forall tid: tid_t do isundefined(tls[tid].pc) ->
+    forall i: 0..N_SP - 1 do !isundefined(tls[tid].sp[i].ptr) ->
+      sp_ctrls_allocated[tls[tid].sp[i].impl]
+    end
+  end;
