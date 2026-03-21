@@ -77,7 +77,6 @@ end;
 
 -- sp_store stack frame
 type sp_store_t: record
-  new: asp_t;
   old: asp_t;
   old_count: count_t;
 end;
@@ -430,14 +429,15 @@ ruleset tid: tid_t do
 
   rule "sp_store (1 / 3)"
     isundefined(tls[tid].pc) & isundefined(tls[tid].sp[1].ptr) ==>
+    var new: asp_t;
   begin
     if isundefined(tls[tid].sp[0].impl) then
-      undefine tls[tid].sp_store.new.ctrl;
+      undefine new.ctrl;
     else
-      tls[tid].sp_store.new.ctrl := tls[tid].sp[0].impl;
+      new.ctrl := tls[tid].sp[0].impl;
     end;
-    tls[tid].sp_store.new.load_count := 0;
-    tls[tid].sp_store.old := asp_xchg(tls[tid].sp_store.new);
+    new.load_count := 0;
+    tls[tid].sp_store.old := asp_xchg(new);
     tls[tid].pc := SP_STORE_L1;
   end;
 
