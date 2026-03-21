@@ -16,12 +16,14 @@ from typing import List
 def run(*args: str):
     env = os.environ.copy()
     env["FILTER_BRANCH_SQUELCH_WARNING"] = "1"
-    print(f"+ env FILTER_BRANCH_SQUELCH_WARNING=1 {shlex.join(str(x) for x in args)}")
+    print(
+        f"+ env FILTER_BRANCH_SQUELCH_WARNING=1 {' '.join(shlex.quote(str(x)) for x in args)}"
+    )
     sp.check_call(args, env=env)
 
 
 def call(*args: str):
-    print(f"+ {shlex.join(str(x) for x in args)}")
+    print(f"+ {' '.join(shlex.quote(str(x)) for x in args)}")
     return sp.check_output(args, universal_newlines=True)
 
 
@@ -88,7 +90,7 @@ def main(args: List[str]) -> int:
         f"{base}..{head}",
     ]
     if options.dry_run:
-        print(f"would run: {shlex.join(str(c) for c in cmd)}")
+        print(f"would run: {' '.join(shlex.quote(c) for c in cmd)}")
     else:
         run(*cmd)
 

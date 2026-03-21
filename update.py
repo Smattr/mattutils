@@ -15,7 +15,7 @@ from pathlib import Path
 def run(args, cwd=None) -> str:
     """run a command with some niceties"""
     cd = "" if cwd is None else f"cd {shlex.quote(str(cwd))} && "
-    print(f"+ {cd}{shlex.join(str(a) for a in args)}")
+    print(f"+ {cd}{' '.join(shlex.quote(str(a)) for a in args)}")
     p = subprocess.run(args, stdout=subprocess.PIPE, cwd=cwd, check=False, text=True)
     sys.stdout.write(p.stdout)
     p.check_returncode()
