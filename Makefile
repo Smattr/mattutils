@@ -23,7 +23,6 @@ default: \
   ${HOME}/.tmux.conf \
   ${HOME}/.tmux-new-vi-copy.conf \
   ${HOME}/.tmux-old-vi-copy.conf \
-  ${HOME}/.tmux-tpm.conf \
   ${HOME}/.vimrc \
   ${HOME}/.vim \
   ${HOME}/.wgetrc \

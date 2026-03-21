@@ -13,7 +13,3 @@ if [ $(awk 'BEGIN{ print ("'${TMUX_VERSION}'">="2.4") }') -eq 1 ]; then
 else
     tmux source-file ${HOME}/.tmux-old-vi-copy.conf
 fi
-
-if [ $(awk 'BEGIN{ print ("'${TMUX_VERSION}'">="1.9") }') -eq 1 ]; then
-    tmux source-file ${HOME}/.tmux-tpm.conf
-fi
