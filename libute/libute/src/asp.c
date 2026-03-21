@@ -54,6 +54,8 @@
 ///   pointers:
 ///     https://devblogs.microsoft.com/oldnewthing/20241219-00/?p=110663
 ///     https://devblogs.microsoft.com/oldnewthing/20230818-00/?p=108619
+///
+/// All content in this file is in the public domain. Use it any way you wish.
 
 #include <assert.h>
 #include <limits.h>
