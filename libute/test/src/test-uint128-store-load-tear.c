@@ -38,7 +38,7 @@ static THREAD_RET entry(void *arg) {
       size_t nonzero_bits = 0;
       for (size_t i = 0; i < sizeof(old) * CHAR_BIT; ++i)
         nonzero_bits += (old >> i) & 1;
-      ASSERT_LE(nonzero_bits, CHAR_BIT); // no torn reads/writes
+      ASSERT_LE(nonzero_bits, (size_t)CHAR_BIT); // no torn reads/writes
     }
 
     // we should see either what we are looking for or a lower ID

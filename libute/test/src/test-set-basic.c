@@ -11,7 +11,7 @@
 /// freeing an empty set should be OK and should not leak memory
 TEST("empty set lifecycle") {
   SET(int) ints = {0};
-  ASSERT_EQ(SET_SIZE(&ints), 0);
+  ASSERT_EQ(SET_SIZE(&ints), 0u);
   SET_FREE(&ints);
 }
 
@@ -137,7 +137,7 @@ TEST("0-sized element set") {
   for (int i = 0; i < 10; ++i) {
     const int r = SET_INSERT(&foos, (struct foo){});
     ASSERT_EQ(r, 0);
-    ASSERT_EQ(SET_SIZE(&foos), 1);
+    ASSERT_EQ(SET_SIZE(&foos), 1u);
 
     for (int j = 0; j < 10; ++j) {
       const bool present = SET_CONTAINS(&foos, (struct foo){});
@@ -152,7 +152,7 @@ TEST("0-sized element set") {
     } else {
       ASSERT(!r);
     }
-    ASSERT_EQ(SET_SIZE(&foos), 0);
+    ASSERT_EQ(SET_SIZE(&foos), 0u);
 
     for (int j = 0; j < 10; ++j) {
       const bool present = SET_CONTAINS(&foos, (struct foo){});

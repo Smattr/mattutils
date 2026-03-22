@@ -84,7 +84,7 @@ TEST("int set multithreaded") {
     ASSERT_EQ(ret, (THREAD_RET){0});
   }
 
-  ASSERT_EQ(SET_SIZE(&ints), 0);
+  ASSERT_EQ(SET_SIZE(&ints), 0u);
   SET_FREE(&ints);
 }
 
