@@ -7,16 +7,17 @@
 #include <stddef.h>
 #include <ute/int128.h>
 
-#ifdef __has_include
+#ifndef __has_include
+#define __has_include(x) 0
+#endif
+
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
-#endif
 #endif
 
 void uint128_atomic_store(uint128_t *dst, uint128_t src) {
   assert(dst != NULL);
 
-#ifdef __has_include
 #if __has_include(<immintrin.h>)
 #ifdef __SSE2__
   // A 128-bit AVX store is atomic. However _mm_store_si128 does not reliably
@@ -27,7 +28,6 @@ void uint128_atomic_store(uint128_t *dst, uint128_t src) {
     volatile avx128_t *d = (avx128_t *)dst;
     *d = (__m128i)src;
   }
-#endif
 #endif
 #endif
 
