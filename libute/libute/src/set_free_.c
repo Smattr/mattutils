@@ -15,9 +15,9 @@ void set_free_(set_t_ *set) {
   // deallocate all items (deleted or not) in the set
   for (size_t i = 0; i < set->capacity; ++i) {
     const uintptr_t slot = set->base[i];
-    if (set_slot_is_free(slot))
+    if (slot_is_free(slot))
       continue;
-    void *const p = set_slot_to_ptr(slot);
+    void *const p = slot_to_ptr(slot);
     free(p);
   }
 

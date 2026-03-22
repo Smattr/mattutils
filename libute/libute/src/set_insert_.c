@@ -34,18 +34,18 @@ static bool insert(set_t_ *set, void *item, size_t item_size) {
     const uintptr_t slot = set->base[index];
 
     // if this slot is unoccupied, try to insert our item
-    if (set_slot_is_free(slot)) {
+    if (slot_is_free(slot)) {
       set->base[index] = (uintptr_t)item;
       ++set->used;
       return true;
     }
 
     // if this is a deleted item, skip over it
-    if (set_slot_is_deleted(slot))
+    if (slot_is_deleted(slot))
       continue;
 
     // otherwise, check if this is our item already present
-    void *const p = set_slot_to_ptr(slot);
+    void *const p = slot_to_ptr(slot);
     if (item_size == 0 || memcmp(p, item, item_size) == 0)
       return false;
   }
@@ -67,10 +67,10 @@ static void rehash(set_t_ *dst, set_t_ *src, size_t item_size) {
 
   for (size_t i = 0; i < src->capacity; ++i) {
     const uintptr_t slot = src->base[i];
-    if (set_slot_is_free(slot))
+    if (slot_is_free(slot))
       continue;
-    void *const p = set_slot_to_ptr(slot);
-    if (set_slot_is_deleted(slot)) {
+    void *const p = slot_to_ptr(slot);
+    if (slot_is_deleted(slot)) {
       free(p);
       continue;
     }
