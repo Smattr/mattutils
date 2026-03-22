@@ -11,11 +11,17 @@
 #define __has_include(x) 0
 #endif
 
+#ifndef __has_feature
+#define __has_feature(x) 0
+#endif
+
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
 
 #ifdef __SSE2__
+#if !__has_feature(thread_sanitizer)
 #define USE_AVX
+#endif
 #endif
 #endif
 

@@ -11,6 +11,10 @@
 #define __has_include(x) 0
 #endif
 
+#ifndef __has_feature
+#define __has_feature(x) 0
+#endif
+
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
 #endif
@@ -19,6 +23,7 @@ void int128_atomic_store(int128_t *dst, int128_t src) {
   assert(dst != NULL);
 
 #if __has_include(<immintrin.h>)
+#if !__has_feature(thread_sanitizer)
 #ifdef __SSE2__
   // A 128-bit AVX store is atomic. However _mm_store_si128 does not reliably
   // lower to a MOVDQA. Thankfully a volatile store seems to reliably do this.
@@ -28,6 +33,7 @@ void int128_atomic_store(int128_t *dst, int128_t src) {
     volatile avx128_t *d = (avx128_t *)dst;
     *d = (__m128i)src;
   }
+#endif
 #endif
 #endif
 
