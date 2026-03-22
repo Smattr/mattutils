@@ -166,7 +166,8 @@ bool uint128_atomic_cas(uint128_t *dst, uint128_t *expected, uint128_t desired);
 /// @param expected Expected old value
 /// @param desired Value to try to write
 /// @return True if the swap succeeded
-bool uint128_atomic_cas_n(uint128_t *dst, uint128_t expected, uint128_t desired);
+bool uint128_atomic_cas_n(uint128_t *dst, uint128_t expected,
+                          uint128_t desired);
 
 /// atomically read and write a 128-bit unsigned integer
 ///
