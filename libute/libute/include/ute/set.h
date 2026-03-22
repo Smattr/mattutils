@@ -1,11 +1,25 @@
 /// @file
 /// @brief Type-generic set
 ///
-/// This is based on a technique from
-/// https://danielchasehooper.com/posts/typechecked-generic-c-data-structures
+/// This set is:
+///   • Type-generic – works for any element type (WIP)
+///   • Type-safe – compiler should catch all incorrect parameter passing
+///   • Thread-safe – all macros are safe to call concurrently
+///
+/// The trade off in being such a general belt-and-suspenders implementation is
+/// that it is not particularly fast. But it still aims to be memory efficient.
+///
+/// The type-generic, type-safe aspect of this is based on techniques from:
+///   Type Safe Generic Data Structures in C
+///   Daniel Hooper
+///   https://danielchasehooper.com/posts/typechecked-generic-c-data-structures
+///
+/// The thread-safe aspect of this is based on techniques from:
+///   A Lock-Free Wait-Free Hash Table
+///   Dr Cliff Click
+///   https://web.stanford.edu/class/ee380/Abstracts/070221_LockFreeHash.pdf
 ///
 /// TODO:
-///   • thread-safety
 ///   • custom hash
 ///   • custom eq
 ///   • dtor
@@ -23,6 +37,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <ute/asp.h>
 #include <ute/typeof.h>
 
 #ifdef __cplusplus
@@ -82,7 +97,7 @@ extern "C" {
 ///
 /// This macro can be thought of as having the C type:
 ///
-///   bool SET_CONTAINS(const SET(<type>) *set, const <type> item);
+///   bool SET_CONTAINS(SET(<type>) *set, const <type> item);
 ///
 /// @param set Set to operate on
 /// @param item Item whose existence to check
@@ -95,7 +110,7 @@ extern "C" {
 ///
 /// This macro can be thought of as having the C type:
 ///
-///   size_t SET_SIZE(const SET(<type> *set);
+///   size_t SET_SIZE(SET(<type> *set);
 ///
 /// @param set Set to operate on
 /// @return Size of the set
@@ -120,14 +135,8 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// set private implementation
-///
-/// This structure carries no information about the size of set items. This is
-/// expected to be passed in by callers.
 typedef struct {
-  uintptr_t *base; ///< backing storage of set slots
-  size_t used;     ///< how many slots are non-empty?
-  size_t deleted;  ///< how many slots contain deleted items?
-  size_t capacity; ///< how many total slots at `base`?
+  asp_t root; ///< shared (opaque) pointer to the implementation itself
 } set_t_;
 
 /// insert an item into a set
@@ -152,13 +161,13 @@ bool set_remove_(set_t_ *set, const void *item, size_t item_size);
 /// @param item Item to seek
 /// @param item_size Byte size of `item`
 /// @return True if item was found in the set
-bool set_contains_(const set_t_ *set, const void *item, size_t item_size);
+bool set_contains_(set_t_ *set, const void *item, size_t item_size);
 
 /// get the number of items in a set
 ///
 /// @param set Set to operate on
 /// @return Size of the set
-size_t set_size_(const set_t_ *set);
+size_t set_size_(set_t_ *set);
 
 /// clear a set and deallocate its backing resources
 ///

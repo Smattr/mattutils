@@ -5,10 +5,12 @@
 
 #include "set.h"
 #include <assert.h>
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <ute/asp.h>
 #include <ute/hash.h>
 #include <ute/set.h>
 
@@ -17,9 +19,27 @@ bool set_remove_(set_t_ *set, const void *item, size_t item_size) {
   assert(item != NULL || item_size == 0);
 
   const size_t h = hash(item, item_size);
-  for (size_t i = 0; i < set->capacity; ++i) {
-    const size_t index = (h + i) % set->capacity;
-    const uintptr_t slot = set->base[index];
+
+retry1:;
+  // acquire a reference to the set
+  sp_t sp = sp_acq(&set->root);
+
+  // if the set is uninitialised, it is semantically empty
+  if (sp.ptr == NULL)
+    return false;
+
+  set_impl_t *const s = sp.ptr;
+
+  for (size_t i = 0; i < s->capacity; ++i) {
+    const size_t index = (h + i) % s->capacity;
+    uintptr_t slot = slot_load(&s->base[index]);
+
+  retry2:
+    if (slot_is_moved(slot)) {
+      // someone is rehashing the set into new storage
+      sp_rel(sp);
+      goto retry1;
+    }
 
     // if this slot is unoccupied, we have probed as far as the item could be
     if (slot_is_free(slot))
@@ -33,11 +53,14 @@ bool set_remove_(set_t_ *set, const void *item, size_t item_size) {
     const void *const p = slot_to_ptr(slot);
     if (item_size == 0 || memcmp(item, p, item_size) == 0) {
       // mark as deleted
-      set->base[index] = slot | 1;
-      ++set->deleted;
+      if (!slot_cas(&s->base[index], &slot, slot_deleted(slot)))
+        goto retry2;
+      (void)atomic_fetch_add_explicit(&s->deleted, 1, memory_order_acq_rel);
+      sp_rel(sp);
       return true;
     }
   }
 
+  sp_rel(sp);
   return false;
 }
