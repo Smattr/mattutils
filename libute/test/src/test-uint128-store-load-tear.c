@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <ute/attr.h>
 #include <ute/int128.h>
 
 typedef struct {
@@ -63,7 +64,7 @@ static THREAD_RET entry(void *arg) {
     assert(next <= UINT8_MAX);
     const uint128_t desired = pack(next);
     {
-      size_t nonzero_bits = 0;
+      size_t nonzero_bits UNUSED = 0;
       for (size_t i = 0; i < sizeof(desired) * CHAR_BIT; ++i)
         nonzero_bits += (desired >> i) & 1;
       assert(nonzero_bits <= CHAR_BIT);
