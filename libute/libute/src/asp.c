@@ -108,7 +108,7 @@
 static const size_t LOAD_SCALE = (size_t)1 << (sizeof(size_t) * CHAR_BIT / 2);
 
 /// AND mask for extracting lower half of `sp_ctrl_t.ref_count`
-static const size_t REFS_MASK = LOAD_SCALE - 1;
+static const size_t REFS_MASK UNUSED = LOAD_SCALE - 1;
 
 struct sp_ctrl {
   void *value;              ///< the managed underlying pointer
