@@ -17,6 +17,11 @@ add_library(libute
   src/int128_atomic_store.c
   src/int128_atomic_xchg.c
   src/int128_put.c
+  src/set_contains_.c
+  src/set_free_.c
+  src/set_insert_.c
+  src/set_remove_.c
+  src/set_size_.c
   src/uint128_atomic_cas.c
   src/uint128_atomic_cas_n.c
   src/uint128_atomic_load.c
