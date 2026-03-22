@@ -5,6 +5,7 @@
 ///   • Type-generic – works for any element type (WIP)
 ///   • Type-safe – compiler should catch all incorrect parameter passing
 ///   • Thread-safe – all macros are safe to call concurrently
+///   • Lock-free – no mutexes or semaphores involved
 ///
 /// The trade off in being such a general belt-and-suspenders implementation is
 /// that it is not particularly fast. But it still aims to be memory efficient.
