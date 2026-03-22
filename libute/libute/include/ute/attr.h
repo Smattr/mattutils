@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <stddef.h>
+#include <stdlib.h>
+
 /// mark a switch case as intentionally missing a `break` statement
 #if defined(__cplusplus) && defined(__has_cpp_attribute)
 #if __has_cpp_attribute(fallthrough)
@@ -62,6 +65,40 @@
 #endif
 #ifndef NORETURN
 #define NORETURN /* nothing */
+#endif
+
+#if !defined(UNREACHABLE) && defined(__cplusplus)
+#if __cplusplus == 202302L
+#include <utility>
+#define UNREACHABLE()                                                          \
+  do {                                                                         \
+    assert(0 && !"unreachable code reached");                                  \
+    std::unreachable();                                                        \
+  } while (0)
+#endif
+#endif
+#if !defined(UNREACHABLE) && defined(__STDC_VERSION__)
+#if __STDC_VERSION__ == 202311L
+#define UNREACHABLE()                                                          \
+  do {                                                                         \
+    assert(0 && !"unreachable code reached");                                  \
+    unreachable();                                                             \
+  } while (0)
+#endif
+#endif
+#if !defined(UNREACHABLE) && defined(__GNUC__)
+#define UNREACHABLE()                                                          \
+  do {                                                                         \
+    assert(0 && !"unreachable code reached");                                  \
+    __builtin_unreachable();                                                   \
+  } while (0)
+#endif
+#ifndef UNREACHABLE
+#define UNREACHABLE()                                                          \
+  do {                                                                         \
+    assert(0 && !"unreachable code reached");                                  \
+    abort();                                                                   \
+  } while (0)
 #endif
 
 /// mark a variable or function return value as being intentionally not used
