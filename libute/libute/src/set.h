@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdatomic.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /// internal implementation of a set
