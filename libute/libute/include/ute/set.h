@@ -13,6 +13,8 @@
 ///   • unboxing optimisation
 ///   • return “inserted?” indication in SET_INSERT
 ///   • capacity exponential optimisation
+///   • handle under-alignment
+///   • handle over-alignment
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
