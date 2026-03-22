@@ -7,13 +7,15 @@
 #include <stddef.h>
 #include <ute/int128.h>
 
-#ifdef __has_include
+#ifndef __has_include
+#define __has_include(x) 0
+#endif
+
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
 
 #ifdef __SSE2__
 #define USE_AVX
-#endif
 #endif
 #endif
 
