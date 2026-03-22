@@ -114,7 +114,6 @@ end;
 
 /******************************************************************************/
 
-var sp_ctrls_allocated: array[sp_ctrl_ptr_t] of boolean;
 var sp_ctrls: array[sp_ctrl_ptr_t] of sp_ctrl_t;
 
 -- assume we have a single global asp
@@ -154,9 +153,7 @@ end;
 function calloc_sp_ctrl(): nullable_sp_ctrl_ptr_t;
 begin
   for i: sp_ctrl_ptr_t do
-    if !sp_ctrls_allocated[i] then
-      sp_ctrls_allocated[i] := true;
-      undefine sp_ctrls[i].value;
+    if isundefined(sp_ctrls[i].value) then
       sp_ctrls[i].ref_count := 0;
       return i;
     end;
@@ -169,8 +166,7 @@ begin
   if isundefined(p) then
     return;
   end;
-  assert sp_ctrls_allocated[p] "double free";
-  sp_ctrls_allocated[p] := false;
+  assert !isundefined(sp_ctrls[p].value) "double free";
   undefine sp_ctrls[p];
 end;
 
@@ -298,9 +294,7 @@ begin
 end;
 
 startstate begin
-  for ctrl: sp_ctrl_ptr_t do
-    sp_ctrls_allocated[ctrl] := false;
-  end;
+  -- nothing required
 end;
 
 ruleset tid: tid_t do
@@ -566,7 +560,7 @@ invariant
   "no memory leaks of control blocks"
   forall tid: tid_t do isundefined(tls[tid].pc) end -> -- all threads idle
     forall ctrl: sp_ctrl_ptr_t do
-      sp_ctrls_allocated[ctrl] -> exists tid: tid_t do exists i: 0..N_SP - 1 do
+      !isundefined(sp_ctrls[ctrl].value) -> exists tid: tid_t do exists i: 0..N_SP - 1 do
         !isundefined(tls[tid].sp[i].impl) & ctrl = tls[tid].sp[i].impl
       end end | (!isundefined(asp.ctrl) & asp.ctrl = ctrl)
     end;
@@ -579,6 +573,6 @@ invariant
   "live shared pointers do not use freed control blocks"
   forall tid: tid_t do isundefined(tls[tid].pc) ->
     forall i: 0..N_SP - 1 do !isundefined(tls[tid].sp[i].ptr) ->
-      sp_ctrls_allocated[tls[tid].sp[i].impl]
+      !isundefined(sp_ctrls[tls[tid].sp[i].impl].value)
     end
   end;
