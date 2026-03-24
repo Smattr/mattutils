@@ -34,8 +34,13 @@ typedef struct {
 
   _Atomic size_t used;    ///< how many slots are non-empty?
   _Atomic size_t deleted; ///< how many slots contain deleted items?
-  size_t capacity;        ///< how many total slots at `base`?
+  size_t capacity;        ///< exponent + 1 of how many total slots at `base`?
 } set_impl_t;
+
+/// get the capacity (in slots) of a set
+static inline size_t set_capacity(const set_impl_t set) {
+  return (size_t)1 << set.capacity >> 1;
+}
 
 /// atomically read a slot from a hash table
 static inline uintptr_t slot_load(_Atomic uintptr_t *slotptr) {

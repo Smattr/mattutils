@@ -30,8 +30,8 @@ retry1:;
 
   set_impl_t *const s = sp.ptr;
 
-  for (size_t i = 0; i < s->capacity; ++i) {
-    const size_t index = (h + i) % s->capacity;
+  for (size_t i = 0; i < set_capacity(*s); ++i) {
+    const size_t index = (h + i) % set_capacity(*s);
     uintptr_t slot = slot_load(&s->base[index]);
 
   retry2:

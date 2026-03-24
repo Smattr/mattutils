@@ -29,8 +29,8 @@ bool set_contains_(set_t_ *set, const void *item, size_t item_size) {
 
   set_impl_t *const s = sp.ptr;
 
-  for (size_t i = 0; i < s->capacity; ++i) {
-    const size_t index = (h + i) % s->capacity;
+  for (size_t i = 0; i < set_capacity(*s); ++i) {
+    const size_t index = (h + i) % set_capacity(*s);
     const uintptr_t slot = slot_load(&s->base[index]);
 
     // skip checking whether this slot is moved or not, because we do not care

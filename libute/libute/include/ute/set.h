@@ -27,7 +27,6 @@
 ///   • support char *
 ///   • unboxing optimisation
 ///   • return “inserted?” indication in SET_INSERT
-///   • capacity exponential optimisation
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 

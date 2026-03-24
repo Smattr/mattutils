@@ -51,7 +51,7 @@ static void dtor(void *set) {
   set_impl_t *const s = set;
 
   // free any slots we own
-  for (size_t i = 0; i < s->capacity; ++i) {
+  for (size_t i = 0; i < set_capacity(*s); ++i) {
     const uintptr_t slot = slot_load(&s->base[i]);
     if (slot_is_moved(slot) && !slot_is_deleted(slot))
       continue;
@@ -79,8 +79,8 @@ static int insert(set_impl_t *set, void *item, size_t item_size) {
   assert(((uintptr_t)item & 3) == 0 && "heap pointer insufficiently aligned");
 
   const size_t h = hash(item, item_size);
-  for (size_t i = 0; i < set->capacity; ++i) {
-    const size_t index = (h + i) % set->capacity;
+  for (size_t i = 0; i < set_capacity(*set); ++i) {
+    const size_t index = (h + i) % set_capacity(*set);
     uintptr_t slot = slot_load(&set->base[index]);
   retry:
 
@@ -121,13 +121,13 @@ static int insert(set_impl_t *set, void *item, size_t item_size) {
 /// @return 0 on success or an errno on failure
 static int rehash(set_impl_t *dst, set_impl_t *src, size_t item_size) {
   assert(dst != NULL);
-  assert(src == NULL || dst->capacity >= src->capacity);
+  assert(src == NULL || set_capacity(*dst) >= set_capacity(*src));
 
   // nothing to do for an uninitialised set
   if (src == NULL)
     return 0;
 
-  for (size_t i = 0; i < src->capacity; ++i) {
+  for (size_t i = 0; i < set_capacity(*src); ++i) {
     uintptr_t slot = slot_load(&src->base[i]);
   retry:
 
@@ -172,12 +172,12 @@ retry:;
   set_impl_t *const s = sp.ptr;
   const size_t used =
       s == NULL ? 0 : atomic_load_explicit(&s->used, memory_order_acquire);
-  const size_t capacity = s == NULL ? 0 : s->capacity;
+  const size_t capacity = s == NULL ? 0 : set_capacity(*s);
 
   // do we need to expand the backing storage?
   if (used * 100 >= capacity * LOAD_FACTOR) {
-    const size_t c = capacity == 0 ? 1 : capacity * 2;
-    _Atomic uintptr_t *const b = calloc(c, sizeof(b[0]));
+    const size_t c = capacity + 1;
+    _Atomic uintptr_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
     if (b == NULL) {
       sp_rel(sp);
       return ENOMEM;
