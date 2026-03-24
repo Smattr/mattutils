@@ -29,6 +29,7 @@ add_executable(test
   src/test-set-basic.c
   src/test-set-conflict.c
   src/test-set-mt.c
+  src/test-set-over-align.c
   src/test-uint128-cas.c
   src/test-uint128-cas-fail.c
   src/test-uint128-cas-fail-mt.c
