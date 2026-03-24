@@ -27,6 +27,10 @@ size_t set_size_(set_t_ *set) {
 
   sp_rel(sp);
 
-  assert(used >= deleted);
+  // in the case of racing insertions and deletes, we can see an inconsistent
+  // state
+  if (used < deleted)
+    return 0;
+
   return used - deleted;
 }
