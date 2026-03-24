@@ -55,6 +55,7 @@ void run_cleanups(void);
       }                                                                        \
       if (strcmp((desc), (*t)->description) == 0) {                            \
         fprintf(stderr, "duplicate test cases \"%s\"\n", (desc));              \
+        fflush(stderr);                                                        \
         abort();                                                               \
       }                                                                        \
     }                                                                          \
@@ -108,6 +109,7 @@ void run_cleanups(void);
     if (!(expr)) {                                                             \
       fprintf(stderr, "failed\n    %s:%d: assertion “%s” failed\n", __FILE__,  \
               __LINE__, #expr);                                                \
+      fflush(stderr);                                                          \
       run_cleanups();                                                          \
       abort();                                                                 \
     }                                                                          \
