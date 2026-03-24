@@ -27,6 +27,18 @@ static void *alloc(size_t alignment, size_t size) {
   if (size == 0)
     size = 1;
 
+  // For small (in both size and alignment) allocations, `aligned_alloc` may
+  // delegate to `malloc`. In this scenario, some allocators will return
+  // pointers that are < 4 byte aligned, which also appears to be explicitly
+  // allowed under ≥C23. We need ≥ 4 byte alignment (see ./set.h), so be
+  // explicit about this.
+  // See also https://github.com/openjdk/jdk/pull/28235.
+  if (alignment < 4) {
+    alignment = 4;
+    if (size % 4 != 0)
+      size += 4 - size % 4;
+  }
+
   return aligned_alloc(alignment, size);
 }
 
