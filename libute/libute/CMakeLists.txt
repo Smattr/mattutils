@@ -37,7 +37,7 @@ endif()
 
 CHECK_C_COMPILER_FLAG(-mcx16 HAS_MCX16)
 if(HAS_MCX16)
-  target_compile_options(libute PRIVATE -mcx16)
+  target_compile_options(libute PUBLIC -mcx16)
 endif()
 
 target_include_directories(libute
