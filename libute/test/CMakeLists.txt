@@ -27,6 +27,7 @@ add_executable(test
   src/test-print-uint128-small.c
   src/test-putb.c
   src/test-set-basic.c
+  src/test-set-conflict.c
   src/test-set-mt.c
   src/test-uint128-cas.c
   src/test-uint128-cas-fail.c
