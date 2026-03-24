@@ -45,10 +45,12 @@ static void *alloc(size_t alignment, size_t size) {
 /// deallocate a set that is going out of scope
 ///
 /// @param set Set to operate on
-static void dtor(void *set, void *context UNUSED) {
+/// @param context Optional user-supplied destructor
+static void dtor(void *set, void *context) {
   assert(set != NULL);
 
   set_impl_t *const s = set;
+  void (*user_dtor)(void *) = context;
 
   // free any slots we own
   for (size_t i = 0; i < set_capacity(*s); ++i) {
@@ -56,6 +58,8 @@ static void dtor(void *set, void *context UNUSED) {
     if (slot_is_moved(slot) && !slot_is_deleted(slot))
       continue;
     void *const p = slot_to_ptr(slot);
+    if (user_dtor != NULL && p != NULL)
+      user_dtor(p);
     free(p);
   }
 
@@ -157,7 +161,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, size_t item_size) {
 }
 
 int set_insert_(set_t_ *set, const void *item, size_t item_alignment,
-                size_t item_size) {
+                size_t item_size, void (*user_dtor)(void *)) {
   assert(set != NULL);
   assert(item != NULL || item_size == 0);
 
@@ -191,9 +195,9 @@ retry:;
     }
     *new = (set_impl_t){.base = b, .capacity = c};
 
-    sp_t new_sp = sp_new(new, dtor, NULL);
+    sp_t new_sp = sp_new(new, dtor, user_dtor);
     if (new_sp.ptr == NULL) {
-      dtor(new, NULL);
+      dtor(new, user_dtor);
       sp_rel(sp);
       return ENOMEM;
     }

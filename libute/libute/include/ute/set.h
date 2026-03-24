@@ -23,7 +23,6 @@
 /// TODO:
 ///   • custom hash
 ///   • custom eq
-///   • dtor
 ///   • support char *
 ///   • unboxing optimisation
 ///   • return “inserted?” indication in SET_INSERT
@@ -72,6 +71,12 @@ extern "C" {
       /* an extension too, but one supported by both Clang and GCC.         */ \
       char (*alignment)[alignof(type)];                                        \
     } u_;                                                                      \
+                                                                               \
+    /** optional user-supplied item destructor                              */ \
+    /*                                                                      */ \
+    /* If this member is non-null, it will be called on set items           */ \
+    /* immediately before they are removed from the set.                    */ \
+    void (*dtor)(void *);                                                      \
   }
 
 /// insert an item into a set
@@ -85,7 +90,8 @@ extern "C" {
 /// @return 0 on success or an errno on failure
 #define SET_INSERT(set, item)                                                  \
   set_insert_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},          \
-              sizeof(*(set)->u_.alignment), sizeof(*(set)->u_.witness))
+              sizeof(*(set)->u_.alignment), sizeof(*(set)->u_.witness),        \
+              (set)->dtor)
 
 /// remove an item from a set
 ///
@@ -152,9 +158,10 @@ typedef struct {
 /// @param item Item to insert
 /// @param item_alignment Byte alignment of `item`
 /// @param item_size Byte size of `item`
+/// @param user_dtor User-supplied destructor
 /// @return 0 on success or an errno on failure
 int set_insert_(set_t_ *set, const void *item, size_t item_alignment,
-                size_t item_size);
+                size_t item_size, void (*user_dtor)(void *));
 
 /// remove an item from a set
 ///
