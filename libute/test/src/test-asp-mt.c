@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ute/asp.h>
+#include <ute/attr.h>
 
 typedef struct {
   size_t thread_id;
@@ -46,6 +47,8 @@ static THREAD_RET inplace_entry(void *arg) {
   return 0;
 }
 
+static void free_(void *p, void *context UNUSED) { free(p); }
+
 /// count 0..10 by incrementing the value pointed to by a shared pointer
 ///
 /// The failure mode of this test case will typically be:
@@ -68,7 +71,7 @@ TEST("atomic shared pointer counter in-place, multi-threaded") {
     _Atomic size_t *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     atomic_store_explicit(p, 0, memory_order_release);
-    const sp_t sp = sp_new(p, free);
+    const sp_t sp = sp_new(p, free_, NULL);
     ASSERT_NOT_NULL(sp.ptr);
     sp_store(&ptr, sp);
   }
@@ -112,7 +115,7 @@ static THREAD_RET reallocate_entry(void *arg) {
       _Atomic size_t *const p = malloc(sizeof(*p));
       ASSERT_NOT_NULL(p);
       atomic_store_explicit(p, 1, memory_order_release);
-      const sp_t new = sp_new(p, free);
+      const sp_t new = sp_new(p, free_, NULL);
       ASSERT_NOT_NULL(new.ptr);
       sp_store(s->ptr, new);
       break;
@@ -130,7 +133,7 @@ static THREAD_RET reallocate_entry(void *arg) {
     _Atomic size_t *const next = malloc(sizeof(*next));
     ASSERT_NOT_NULL(next);
     atomic_store_explicit(next, s->thread_id + 1, memory_order_release);
-    const sp_t new = sp_new(next, free);
+    const sp_t new = sp_new(next, free_, NULL);
     ASSERT_NOT_NULL(new.ptr);
     sp_store(s->ptr, new);
 
@@ -163,7 +166,7 @@ TEST("atomic shared pointer counter reallocate, multi-threaded") {
     _Atomic size_t *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     atomic_store_explicit(p, 0, memory_order_release);
-    const sp_t sp = sp_new(p, free);
+    const sp_t sp = sp_new(p, free_, NULL);
     ASSERT_NOT_NULL(sp.ptr);
     sp_store(&ptr, sp);
   }
@@ -201,7 +204,7 @@ static THREAD_RET write_entry(void *arg) {
   _Atomic size_t *const p = malloc(sizeof(*p));
   ASSERT_NOT_NULL(p);
   atomic_store_explicit(p, s->thread_id, memory_order_release);
-  const sp_t new = sp_new(p, free);
+  const sp_t new = sp_new(p, free_, NULL);
   ASSERT_NOT_NULL(new.ptr);
   sp_store(s->ptr, new);
 

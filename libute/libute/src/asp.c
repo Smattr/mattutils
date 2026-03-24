@@ -111,9 +111,10 @@ static const size_t LOAD_SCALE = (size_t)1 << (sizeof(size_t) * CHAR_BIT / 2);
 static const size_t REFS_MASK UNUSED = LOAD_SCALE - 1;
 
 struct sp_ctrl {
-  void *value;              ///< the managed underlying pointer
-  void (*dtor)(void *);     ///< optional user-supplied destructor
-  _Atomic size_t ref_count; ///< outstanding references
+  void *value;                  ///< the managed underlying pointer
+  void (*dtor)(void *, void *); ///< optional user-supplied destructor
+  void *dtor_context;           ///< second parameter to `dtor`
+  _Atomic size_t ref_count;     ///< outstanding references
 };
 
 /// increment the reference count of a shared pointer
@@ -155,7 +156,7 @@ static void dec_ref(sp_ctrl_t *ctrl) {
   // if we just dropped the last reference, clean up
   if (old == 1) {
     if (ctrl->dtor != NULL)
-      ctrl->dtor(ctrl->value);
+      ctrl->dtor(ctrl->value, ctrl->dtor_context);
     free(ctrl);
   }
 }
@@ -196,7 +197,7 @@ UNUSED static void inc_and_dec(sp_ctrl_t *ctrl, size_t load_by) {
   // if we just dropped the last reference, clean up
   if (old + load_by * LOAD_SCALE == 1) {
     if (ctrl->dtor != NULL)
-      ctrl->dtor(ctrl->value);
+      ctrl->dtor(ctrl->value, ctrl->dtor_context);
     free(ctrl);
   }
 }
@@ -228,7 +229,7 @@ static dword_t impl2asp(asp_impl_t src) {
   return dst;
 }
 
-sp_t sp_new(void *value, void (*dtor)(void *)) {
+sp_t sp_new(void *value, void (*dtor)(void *, void *), void *dtor_context) {
 
   // a null pointer needs no bookkeeping
   if (value == NULL) {
@@ -242,6 +243,7 @@ sp_t sp_new(void *value, void (*dtor)(void *)) {
 
   ctrl->value = value;
   ctrl->dtor = dtor;
+  ctrl->dtor_context = dtor_context;
   inc_ref(ctrl, 1);
 
   return (sp_t){.ptr = value, .impl = ctrl};

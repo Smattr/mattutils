@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ute/asp.h>
+#include <ute/attr.h>
 
 typedef struct {
   size_t thread_id;
@@ -79,6 +80,8 @@ static THREAD_RET count(void *arg) {
   return 0;
 }
 
+static void free_(void *p, void *context UNUSED) { free(p); }
+
 /// race a group of threads, half counting up and half self-storing
 ///
 /// The failure mode of this test case will typically be:
@@ -101,7 +104,7 @@ TEST("atomic shared pointer store/acquire race") {
     _Atomic size_t *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     atomic_store_explicit(p, 0, memory_order_release);
-    const sp_t sp = sp_new(p, free);
+    const sp_t sp = sp_new(p, free_, NULL);
     ASSERT_NOT_NULL(sp.ptr);
     sp_store(&ptr, sp);
   }

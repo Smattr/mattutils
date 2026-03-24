@@ -45,7 +45,7 @@ static void *alloc(size_t alignment, size_t size) {
 /// deallocate a set that is going out of scope
 ///
 /// @param set Set to operate on
-static void dtor(void *set) {
+static void dtor(void *set, void *context UNUSED) {
   assert(set != NULL);
 
   set_impl_t *const s = set;
@@ -191,9 +191,9 @@ retry:;
     }
     *new = (set_impl_t){.base = b, .capacity = c};
 
-    sp_t new_sp = sp_new(new, dtor);
+    sp_t new_sp = sp_new(new, dtor, NULL);
     if (new_sp.ptr == NULL) {
-      dtor(new);
+      dtor(new, NULL);
       sp_rel(sp);
       return ENOMEM;
     }

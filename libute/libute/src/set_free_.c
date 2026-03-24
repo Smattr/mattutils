@@ -12,6 +12,6 @@ void set_free_(set_t_ *set) {
   assert(set != NULL);
 
   // overwriting the root with a null pointer is enough to free the set
-  sp_t null = sp_new(0, NULL);
+  sp_t null = sp_new(0, NULL, NULL);
   sp_store(&set->root, null);
 }

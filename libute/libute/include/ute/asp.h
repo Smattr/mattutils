@@ -50,8 +50,9 @@ typedef atomic_dword_t asp_t;
 ///
 /// @param value Raw pointer to encapsulate
 /// @param dtor Optional destructor to be called when last `sp_t` is released
+/// @param dtor_context Value to pass in `dtor` calls as second parameter
 /// @return A shared pointer or `(sp_t){0}` on failure.
-sp_t sp_new(void *value, void (*dtor)(void *));
+sp_t sp_new(void *value, void (*dtor)(void *, void *), void *dtor_context);
 
 /// load a shared pointer
 ///

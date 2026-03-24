@@ -6,6 +6,9 @@
 #include "test.h"
 #include <stdlib.h>
 #include <ute/asp.h>
+#include <ute/attr.h>
+
+static void free_(void *p, void *context UNUSED) { free(p); }
 
 /// count 0..10 by incrementing the value pointed to by a shared pointer
 ///
@@ -29,7 +32,7 @@ TEST("atomic shared pointer counter in-place, single-threaded") {
     int *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     *p = 0;
-    const sp_t sp = sp_new(p, free);
+    const sp_t sp = sp_new(p, free_, NULL);
     ASSERT_NOT_NULL(sp.ptr);
     sp_store(&ptr, sp);
   }
@@ -71,7 +74,7 @@ TEST("atomic shared pointer counter reallocate, single-threaded") {
     int *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     *p = 0;
-    const sp_t sp = sp_new(p, free);
+    const sp_t sp = sp_new(p, free_, NULL);
     ASSERT_NOT_NULL(sp.ptr);
     sp_store(&ptr, sp);
   }
@@ -90,7 +93,7 @@ TEST("atomic shared pointer counter reallocate, single-threaded") {
     ASSERT_NOT_NULL(p);
     *p = i + 1;
     // overwrite the shared pointer with this
-    const sp_t sp = sp_new(p, free);
+    const sp_t sp = sp_new(p, free_, NULL);
     ASSERT_NOT_NULL(sp.ptr);
     sp_store(&ptr, sp);
   }
