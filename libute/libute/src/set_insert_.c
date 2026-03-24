@@ -16,6 +16,20 @@
 #include <ute/hash.h>
 #include <ute/set.h>
 
+/// allocate storage for a new set item
+///
+/// @param alignment Required alignment for the to-be-stored value
+/// @param size Required size in bytes
+/// @return Pointer to new storage on success or `NULL` on out of memory
+static void *alloc(size_t alignment, size_t size) {
+
+  // ensure we never return null for a successful allocation
+  if (size == 0)
+    size = 1;
+
+  return aligned_alloc(alignment, size);
+}
+
 /// deallocate a set that is going out of scope
 ///
 /// @param set Set to operate on
@@ -130,7 +144,8 @@ static int rehash(set_impl_t *dst, set_impl_t *src, size_t item_size) {
   return 0;
 }
 
-int set_insert_(set_t_ *set, const void *item, size_t item_size) {
+int set_insert_(set_t_ *set, const void *item, size_t item_alignment,
+                size_t item_size) {
   assert(set != NULL);
   assert(item != NULL || item_size == 0);
 
@@ -183,7 +198,7 @@ retry:;
   }
 
   // copy the item for insertion
-  void *const p = malloc(item_size == 0 ? 1 : item_size);
+  void *const p = alloc(item_alignment, item_size);
   if (p == NULL) {
     sp_rel(sp);
     return ENOMEM;

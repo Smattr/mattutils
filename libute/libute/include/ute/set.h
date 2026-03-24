@@ -29,12 +29,12 @@
 ///   • return “inserted?” indication in SET_INSERT
 ///   • capacity exponential optimisation
 ///   • handle under-alignment
-///   • handle over-alignment
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
 #pragma once
 
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -65,6 +65,14 @@ extern "C" {
       /* This does not need to be a pointer or be unioned with the `impl`   */ \
       /* member, but this ensures we minimise the size of the struct.       */ \
       type *witness;                                                           \
+                                                                               \
+      /** mechanism for re-obtaining the alignment of the set item type     */ \
+      /*                                                                    */ \
+      /* One might think this could already be recovered by                 */ \
+      /* `alignof(*witness)`. But calling `alignof` on an expression is a   */ \
+      /* GNU extension not supported by Clang. Using a VLA in a struct is   */ \
+      /* an extension too, but one supported by both Clang and GCC.         */ \
+      char (*alignment)[alignof(type)];                                        \
     } u_;                                                                      \
   }
 
@@ -79,7 +87,7 @@ extern "C" {
 /// @return 0 on success or an errno on failure
 #define SET_INSERT(set, item)                                                  \
   set_insert_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},          \
-              sizeof(*(set)->u_.witness))
+              sizeof(*(set)->u_.alignment), sizeof(*(set)->u_.witness))
 
 /// remove an item from a set
 ///
@@ -144,9 +152,11 @@ typedef struct {
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
+/// @param item_alignment Byte alignment of `item`
 /// @param item_size Byte size of `item`
 /// @return 0 on success or an errno on failure
-int set_insert_(set_t_ *set, const void *item, size_t item_size);
+int set_insert_(set_t_ *set, const void *item, size_t item_alignment,
+                size_t item_size);
 
 /// remove an item from a set
 ///
