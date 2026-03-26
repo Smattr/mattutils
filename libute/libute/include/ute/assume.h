@@ -9,17 +9,25 @@
 ///
 /// This is a primitive for teaching the compiler something it can then use as
 /// an optimization hint.
-#ifdef __clang__
+#if !defined(ASSUME) && defined(__cplusplus) && defined(__has_cpp_attribute)
+#if __has_cpp_attribute(assume)
+#define ASSUME(expr) [[assume(expr)]]
+#endif
+#endif
+#if !defined(ASSUME) && defined(__clang__)
 #define ASSUME(expr) __builtin_assume(expr)
-#elif defined(__GNUC__)
+#endif
+#if !defined(ASSUME) && defined(__GNUC__)
 #define ASSUME(expr)                                                           \
   do {                                                                         \
     if (!(expr)) {                                                             \
       __builtin_unreachable();                                                 \
     }                                                                          \
   } while (0)
-#elif defined(_MSC_VER)
+#endif
+#if !defined(ASSUME) && defined(_MSC_VER)
 #define ASSUME(expr) __assume(expr)
-#else
+#endif
+#ifndef ASSUME
 #define ASSUME(expr) /* nothing */
 #endif
