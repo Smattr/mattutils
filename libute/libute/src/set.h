@@ -13,7 +13,20 @@
 
 /// internal implementation of a set
 ///
-/// This structure carries no information about the size of set items. This is
+/// A set data structure looks like:
+///
+///   set_t_      set_impl_t     slots
+///   ┌───────┐   ┌──────────┐   ┌──────┬──────┬──────┬──
+///   │ root¹ ├──►│   base   ├──►│  0   │  1   │  2   │ …
+///   │       │   ├──────────┤   └──┬───┴──────┴──┬───┴──
+///   └───────┘   │   used   │      │             │
+///               ├──────────┤      ▼             ▼
+///               │ deleted  │   ┌──────┐      ┌──────┐
+///               ├──────────┤   │ item │      │ item │
+///               │ capacity │   └──────┘      └──────┘
+///               └──────────┘
+///
+/// `set_impl_t` carries no information about the size of set items. This is
 /// expected to be passed in by callers.
 typedef struct {
   /** backing storage of set slots
