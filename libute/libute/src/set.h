@@ -29,20 +29,19 @@
 /// `set_impl_t` carries no information about the size of set items. This is
 /// expected to be passed in by callers.
 typedef struct {
-  /** backing storage of set slots
-   *
-   * The high bits of each slot are a pointer and the low bits indicate the
-   * state of the slot:
-   *
-   *    sizeof(uintptr_t) * CHAR_BIT   1 0
-   *    ▼                              ▼ ▼
-   *   ┌──────────────────────────────┬─┬─┐
-   *   └──────────────────────────────┴─┴─┘
-   *          pointer to item          ▲ ▲
-   *                                   │ │
-   *               has been migrated? ─┘ │
-   *                  has been deleted? ─┘
-   */
+  /// backing storage of set slots
+  ///
+  /// The high bits of each slot are a pointer and the low bits indicate the
+  /// state of the slot:
+  ///
+  ///    sizeof(uintptr_t) * CHAR_BIT   1 0
+  ///    ▼                              ▼ ▼
+  ///   ┌──────────────────────────────┬─┬─┐
+  ///   └──────────────────────────────┴─┴─┘
+  ///          pointer to item          ▲ ▲
+  ///                                   │ │
+  ///               has been migrated? ─┘ │
+  ///                  has been deleted? ─┘
   _Atomic uintptr_t *base;
 
   _Atomic size_t used;    ///< how many slots are non-empty?
