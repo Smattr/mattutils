@@ -83,12 +83,11 @@ void sp_store(asp_t *dst, sp_t src);
 
 /// atomically compare-and-swap a shared pointer
 ///
-/// `expected` is consumed (`sp_rel` is called on it) regardless of whether the
-/// CAS succeeds or fails. It is assumed that any caller wanting to retry a
-/// failed CAS will have to acquire a new (different) `expected` before
-/// recalling this function. Note that this means, in contrast to many CAS APIs,
-/// there is no way for the caller to directly learn the value that was read on
-/// failure.
+/// `expected` is not consumed (`sp_rel` is not called on it) nor updated.
+/// Callers can continue using it as a valid shared pointer after calling
+/// `sp_cas` and are expected to eventually `sp_rel` it. Note that this means,
+/// in contrast to many CAS APIs, there is no way for the caller to directly
+/// learn the value that was read on failure.
 ///
 /// `desired` is consumed iff the CAS succeeds.
 ///

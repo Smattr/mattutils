@@ -390,7 +390,5 @@ bool sp_cas(asp_t *dst, sp_t expected, sp_t desired) {
       break;
   }
 
-  sp_rel(expected);
-
   return ret;
 }

@@ -210,6 +210,7 @@ retry:;
 
     if (!sp_cas(&set->root, sp, new_sp))
       sp_rel(new_sp);
+    sp_rel(sp);
     goto retry;
   }
 

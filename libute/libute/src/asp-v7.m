@@ -491,9 +491,6 @@ ruleset tid: tid_t do
     end;
     if (isundefined(tls[tid].sp_cas.old.ctrl) != isundefined(tls[tid].sp[0].impl)) |
        (!isundefined(tls[tid].sp_cas.old.ctrl) & !isundefined(tls[tid].sp[0].impl) & tls[tid].sp_cas.old.ctrl != tls[tid].sp[0].impl) then
-      -- As an optimisation, ignore the `sp_rel(expected)`. This should not be
-      -- necessary for correctness and omitting it allows a strict superset of
-      -- behaviours of the implementation.
       undefine tls[tid].sp_cas;
       undefine tls[tid].pc;
     end;
@@ -512,9 +509,6 @@ ruleset tid: tid_t do
       tls[tid].pc := SP_CAS_L3;
       return;
     end;
-    -- As an optimisation, ignore the `sp_rel(expected)`. This should not be
-    -- necessary for correctness and omitting it allows a strict superset of
-    -- behaviours of the implementation.
     undefine tls[tid].sp_cas;
     undefine tls[tid].pc;
   end;
@@ -523,9 +517,6 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_CAS_L3 ==>
   begin
     dec_ref_2(tls[tid].sp_cas.old.ctrl, tls[tid].sp_cas.old_count);
-    -- As an optimisation, ignore the `sp_rel(expected)`. This should not be
-    -- necessary for correctness and omitting it allows a strict superset of
-    -- behaviours of the implementation.
     undefine tls[tid].sp_cas;
     undefine tls[tid].pc;
   end;
