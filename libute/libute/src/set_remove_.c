@@ -14,11 +14,11 @@
 #include <ute/hash.h>
 #include <ute/set.h>
 
-bool set_remove_(set_t_ *set, const void *item, size_t item_size) {
+bool set_remove_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
-  assert(item != NULL || item_size == 0);
+  assert(item != NULL || sig.size == 0);
 
-  const size_t h = hash(item, item_size);
+  const size_t h = hash(item, sig.size);
 
 retry1:;
   // acquire a reference to the set
@@ -51,7 +51,7 @@ retry1:;
 
     // is this our sought item?
     const void *const p = slot_to_ptr(slot);
-    if (item_size == 0 || memcmp(item, p, item_size) == 0) {
+    if (sig.size == 0 || memcmp(item, p, sig.size) == 0) {
       // mark as deleted
       if (!slot_cas(&s->base[index], &slot, slot_deleted(slot)))
         goto retry2;

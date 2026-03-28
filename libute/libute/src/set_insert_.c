@@ -160,10 +160,10 @@ static int rehash(set_impl_t *dst, set_impl_t *src, size_t item_size) {
   return 0;
 }
 
-int set_insert_(set_t_ *set, const void *item, size_t item_alignment,
-                size_t item_size, void (*user_dtor)(void *)) {
+int set_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
+                void (*user_dtor)(void *)) {
   assert(set != NULL);
-  assert(item != NULL || item_size == 0);
+  assert(item != NULL || sig.size == 0);
 
   // percentage occupancy at which we expand the backing storage
   enum { LOAD_FACTOR = 70 };
@@ -202,7 +202,7 @@ retry:;
       return ENOMEM;
     }
 
-    if (rehash(new, s, item_size) != 0) {
+    if (rehash(new, s, sig.size) != 0) {
       sp_rel(new_sp);
       sp_rel(sp);
       goto retry;
@@ -215,17 +215,17 @@ retry:;
   }
 
   // copy the item for insertion
-  void *const p = alloc(item_alignment, item_size);
+  void *const p = alloc(sig.alignment, sig.size);
   if (p == NULL) {
     sp_rel(sp);
     return ENOMEM;
   }
-  if (item_size > 0)
-    memcpy(p, item, item_size);
+  if (sig.size > 0)
+    memcpy(p, item, sig.size);
 
   // insert it
   {
-    const int rc = insert(s, p, item_size);
+    const int rc = insert(s, p, sig.size);
     sp_rel(sp);
     if (rc != 0) {
       free(p);

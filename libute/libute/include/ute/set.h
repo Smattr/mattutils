@@ -90,7 +90,8 @@ extern "C" {
 /// @return 0 on success or an errno on failure
 #define SET_INSERT(set, item)                                                  \
   set_insert_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},          \
-              sizeof(*(set)->u_.alignment), sizeof(*(set)->u_.witness),        \
+              (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),          \
+                           .size = sizeof(*(set)->u_.witness)},                \
               (set)->dtor)
 
 /// remove an item from a set
@@ -104,7 +105,8 @@ extern "C" {
 /// @return True if the item was removed or false if it was not in the set
 #define SET_REMOVE(set, item)                                                  \
   set_remove_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},          \
-              sizeof(*(set)->u_.witness))
+              (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),          \
+                           .size = sizeof(*(set)->u_.witness)})
 
 /// does an item exist in a set?
 ///
@@ -117,7 +119,8 @@ extern "C" {
 /// @return True if the item was found in the set
 #define SET_CONTAINS(set, item)                                                \
   set_contains_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},        \
-                sizeof(*(set)->u_.witness))
+                (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),        \
+                             .size = sizeof(*(set)->u_.witness)})
 
 /// get the number of items in a set
 ///
@@ -152,32 +155,37 @@ typedef struct {
   asp_t root; ///< shared (opaque) pointer to the implementation itself
 } set_t_;
 
+/// the characterisation of a type
+typedef struct {
+  size_t alignment; ///< required alignment
+  size_t size;      ///< byte size
+} set_sig_t_;
+
 /// insert an item into a set
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
-/// @param item_alignment Byte alignment of `item`
-/// @param item_size Byte size of `item`
+/// @param sig Signature of the set item type
 /// @param user_dtor User-supplied destructor
 /// @return 0 on success or an errno on failure
-int set_insert_(set_t_ *set, const void *item, size_t item_alignment,
-                size_t item_size, void (*user_dtor)(void *));
+int set_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
+                void (*user_dtor)(void *));
 
 /// remove an item from a set
 ///
 /// @param set Set to operate on
 /// @param item Item to remove
-/// @param item_size Byte size of `item`
+/// @param sig Signature of the set item type
 /// @return True if the item was previously in the set
-bool set_remove_(set_t_ *set, const void *item, size_t item_size);
+bool set_remove_(set_t_ *set, const void *item, set_sig_t_ sig);
 
 /// check if an item is in a set
 ///
 /// @param set Set to operate on
 /// @param item Item to seek
-/// @param item_size Byte size of `item`
+/// @param sig Signature of the set item type
 /// @return True if item was found in the set
-bool set_contains_(set_t_ *set, const void *item, size_t item_size);
+bool set_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
 
 /// get the number of items in a set
 ///
