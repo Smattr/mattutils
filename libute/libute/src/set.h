@@ -34,7 +34,8 @@ typedef struct {
   /// The high bits of each slot are a pointer and the low bits indicate the
   /// state of the slot:
   ///
-  ///    sizeof(uintptr_t) * CHAR_BIT   1 0
+  ///    ┌─ sizeof(uintptr_t) * CHAR_BIT - 1
+  ///    │                              1 0
   ///    ▼                              ▼ ▼
   ///   ┌──────────────────────────────┬─┬─┐
   ///   └──────────────────────────────┴─┴─┘
