@@ -102,3 +102,11 @@ static inline uintptr_t slot_moved(uintptr_t slot) {
 static inline void *slot_to_ptr(uintptr_t slot) {
   return (void *)(slot & ~(MIGRATED | DELETED));
 }
+
+/// convert an item pointer to a set slot
+static inline uintptr_t ptr_to_slot(void *ptr) {
+  const uintptr_t slot = (uintptr_t)ptr;
+  assert((slot & (MIGRATED | DELETED)) == 0 &&
+         "item pointer insufficiently aligned");
+  return slot;
+}

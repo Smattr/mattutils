@@ -80,7 +80,6 @@ static void dtor(void *set, void *context) {
 /// @return 0 on success or an errno otherwise
 static int insert(set_impl_t *set, void *item, size_t item_size) {
   assert(set != NULL);
-  assert(((uintptr_t)item & 3) == 0 && "heap pointer insufficiently aligned");
 
   const size_t h = hash(item, item_size);
   for (size_t i = 0; i < set_capacity(*set); ++i) {
@@ -94,7 +93,7 @@ static int insert(set_impl_t *set, void *item, size_t item_size) {
 
     // if this slot is unoccupied, try to insert our item
     if (slot_is_free(slot)) {
-      if (!slot_cas(&set->base[index], &slot, (uintptr_t)item))
+      if (!slot_cas(&set->base[index], &slot, ptr_to_slot(item)))
         goto retry;
       (void)atomic_fetch_add_explicit(&set->used, 1, memory_order_acq_rel);
       return 0;
