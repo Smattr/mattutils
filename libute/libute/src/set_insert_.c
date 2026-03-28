@@ -76,12 +76,12 @@ static void dtor(void *set, void *context) {
 ///
 /// @param set Set to operate on
 /// @param item Copy to insert
-/// @param item_size Byte size of `item`
+/// @param sig Signature of the set item type
 /// @return 0 on success or an errno otherwise
-static int insert(set_impl_t *set, void *item, size_t item_size) {
+static int insert(set_impl_t *set, void *item, set_sig_t_ sig) {
   assert(set != NULL);
 
-  const size_t h = hash(item, item_size);
+  const size_t h = hash(item, sig.size);
   for (size_t i = 0; i < set_capacity(*set); ++i) {
     const size_t index = (h + i) % set_capacity(*set);
     uintptr_t slot = slot_load(&set->base[index]);
@@ -105,7 +105,7 @@ static int insert(set_impl_t *set, void *item, size_t item_size) {
 
     // otherwise, check if this is our item already present
     void *const p = slot_to_ptr(slot);
-    if (item_size == 0 || memcmp(p, item, item_size) == 0)
+    if (sig.size == 0 || memcmp(p, item, sig.size) == 0)
       return EEXIST;
   }
 
@@ -120,9 +120,9 @@ static int insert(set_impl_t *set, void *item, size_t item_size) {
 ///
 /// @param dst Set to insert into
 /// @param src Set to insert from
-/// @param item_size Byte size of set items
+/// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-static int rehash(set_impl_t *dst, set_impl_t *src, size_t item_size) {
+static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
   assert(dst != NULL);
   assert(src == NULL || set_capacity(*dst) >= set_capacity(*src));
 
@@ -152,7 +152,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, size_t item_size) {
       continue;
 
     void *const p = slot_to_ptr(slot);
-    const int rc UNUSED = insert(dst, p, item_size);
+    const int rc UNUSED = insert(dst, p, sig);
     assert(rc == 0 && "rehash destination not owned exclusively?");
   }
 
@@ -201,7 +201,7 @@ retry:;
       return ENOMEM;
     }
 
-    if (rehash(new, s, sig.size) != 0) {
+    if (rehash(new, s, sig) != 0) {
       sp_rel(new_sp);
       sp_rel(sp);
       goto retry;
@@ -224,7 +224,7 @@ retry:;
 
   // insert it
   {
-    const int rc = insert(s, p, sig.size);
+    const int rc = insert(s, p, sig);
     sp_rel(sp);
     if (rc != 0) {
       free(p);
