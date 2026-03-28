@@ -66,30 +66,39 @@ static inline bool slot_cas(_Atomic uintptr_t *slotptr, uintptr_t *expected,
       slotptr, expected, desired, memory_order_acq_rel, memory_order_acquire);
 }
 
+enum {
+  MIGRATED = (uintptr_t)2, ///< mask for migration bit (see above)
+  DELETED = (uintptr_t)1,  ///< mask for deletion bit (see above)
+};
+
 /// is this set slot unoccupied?
 static inline bool slot_is_free(uintptr_t slot) {
-  return (slot & (uintptr_t)~2) == 0;
+  return (slot & ~MIGRATED) == 0;
 }
 
 /// does this set slot contain an item that was deleted?
-static inline bool slot_is_deleted(uintptr_t slot) { return slot & 1; }
+static inline bool slot_is_deleted(uintptr_t slot) {
+  return (slot & DELETED) != 0;
+}
 
 /// derive the equivalent deleted representation of a slot
 static inline uintptr_t slot_deleted(uintptr_t slot) {
   assert(!slot_is_deleted(slot));
-  return slot | 1;
+  return slot | DELETED;
 }
 
 /// has this slot been migrated to a new set?
-static inline bool slot_is_moved(uintptr_t slot) { return !!(slot & 2); }
+static inline bool slot_is_moved(uintptr_t slot) {
+  return (slot & MIGRATED) != 0;
+}
 
 /// derive the equivalent moved representation of a slot
 static inline uintptr_t slot_moved(uintptr_t slot) {
   assert(!slot_is_moved(slot));
-  return slot | 2;
+  return slot | MIGRATED;
 }
 
 /// convert a set slot to its originating item pointer
 static inline void *slot_to_ptr(uintptr_t slot) {
-  return (void *)(slot & (uintptr_t)~3);
+  return (void *)(slot & ~(MIGRATED | DELETED));
 }
