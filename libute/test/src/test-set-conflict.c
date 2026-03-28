@@ -13,6 +13,7 @@ typedef SET(int) ints_t;
 typedef struct {
   ints_t *ints;
   size_t thread_id;
+  size_t n_threads;
 } state_t;
 
 static THREAD_RET entry(void *arg) {
@@ -22,12 +23,12 @@ static THREAD_RET entry(void *arg) {
   for (int i = 0; i < 10; ++i) {
     const int r = SET_INSERT(s->ints, i);
     ASSERT_EQ(r, 0);
-    ASSERT_LE(SET_SIZE(s->ints), 10u);
+    ASSERT_LE(SET_SIZE(s->ints), 10 + s->n_threads - 1);
   }
 
   for (int i = 0; i < 10; ++i) {
     (void)SET_REMOVE(s->ints, i);
-    ASSERT_LE(SET_SIZE(s->ints), 10u);
+    ASSERT_LE(SET_SIZE(s->ints), 10 + s->n_threads - 1);
   }
 
   return 0;
@@ -42,7 +43,8 @@ TEST("int set multithreaded, overlapping operations") {
 
   // setup states
   for (size_t i = 0; i < sizeof(s) / sizeof(s[0]); ++i)
-    s[i] = (state_t){.ints = &ints, .thread_id = i};
+    s[i] = (state_t){
+        .ints = &ints, .thread_id = i, .n_threads = sizeof(t) / sizeof(t[0])};
 
   for (size_t i = 0; i < sizeof(t) / sizeof(t[0]); ++i) {
     const int r = THREAD_CREATE(&t[i], entry, &s[i]);
