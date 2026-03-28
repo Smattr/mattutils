@@ -78,7 +78,7 @@ static void dtor(void *set, void *context) {
 /// @param item Copy to insert
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno otherwise
-static int insert(set_impl_t *set, void *item, set_sig_t_ sig) {
+static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
 
   const size_t h = hash(item, sig.size);
@@ -151,7 +151,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
     if (slot_is_free(slot) || slot_is_deleted(slot))
       continue;
 
-    void *const p = slot_to_ptr(slot);
+    const void *const p = slot_to_ptr(slot);
     const int rc UNUSED = insert(dst, p, sig);
     assert(rc == 0 && "rehash destination not owned exclusively?");
   }

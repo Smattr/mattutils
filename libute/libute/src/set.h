@@ -105,7 +105,7 @@ static inline void *slot_to_ptr(uintptr_t slot) {
 }
 
 /// convert an item pointer to a set slot
-static inline uintptr_t ptr_to_slot(void *ptr) {
+static inline uintptr_t ptr_to_slot(const void *ptr) {
   const uintptr_t slot = (uintptr_t)ptr;
   assert((slot & (MIGRATED | DELETED)) == 0 &&
          "item pointer insufficiently aligned");
