@@ -15,6 +15,117 @@ TEST("empty set lifecycle") {
   SET_FREE(&ints);
 }
 
+/// some basic operations on an boolean set
+TEST("bool set") {
+  SET(bool) bools = {0};
+
+  for (int i = 0; i < 2; ++i) {
+    const int r = SET_INSERT(&bools, i != 0);
+    ASSERT_EQ(r, 0);
+    ASSERT_EQ(SET_SIZE(&bools), (size_t)i + 1);
+
+    for (int j = 0; j < 2; ++j) {
+      const bool present = SET_CONTAINS(&bools, j != 0);
+      if (j <= i) {
+        ASSERT(present);
+      } else {
+        ASSERT(!present);
+      }
+    }
+  }
+
+  for (int i = 0; i < 2; ++i) {
+    const bool r = SET_REMOVE(&bools, i != 0);
+    ASSERT(r);
+    ASSERT_EQ(SET_SIZE(&bools), 2 - (size_t)i - 1);
+
+    for (int j = 0; j < 2; ++j) {
+      const bool present = SET_CONTAINS(&bools, j != 0);
+      if (j <= i) {
+        ASSERT(!present);
+      } else {
+        ASSERT(present);
+      }
+    }
+  }
+
+  SET_FREE(&bools);
+}
+
+/// some basic operations on an character set
+TEST("char set") {
+  SET(char) chars = {0};
+
+  for (int i = 0; i < 10; ++i) {
+    const int r = SET_INSERT(&chars, 'a' + i);
+    ASSERT_EQ(r, 0);
+    ASSERT_EQ(SET_SIZE(&chars), (size_t)i + 1);
+
+    for (int j = 0; j < 10; ++j) {
+      const bool present = SET_CONTAINS(&chars, 'a' + j);
+      if (j <= i) {
+        ASSERT(present);
+      } else {
+        ASSERT(!present);
+      }
+    }
+  }
+
+  for (int i = 0; i < 10; ++i) {
+    const bool r = SET_REMOVE(&chars, 'a' + i);
+    ASSERT(r);
+    ASSERT_EQ(SET_SIZE(&chars), 10 - (size_t)i - 1);
+
+    for (int j = 0; j < 10; ++j) {
+      const bool present = SET_CONTAINS(&chars, 'a' + j);
+      if (j <= i) {
+        ASSERT(!present);
+      } else {
+        ASSERT(present);
+      }
+    }
+  }
+
+  SET_FREE(&chars);
+}
+
+/// some basic operations on a short integer set
+TEST("short set") {
+  SET(short) shorts = {0};
+
+  for (short i = 0; i < 10; ++i) {
+    const int r = SET_INSERT(&shorts, i);
+    ASSERT_EQ(r, 0);
+    ASSERT_EQ(SET_SIZE(&shorts), (size_t)i + 1);
+
+    for (short j = 0; j < 10; ++j) {
+      const bool present = SET_CONTAINS(&shorts, j);
+      if (j <= i) {
+        ASSERT(present);
+      } else {
+        ASSERT(!present);
+      }
+    }
+  }
+
+  for (short i = 0; i < 10; ++i) {
+    const bool r = SET_REMOVE(&shorts, i);
+    ASSERT(r);
+    ASSERT_EQ(SET_SIZE(&shorts), 10 - (size_t)i - 1);
+
+    for (short j = 0; j < 10; ++j) {
+      const bool present = SET_CONTAINS(&shorts, j);
+      if (j <= i) {
+        ASSERT(!present);
+      } else {
+        ASSERT(present);
+      }
+    }
+  }
+
+  SET_FREE(&shorts);
+}
+
 /// some basic operations on an integer set
 TEST("int set") {
   SET(int) ints = {0};
@@ -50,6 +161,43 @@ TEST("int set") {
   }
 
   SET_FREE(&ints);
+}
+
+/// some basic operations on a long integer set
+TEST("long set") {
+  SET(long) longs = {0};
+
+  for (long i = 0; i < 10; ++i) {
+    const int r = SET_INSERT(&longs, i);
+    ASSERT_EQ(r, 0);
+    ASSERT_EQ(SET_SIZE(&longs), (size_t)i + 1);
+
+    for (long j = 0; j < 10; ++j) {
+      const bool present = SET_CONTAINS(&longs, j);
+      if (j <= i) {
+        ASSERT(present);
+      } else {
+        ASSERT(!present);
+      }
+    }
+  }
+
+  for (long i = 0; i < 10; ++i) {
+    const bool r = SET_REMOVE(&longs, i);
+    ASSERT(r);
+    ASSERT_EQ(SET_SIZE(&longs), 10 - (size_t)i - 1);
+
+    for (long j = 0; j < 10; ++j) {
+      const bool present = SET_CONTAINS(&longs, j);
+      if (j <= i) {
+        ASSERT(!present);
+      } else {
+        ASSERT(present);
+      }
+    }
+  }
+
+  SET_FREE(&longs);
 }
 
 /// some basic operations on a `uint64_t` set
