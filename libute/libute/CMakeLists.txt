@@ -27,6 +27,11 @@ add_library(libute
   src/set_insert_.c
   src/set_remove_.c
   src/set_size_.c
+  src/set_unboxed_contains.c
+  src/set_unboxed_free.c
+  src/set_unboxed_insert.c
+  src/set_unboxed_remove.c
+  src/set_unboxed_size.c
   src/uint128_atomic_cas.c
   src/uint128_atomic_cas_n.c
   src/uint128_atomic_load.c

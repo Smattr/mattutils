@@ -130,7 +130,10 @@ extern "C" {
 ///
 /// @param set Set to operate on
 /// @return Size of the set
-#define SET_SIZE(set) set_size_(&(set)->u_.impl)
+#define SET_SIZE(set)                                                          \
+  set_size_(&(set)->u_.impl,                                                   \
+            (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),            \
+                         .size = sizeof(*(set)->u_.witness)})
 
 /// clear a set and deallocate its backing resources
 ///
@@ -190,8 +193,9 @@ bool set_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
 /// get the number of items in a set
 ///
 /// @param set Set to operate on
+/// @param sig Signature of the set item type
 /// @return Size of the set
-size_t set_size_(set_t_ *set);
+size_t set_size_(set_t_ *set, set_sig_t_ sig);
 
 /// clear a set and deallocate its backing resources
 ///

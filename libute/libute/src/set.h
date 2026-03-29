@@ -20,3 +20,15 @@ PRIVATE bool set_boxed_remove(set_t_ *set, const void *item, set_sig_t_ sig);
 PRIVATE bool set_boxed_contains(set_t_ *set, const void *item, set_sig_t_ sig);
 PRIVATE size_t set_boxed_size(set_t_ *set);
 PRIVATE void set_boxed_free(set_t_ *set);
+
+////////////////////////////////////////////////////////////////////////////////
+// implementations for unboxed set
+////////////////////////////////////////////////////////////////////////////////
+
+PRIVATE int set_unboxed_insert(set_t_ *set, const void *item, set_sig_t_ sig,
+                               void (*user_dtor)(void *));
+PRIVATE bool set_unboxed_remove(set_t_ *set, const void *item, set_sig_t_ sig);
+PRIVATE bool set_unboxed_contains(set_t_ *set, const void *item,
+                                  set_sig_t_ sig);
+PRIVATE size_t set_unboxed_size(set_t_ *set);
+PRIVATE void set_unboxed_free(set_t_ *set);
