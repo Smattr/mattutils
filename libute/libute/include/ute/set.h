@@ -24,7 +24,6 @@
 ///   • custom hash
 ///   • custom eq
 ///   • support char *
-///   • unboxing optimisation
 ///   • return “inserted?” indication in SET_INSERT
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
@@ -89,10 +88,14 @@ extern "C" {
 /// @param item Item to insert
 /// @return 0 on success or an errno on failure
 #define SET_INSERT(set, item)                                                  \
-  set_insert_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},          \
-              (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),          \
-                           .size = sizeof(*(set)->u_.witness)},                \
-              (set)->dtor)
+  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
+                               .size = sizeof(*(set)->u_.witness)})            \
+       ? set_unboxed_insert_                                                   \
+       : set_boxed_insert_)(                                                   \
+      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},                  \
+      (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                  \
+                   .size = sizeof(*(set)->u_.witness)},                        \
+      (set)->dtor)
 
 /// remove an item from a set
 ///
@@ -104,9 +107,13 @@ extern "C" {
 /// @param item Item to remove
 /// @return True if the item was removed or false if it was not in the set
 #define SET_REMOVE(set, item)                                                  \
-  set_remove_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},          \
-              (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),          \
-                           .size = sizeof(*(set)->u_.witness)})
+  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
+                               .size = sizeof(*(set)->u_.witness)})            \
+       ? set_unboxed_remove_                                                   \
+       : set_boxed_remove_)(                                                   \
+      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},                  \
+      (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                  \
+                   .size = sizeof(*(set)->u_.witness)})
 
 /// does an item exist in a set?
 ///
@@ -118,9 +125,13 @@ extern "C" {
 /// @param item Item whose existence to check
 /// @return True if the item was found in the set
 #define SET_CONTAINS(set, item)                                                \
-  set_contains_(&(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},        \
-                (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),        \
-                             .size = sizeof(*(set)->u_.witness)})
+  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
+                               .size = sizeof(*(set)->u_.witness)})            \
+       ? set_unboxed_contains_                                                 \
+       : set_boxed_contains_)(                                                 \
+      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},                  \
+      (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                  \
+                   .size = sizeof(*(set)->u_.witness)})
 
 /// get the number of items in a set
 ///
@@ -131,9 +142,10 @@ extern "C" {
 /// @param set Set to operate on
 /// @return Size of the set
 #define SET_SIZE(set)                                                          \
-  set_size_(&(set)->u_.impl,                                                   \
-            (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),            \
-                         .size = sizeof(*(set)->u_.witness)})
+  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
+                               .size = sizeof(*(set)->u_.witness)})            \
+       ? set_unboxed_size_                                                     \
+       : set_boxed_size_)(&(set)->u_.impl)
 
 /// clear a set and deallocate its backing resources
 ///
@@ -144,7 +156,11 @@ extern "C" {
 /// After a call to this function, the set is empty and can be reused.
 ///
 /// @param set Set to operate on
-#define SET_FREE(set) set_free_(&(set)->u_.impl)
+#define SET_FREE(set)                                                          \
+  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
+                               .size = sizeof(*(set)->u_.witness)})            \
+       ? set_unboxed_free_                                                     \
+       : set_boxed_free_)(&(set)->u_.impl)
 
 ////////////////////////////////////////////////////////////////////////////////
 // private API
@@ -164,43 +180,92 @@ typedef struct {
   size_t size;      ///< byte size
 } set_sig_t_;
 
-/// insert an item into a set
+/// can this set use the optimised unboxed implementation?
+#define SET_CAN_UNBOX_(...)                                                    \
+  ((__VA_ARGS__).size < sizeof(uintptr_t) &&                                   \
+   (__VA_ARGS__).alignment <= alignof(uintptr_t))
+
+////////////////////////////////////////////////////////////////////////////////
+// implementations for boxed set
+////////////////////////////////////////////////////////////////////////////////
+
+/// insert an item into a boxed set
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
 /// @param sig Signature of the set item type
 /// @param user_dtor User-supplied destructor
 /// @return 0 on success or an errno on failure
-int set_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
-                void (*user_dtor)(void *));
+int set_boxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
+                      void (*user_dtor)(void *));
 
-/// remove an item from a set
+/// remove an item from a boxed set
 ///
 /// @param set Set to operate on
 /// @param item Item to remove
 /// @param sig Signature of the set item type
 /// @return True if the item was previously in the set
-bool set_remove_(set_t_ *set, const void *item, set_sig_t_ sig);
+bool set_boxed_remove_(set_t_ *set, const void *item, set_sig_t_ sig);
 
-/// check if an item is in a set
+/// check if an item is in a boxed set
 ///
 /// @param set Set to operate on
 /// @param item Item to seek
 /// @param sig Signature of the set item type
 /// @return True if item was found in the set
-bool set_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
+bool set_boxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
 
-/// get the number of items in a set
+/// get the number of items in a boxed set
 ///
 /// @param set Set to operate on
-/// @param sig Signature of the set item type
 /// @return Size of the set
-size_t set_size_(set_t_ *set, set_sig_t_ sig);
+size_t set_boxed_size_(set_t_ *set);
 
-/// clear a set and deallocate its backing resources
+/// clear a boxed set and deallocate its backing resources
 ///
 /// @param set Set to operate on
-void set_free_(set_t_ *set);
+void set_boxed_free_(set_t_ *set);
+
+////////////////////////////////////////////////////////////////////////////////
+// implementations for unboxed set
+////////////////////////////////////////////////////////////////////////////////
+
+/// insert an item into an unboxed set
+///
+/// @param set Set to operate on
+/// @param item Item to insert
+/// @param sig Signature of the set item type
+/// @param user_dtor User-supplied destructor
+/// @return 0 on success or an errno on failure
+int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
+                        void (*user_dtor)(void *));
+
+/// remove an item from an unboxed set
+///
+/// @param set Set to operate on
+/// @param item Item to remove
+/// @param sig Signature of the set item type
+/// @return True if the item was previously in the set
+bool set_unboxed_remove_(set_t_ *set, const void *item, set_sig_t_ sig);
+
+/// check if an item is in an unboxed set
+///
+/// @param set Set to operate on
+/// @param item Item to seek
+/// @param sig Signature of the set item type
+/// @return True if item was found in the set
+bool set_unboxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
+
+/// get the number of items in an unboxed set
+///
+/// @param set Set to operate on
+/// @return Size of the set
+size_t set_unboxed_size_(set_t_ *set);
+
+/// clear an unboxed set and deallocate its backing resources
+///
+/// @param set Set to operate on
+void set_unboxed_free_(set_t_ *set);
 
 #ifdef __cplusplus
 }

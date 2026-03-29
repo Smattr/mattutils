@@ -3,7 +3,6 @@
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include "set.h"
 #include "set_boxed.h"
 #include <assert.h>
 #include <stdatomic.h>
@@ -15,7 +14,7 @@
 #include <ute/hash.h>
 #include <ute/set.h>
 
-bool set_boxed_remove(set_t_ *set, const void *item, set_sig_t_ sig) {
+bool set_boxed_remove_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
 

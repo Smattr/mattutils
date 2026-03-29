@@ -1,12 +1,10 @@
 /// @file
-/// @brief Implementation of set existence check, for unboxed set
+/// @brief Implementation of set existence check, for boxed set
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include "set.h"
-#include "set_unboxed.h"
+#include "set_boxed.h"
 #include <assert.h>
-#include <stdalign.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -16,11 +14,9 @@
 #include <ute/hash.h>
 #include <ute/set.h>
 
-bool set_unboxed_contains(set_t_ *set, const void *item, set_sig_t_ sig) {
+bool set_boxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
-  assert(sig.size < sizeof(uintptr_t));
-  assert(sig.alignment <= alignof(uintptr_t));
 
   const size_t h = hash(item, sig.size);
 
@@ -50,7 +46,7 @@ bool set_unboxed_contains(set_t_ *set, const void *item, set_sig_t_ sig) {
       continue;
 
     // check if this is the item we are seeking
-    const void *const p = SLOT_TO_PTR(slot);
+    const void *const p = slot_to_ptr(slot);
     if (sig.size == 0 || memcmp(item, p, sig.size) == 0) {
       sp_rel(sp);
       return true;

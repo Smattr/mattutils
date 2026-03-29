@@ -3,7 +3,6 @@
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include "set.h"
 #include "set_unboxed.h"
 #include <assert.h>
 #include <stdatomic.h>
@@ -11,7 +10,7 @@
 #include <ute/asp.h>
 #include <ute/set.h>
 
-size_t set_unboxed_size(set_t_ *set) {
+size_t set_unboxed_size_(set_t_ *set) {
   assert(set != NULL);
 
   // acquire a reference to the set

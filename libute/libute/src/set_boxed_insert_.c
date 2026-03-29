@@ -3,7 +3,6 @@
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include "set.h"
 #include "set_boxed.h"
 #include <assert.h>
 #include <errno.h>
@@ -160,8 +159,8 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
   return 0;
 }
 
-int set_boxed_insert(set_t_ *set, const void *item, set_sig_t_ sig,
-                     void (*user_dtor)(void *)) {
+int set_boxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
+                      void (*user_dtor)(void *)) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
 

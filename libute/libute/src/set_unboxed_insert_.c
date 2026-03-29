@@ -3,7 +3,6 @@
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include "set.h"
 #include "set_unboxed.h"
 #include <assert.h>
 #include <errno.h>
@@ -137,8 +136,8 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
   return 0;
 }
 
-int set_unboxed_insert(set_t_ *set, const void *item, set_sig_t_ sig,
-                       void (*user_dtor)(void *)) {
+int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
+                        void (*user_dtor)(void *)) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
   assert(sig.size < sizeof(uintptr_t));

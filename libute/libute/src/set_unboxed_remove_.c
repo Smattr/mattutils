@@ -1,11 +1,11 @@
 /// @file
-/// @brief Implementation of set existence check, for boxed set
+/// @brief Implementation of set removal, for unboxed set
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
-#include "set.h"
-#include "set_boxed.h"
+#include "set_unboxed.h"
 #include <assert.h>
+#include <stdalign.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -15,12 +15,15 @@
 #include <ute/hash.h>
 #include <ute/set.h>
 
-bool set_boxed_contains(set_t_ *set, const void *item, set_sig_t_ sig) {
+bool set_unboxed_remove_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
+  assert(sig.size < sizeof(uintptr_t));
+  assert(sig.alignment <= alignof(uintptr_t));
 
   const size_t h = hash(item, sig.size);
 
+retry1:;
   // acquire a reference to the set
   sp_t sp = sp_acq(&set->root);
 
@@ -32,13 +35,16 @@ bool set_boxed_contains(set_t_ *set, const void *item, set_sig_t_ sig) {
 
   for (size_t i = 0; i < set_capacity(*s); ++i) {
     const size_t index = (h + i) % set_capacity(*s);
-    const uintptr_t slot = slot_load(&s->base[index]);
+    uintptr_t slot = slot_load(&s->base[index]);
 
-    // skip checking whether this slot is moved or not, because we do not care
-    // if we are racing with a rehashing and reading an older stale copy of the
-    // table
+  retry2:
+    if (slot_is_moved(slot)) {
+      // someone is rehashing the set into new storage
+      sp_rel(sp);
+      goto retry1;
+    }
 
-    // if we see an empty slot, we have probed as far as this item would be
+    // if this slot is unoccupied, we have probed as far as the item could be
     if (slot_is_free(slot))
       break;
 
@@ -46,9 +52,13 @@ bool set_boxed_contains(set_t_ *set, const void *item, set_sig_t_ sig) {
     if (slot_is_deleted(slot))
       continue;
 
-    // check if this is the item we are seeking
-    const void *const p = slot_to_ptr(slot);
+    // is this our sought item?
+    const void *const p = SLOT_TO_PTR(slot);
     if (sig.size == 0 || memcmp(item, p, sig.size) == 0) {
+      // mark as deleted
+      if (!slot_cas(&s->base[index], &slot, slot_deleted(slot)))
+        goto retry2;
+      (void)atomic_fetch_add_explicit(&s->deleted, 1, memory_order_acq_rel);
       sp_rel(sp);
       return true;
     }
