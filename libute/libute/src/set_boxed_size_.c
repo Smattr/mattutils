@@ -8,9 +8,10 @@
 #include <stdatomic.h>
 #include <stddef.h>
 #include <ute/asp.h>
+#include <ute/attr.h>
 #include <ute/set.h>
 
-size_t set_boxed_size_(set_t_ *set) {
+size_t set_boxed_size_(set_t_ *set, set_sig_t_ sig UNUSED) {
   assert(set != NULL);
 
   // acquire a reference to the set

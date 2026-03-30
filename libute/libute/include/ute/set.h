@@ -6,6 +6,7 @@
 ///   • Type-safe – compiler should catch all incorrect parameter passing
 ///   • Thread-safe – all macros are safe to call concurrently
 ///   • Lock-free – no mutexes or semaphores involved
+///   • Memory efficient – compile-time specialisation based on set element type
 ///
 /// The trade off in being such a general belt-and-suspenders implementation is
 /// that it is not particularly fast. But it still aims to be memory efficient.
@@ -15,7 +16,8 @@
 ///   Daniel Hooper
 ///   https://danielchasehooper.com/posts/typechecked-generic-c-data-structures
 ///
-/// The thread-safe aspect of this is based on techniques from:
+/// The thread-safe aspect of the “boxed” and “unboxed” set implementations is
+/// based on techniques from:
 ///   A Lock-Free Wait-Free Hash Table
 ///   Dr Cliff Click
 ///   https://web.stanford.edu/class/ee380/Abstracts/070221_LockFreeHash.pdf
@@ -88,13 +90,19 @@ extern "C" {
 /// @param item Item to insert
 /// @return 0 on success or an errno on failure
 #define SET_INSERT(set, item)                                                  \
-  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
-                               .size = sizeof(*(set)->u_.witness)})            \
+  (SET_CAN_BITSET_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),     \
+                                .size = sizeof(*(set)->u_.witness),            \
+                                .dtor = (set)->dtor})                          \
+       ? set_bitset_insert_                                                    \
+   : SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),    \
+                                 .size = sizeof(*(set)->u_.witness),           \
+                                 .dtor = (set)->dtor})                         \
        ? set_unboxed_insert_                                                   \
        : set_boxed_insert_)(                                                   \
       &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},                  \
       (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                  \
-                   .size = sizeof(*(set)->u_.witness)},                        \
+                   .size = sizeof(*(set)->u_.witness),                         \
+                   .dtor = (set)->dtor},                                       \
       (set)->dtor)
 
 /// remove an item from a set
@@ -107,13 +115,19 @@ extern "C" {
 /// @param item Item to remove
 /// @return True if the item was removed or false if it was not in the set
 #define SET_REMOVE(set, item)                                                  \
-  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
-                               .size = sizeof(*(set)->u_.witness)})            \
+  (SET_CAN_BITSET_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),     \
+                                .size = sizeof(*(set)->u_.witness),            \
+                                .dtor = (set)->dtor})                          \
+       ? set_bitset_remove_                                                    \
+   : SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),    \
+                                 .size = sizeof(*(set)->u_.witness),           \
+                                 .dtor = (set)->dtor})                         \
        ? set_unboxed_remove_                                                   \
        : set_boxed_remove_)(                                                   \
       &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},                  \
       (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                  \
-                   .size = sizeof(*(set)->u_.witness)})
+                   .size = sizeof(*(set)->u_.witness),                         \
+                   .dtor = (set)->dtor})
 
 /// does an item exist in a set?
 ///
@@ -125,13 +139,19 @@ extern "C" {
 /// @param item Item whose existence to check
 /// @return True if the item was found in the set
 #define SET_CONTAINS(set, item)                                                \
-  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
-                               .size = sizeof(*(set)->u_.witness)})            \
+  (SET_CAN_BITSET_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),     \
+                                .size = sizeof(*(set)->u_.witness),            \
+                                .dtor = (set)->dtor})                          \
+       ? set_bitset_contains_                                                  \
+   : SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),    \
+                                 .size = sizeof(*(set)->u_.witness),           \
+                                 .dtor = (set)->dtor})                         \
        ? set_unboxed_contains_                                                 \
        : set_boxed_contains_)(                                                 \
       &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item},                  \
       (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                  \
-                   .size = sizeof(*(set)->u_.witness)})
+                   .size = sizeof(*(set)->u_.witness),                         \
+                   .dtor = (set)->dtor})
 
 /// get the number of items in a set
 ///
@@ -142,10 +162,18 @@ extern "C" {
 /// @param set Set to operate on
 /// @return Size of the set
 #define SET_SIZE(set)                                                          \
-  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
-                               .size = sizeof(*(set)->u_.witness)})            \
+  (SET_CAN_BITSET_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),     \
+                                .size = sizeof(*(set)->u_.witness),            \
+                                .dtor = (set)->dtor})                          \
+       ? set_bitset_size_                                                      \
+   : SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),    \
+                                 .size = sizeof(*(set)->u_.witness),           \
+                                 .dtor = (set)->dtor})                         \
        ? set_unboxed_size_                                                     \
-       : set_boxed_size_)(&(set)->u_.impl)
+       : set_boxed_size_)(                                                     \
+      &(set)->u_.impl, (set_sig_t_){.alignment = sizeof(*(set)->u_.alignment), \
+                                    .size = sizeof(*(set)->u_.witness),        \
+                                    .dtor = (set)->dtor})
 
 /// clear a set and deallocate its backing resources
 ///
@@ -157,8 +185,13 @@ extern "C" {
 ///
 /// @param set Set to operate on
 #define SET_FREE(set)                                                          \
-  (SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),      \
-                               .size = sizeof(*(set)->u_.witness)})            \
+  (SET_CAN_BITSET_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),     \
+                                .size = sizeof(*(set)->u_.witness),            \
+                                .dtor = (set)->dtor})                          \
+       ? set_bitset_free_                                                      \
+   : SET_CAN_UNBOX_((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),    \
+                                 .size = sizeof(*(set)->u_.witness),           \
+                                 .dtor = (set)->dtor})                         \
        ? set_unboxed_free_                                                     \
        : set_boxed_free_)(&(set)->u_.impl)
 
@@ -176,9 +209,14 @@ typedef struct {
 
 /// the characterisation of a type
 typedef struct {
-  size_t alignment; ///< required alignment
-  size_t size;      ///< byte size
+  size_t alignment;     ///< required alignment
+  size_t size;          ///< byte size
+  void (*dtor)(void *); ///< set destructor
 } set_sig_t_;
+
+/// can this set use the optimised bitset implementation?
+#define SET_CAN_BITSET_(...)                                                   \
+  ((__VA_ARGS__).size <= 2 && (__VA_ARGS__).dtor == NULL)
 
 /// can this set use the optimised unboxed implementation?
 #define SET_CAN_UNBOX_(...)                                                    \
@@ -218,8 +256,9 @@ bool set_boxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
 /// get the number of items in a boxed set
 ///
 /// @param set Set to operate on
+/// @param sig Signature of the set item type
 /// @return Size of the set
-size_t set_boxed_size_(set_t_ *set);
+size_t set_boxed_size_(set_t_ *set, set_sig_t_ sig);
 
 /// clear a boxed set and deallocate its backing resources
 ///
@@ -259,13 +298,56 @@ bool set_unboxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
 /// get the number of items in an unboxed set
 ///
 /// @param set Set to operate on
+/// @param sig Signature of the set item type
 /// @return Size of the set
-size_t set_unboxed_size_(set_t_ *set);
+size_t set_unboxed_size_(set_t_ *set, set_sig_t_ sig);
 
 /// clear an unboxed set and deallocate its backing resources
 ///
 /// @param set Set to operate on
 void set_unboxed_free_(set_t_ *set);
+
+////////////////////////////////////////////////////////////////////////////////
+// implementations for bitset-backed set
+////////////////////////////////////////////////////////////////////////////////
+
+/// insert an item into a biset-backed set
+///
+/// @param set Set to operate on
+/// @param item Item to insert
+/// @param sig Signature of the set item type
+/// @param user_dtor User-supplied destructor
+/// @return 0 on success or an errno on failure
+int set_bitset_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
+                       void (*user_dtor)(void *));
+
+/// remove an item from a bitset-backed set
+///
+/// @param set Set to operate on
+/// @param item Item to remove
+/// @param sig Signature of the set item type
+/// @return True if the item was previously in the set
+bool set_bitset_remove_(set_t_ *set, const void *item, set_sig_t_ sig);
+
+/// check if an item is in a bitset-backed set
+///
+/// @param set Set to operate on
+/// @param item Item to seek
+/// @param sig Signature of the set item type
+/// @return True if item was found in the set
+bool set_bitset_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
+
+/// get the number of items in a bitset-backed set
+///
+/// @param set Set to operate on
+/// @param sig Signature of the set item type
+/// @return Size of the set
+size_t set_bitset_size_(set_t_ *set, set_sig_t_ sig);
+
+/// clear a bitset-backed set and deallocate its backing resources
+///
+/// @param set Set to operate on
+void set_bitset_free_(set_t_ *set);
 
 #ifdef __cplusplus
 }
