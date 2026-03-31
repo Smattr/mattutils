@@ -68,14 +68,6 @@ extern "C" {
       /* This does not need to be a pointer or be unioned with the `impl`   */ \
       /* member, but this ensures we minimise the size of the struct.       */ \
       type *witness;                                                           \
-                                                                               \
-      /** mechanism for re-obtaining the alignment of the set item type     */ \
-      /*                                                                    */ \
-      /* One might think this could already be recovered by                 */ \
-      /* `alignof(*witness)`. But calling `alignof` on an expression is a   */ \
-      /* GNU extension not supported by Clang. Using a VLA in a struct is   */ \
-      /* an extension too, but one supported by both Clang and GCC.         */ \
-      char (*alignment)[alignof(type)];                                        \
     } u_;                                                                      \
                                                                                \
     /** optional user-supplied item destructor                              */ \
@@ -178,7 +170,7 @@ typedef struct {
 
 /// construct a `set_sig_t_` from a set type
 #define SET_SIG_(set)                                                          \
-  ((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                     \
+  ((set_sig_t_){.alignment = alignof(TYPEOF(*(set)->u_.witness)),              \
                 .size = sizeof(*(set)->u_.witness),                            \
                 .dtor = sizeof((set)->dtor) > 0 ? (set)->dtor[0] : NULL})
 
