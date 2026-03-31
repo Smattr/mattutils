@@ -180,13 +180,11 @@ typedef struct {
                 .dtor = (set)->dtor})
 
 /// can this set use the optimised bitset implementation?
-#define SET_CAN_BITSET_(...)                                                   \
-  ((__VA_ARGS__).size <= 2 && (__VA_ARGS__).dtor == NULL)
+#define SET_CAN_BITSET_(sig) ((sig).size <= 2 && (sig).dtor == NULL)
 
 /// can this set use the optimised unboxed implementation?
-#define SET_CAN_UNBOX_(...)                                                    \
-  ((__VA_ARGS__).size < sizeof(uintptr_t) &&                                   \
-   (__VA_ARGS__).alignment <= alignof(uintptr_t))
+#define SET_CAN_UNBOX_(sig)                                                    \
+  ((sig).size < sizeof(uintptr_t) && (sig).alignment <= alignof(uintptr_t))
 
 ////////////////////////////////////////////////////////////////////////////////
 // implementations for boxed set
