@@ -27,6 +27,11 @@ add_library(libute
   src/set_boxed_insert_.c
   src/set_boxed_remove_.c
   src/set_boxed_size_.c
+  src/set_inline_contains_.c
+  src/set_inline_free_.c
+  src/set_inline_insert_.c
+  src/set_inline_remove_.c
+  src/set_inline_size_.c
   src/set_unboxed_contains_.c
   src/set_unboxed_free_.c
   src/set_unboxed_insert_.c

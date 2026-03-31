@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <limits.h>
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -87,9 +88,10 @@ extern "C" {
 /// @param item Item to insert
 /// @return 0 on success or an errno on failure
 #define SET_INSERT(set, item)                                                  \
-  (SET_CAN_BITSET_(set)  ? set_bitset_insert_                                  \
-   : SET_CAN_UNBOX_(set) ? set_unboxed_insert_                                 \
-                         : set_boxed_insert_)(                                 \
+  (SET_CAN_INLINE_(set)   ? set_inline_insert_                                 \
+   : SET_CAN_BITSET_(set) ? set_bitset_insert_                                 \
+   : SET_CAN_UNBOX_(set)  ? set_unboxed_insert_                                \
+                          : set_boxed_insert_)(                                 \
       &(set)->impl, (TYPEOF(*(set)->witness)[1]){item}, SET_SIG_(set))
 
 /// remove an item from a set
@@ -102,9 +104,10 @@ extern "C" {
 /// @param item Item to remove
 /// @return True if the item was removed or false if it was not in the set
 #define SET_REMOVE(set, item)                                                  \
-  (SET_CAN_BITSET_(set)  ? set_bitset_remove_                                  \
-   : SET_CAN_UNBOX_(set) ? set_unboxed_remove_                                 \
-                         : set_boxed_remove_)(                                 \
+  (SET_CAN_INLINE_(set)   ? set_inline_remove_                                 \
+   : SET_CAN_BITSET_(set) ? set_bitset_remove_                                 \
+   : SET_CAN_UNBOX_(set)  ? set_unboxed_remove_                                \
+                          : set_boxed_remove_)(                                 \
       &(set)->impl, (TYPEOF(*(set)->witness)[1]){item}, SET_SIG_(set))
 
 /// does an item exist in a set?
@@ -117,9 +120,10 @@ extern "C" {
 /// @param item Item whose existence to check
 /// @return True if the item was found in the set
 #define SET_CONTAINS(set, item)                                                \
-  (SET_CAN_BITSET_(set)  ? set_bitset_contains_                                \
-   : SET_CAN_UNBOX_(set) ? set_unboxed_contains_                               \
-                         : set_boxed_contains_)(                               \
+  (SET_CAN_INLINE_(set)   ? set_inline_contains_                               \
+   : SET_CAN_BITSET_(set) ? set_bitset_contains_                               \
+   : SET_CAN_UNBOX_(set)  ? set_unboxed_contains_                              \
+                          : set_boxed_contains_)(                               \
       &(set)->impl, (TYPEOF(*(set)->witness)[1]){item}, SET_SIG_(set))
 
 /// get the number of items in a set
@@ -131,9 +135,10 @@ extern "C" {
 /// @param set Set to operate on
 /// @return Size of the set
 #define SET_SIZE(set)                                                          \
-  (SET_CAN_BITSET_(set)  ? set_bitset_size_                                    \
-   : SET_CAN_UNBOX_(set) ? set_unboxed_size_                                   \
-                         : set_boxed_size_)(&(set)->impl, SET_SIG_(set))
+  (SET_CAN_INLINE_(set)   ? set_inline_size_                                   \
+   : SET_CAN_BITSET_(set) ? set_bitset_size_                                   \
+   : SET_CAN_UNBOX_(set)  ? set_unboxed_size_                                  \
+                          : set_boxed_size_)(&(set)->impl, SET_SIG_(set))
 
 /// clear a set and deallocate its backing resources
 ///
@@ -145,9 +150,10 @@ extern "C" {
 ///
 /// @param set Set to operate on
 #define SET_FREE(set)                                                          \
-  (SET_CAN_BITSET_(set)  ? set_bitset_free_                                    \
-   : SET_CAN_UNBOX_(set) ? set_unboxed_free_                                   \
-                         : set_boxed_free_)(&(set)->impl)
+  (SET_CAN_INLINE_(set)   ? set_inline_free_                                   \
+   : SET_CAN_BITSET_(set) ? set_bitset_free_                                   \
+   : SET_CAN_UNBOX_(set)  ? set_unboxed_free_                                  \
+                          : set_boxed_free_)(&(set)->impl)
 
 ////////////////////////////////////////////////////////////////////////////////
 // private API
@@ -158,21 +164,51 @@ extern "C" {
 
 /// set private implementation
 typedef struct {
-  asp_t root; ///< shared (opaque) pointer to the implementation itself
+  union {
+    asp_t root; ///< shared (opaque) pointer to the implementation itself
+    _Atomic uintptr_t raw[2]; ///< (opaque) bitset used by inline implementation
+  };
 } set_t_;
 
 /// the characterisation of a type
 typedef struct {
-  size_t alignment;     ///< required alignment
-  size_t size;          ///< byte size
+  size_t alignment; ///< required alignment
+  size_t size;      ///< byte size
+
+  /// number of values in this type
+  ///
+  /// This member is only accurate up to `SIZE_MAX >> 8`. A value greater than
+  /// this means the count is ≥`(SIZE_MAX >> 8)`.
+  size_t count;
+
   void (*dtor)(void *); ///< set destructor
 } set_sig_t_;
+
+/// is a given value of boolean type?
+#if !defined(SET_IS_BOOL_) && defined(__STDC_VERSION__)
+#if __STDC_VERSION__ >= 202311L
+#define SET_IS_BOOL_(val) _Generic((val), bool: 1, default: 0)
+#endif
+#endif
+#ifndef SET_IS_BOOL_
+#define SET_IS_BOOL_(val) _Generic((val), _Bool: 1, default: 0)
+#endif
 
 /// construct a `set_sig_t_` from a set type
 #define SET_SIG_(set)                                                          \
   ((set_sig_t_){.alignment = alignof(TYPEOF(*(set)->witness)),                 \
                 .size = sizeof(*(set)->witness),                               \
+                .count = SET_IS_BOOL_(*(set)->witness) ? 2                     \
+                         : sizeof(*(set)->witness) < sizeof(size_t)            \
+                             ? (size_t)1                                       \
+                                   << (sizeof(*(set)->witness) * CHAR_BIT)     \
+                             : SIZE_MAX,                                       \
                 .dtor = sizeof((set)->dtor) > 0 ? (set)->dtor[0] : NULL})
+
+/// can this set use the optimised inline implementation?
+#define SET_CAN_INLINE_(set)                                                   \
+  (SET_SIG_(set).count <= sizeof((set)->impl.raw) * CHAR_BIT &&                \
+   SET_SIG_(set).dtor == NULL)
 
 /// can this set use the optimised bitset implementation?
 #define SET_CAN_BITSET_(set)                                                   \
@@ -302,6 +338,46 @@ size_t set_bitset_size_(set_t_ *set, set_sig_t_ sig);
 ///
 /// @param set Set to operate on
 void set_bitset_free_(set_t_ *set);
+
+////////////////////////////////////////////////////////////////////////////////
+// implementations for inline set
+////////////////////////////////////////////////////////////////////////////////
+
+/// insert an item into an inline set
+///
+/// @param set Set to operate on
+/// @param item Item to insert
+/// @param sig Signature of the set item type
+/// @return 0 on success or an errno on failure
+int set_inline_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
+
+/// remove an item from an inline set
+///
+/// @param set Set to operate on
+/// @param item Item to remove
+/// @param sig Signature of the set item type
+/// @return True if the item was previously in the set
+bool set_inline_remove_(set_t_ *set, const void *item, set_sig_t_ sig);
+
+/// check if an item is in an inline set
+///
+/// @param set Set to operate on
+/// @param item Item to seek
+/// @param sig Signature of the set item type
+/// @return True if item was found in the set
+bool set_inline_contains_(set_t_ *set, const void *item, set_sig_t_ sig);
+
+/// get the number of items in an inline set
+///
+/// @param set Set to operate on
+/// @param sig Signature of the set item type
+/// @return Size of the set
+size_t set_inline_size_(set_t_ *set, set_sig_t_ sig);
+
+/// clear an inline set and deallocate its backing resources
+///
+/// @param set Set to operate on
+void set_inline_free_(set_t_ *set);
 
 #ifdef __cplusplus
 }
