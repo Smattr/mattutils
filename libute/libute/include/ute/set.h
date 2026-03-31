@@ -68,7 +68,7 @@ extern "C" {
       /* This does not need to be a pointer or be unioned with the `impl`   */ \
       /* member, but this ensures we minimise the size of the struct.       */ \
       type *witness;                                                           \
-    } u_;                                                                      \
+    };                                                                         \
                                                                                \
     /** optional user-supplied item destructor                              */ \
     /*                                                                      */ \
@@ -90,7 +90,7 @@ extern "C" {
   (SET_CAN_BITSET_(set)  ? set_bitset_insert_                                  \
    : SET_CAN_UNBOX_(set) ? set_unboxed_insert_                                 \
                          : set_boxed_insert_)(                                 \
-      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set))
+      &(set)->impl, (TYPEOF(*(set)->witness)[1]){item}, SET_SIG_(set))
 
 /// remove an item from a set
 ///
@@ -105,7 +105,7 @@ extern "C" {
   (SET_CAN_BITSET_(set)  ? set_bitset_remove_                                  \
    : SET_CAN_UNBOX_(set) ? set_unboxed_remove_                                 \
                          : set_boxed_remove_)(                                 \
-      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set))
+      &(set)->impl, (TYPEOF(*(set)->witness)[1]){item}, SET_SIG_(set))
 
 /// does an item exist in a set?
 ///
@@ -120,7 +120,7 @@ extern "C" {
   (SET_CAN_BITSET_(set)  ? set_bitset_contains_                                \
    : SET_CAN_UNBOX_(set) ? set_unboxed_contains_                               \
                          : set_boxed_contains_)(                               \
-      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set))
+      &(set)->impl, (TYPEOF(*(set)->witness)[1]){item}, SET_SIG_(set))
 
 /// get the number of items in a set
 ///
@@ -133,7 +133,7 @@ extern "C" {
 #define SET_SIZE(set)                                                          \
   (SET_CAN_BITSET_(set)  ? set_bitset_size_                                    \
    : SET_CAN_UNBOX_(set) ? set_unboxed_size_                                   \
-                         : set_boxed_size_)(&(set)->u_.impl, SET_SIG_(set))
+                         : set_boxed_size_)(&(set)->impl, SET_SIG_(set))
 
 /// clear a set and deallocate its backing resources
 ///
@@ -147,7 +147,7 @@ extern "C" {
 #define SET_FREE(set)                                                          \
   (SET_CAN_BITSET_(set)  ? set_bitset_free_                                    \
    : SET_CAN_UNBOX_(set) ? set_unboxed_free_                                   \
-                         : set_boxed_free_)(&(set)->u_.impl)
+                         : set_boxed_free_)(&(set)->impl)
 
 ////////////////////////////////////////////////////////////////////////////////
 // private API
@@ -170,8 +170,8 @@ typedef struct {
 
 /// construct a `set_sig_t_` from a set type
 #define SET_SIG_(set)                                                          \
-  ((set_sig_t_){.alignment = alignof(TYPEOF(*(set)->u_.witness)),              \
-                .size = sizeof(*(set)->u_.witness),                            \
+  ((set_sig_t_){.alignment = alignof(TYPEOF(*(set)->witness)),                 \
+                .size = sizeof(*(set)->witness),                               \
                 .dtor = sizeof((set)->dtor) > 0 ? (set)->dtor[0] : NULL})
 
 /// can this set use the optimised bitset implementation?
