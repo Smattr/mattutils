@@ -15,7 +15,8 @@
 bool set_bitset_contains_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
-  assert(SET_CAN_BITSET_(sig));
+  assert(sig.size <= 2);
+  assert(sig.dtor == NULL);
 
   sp_t sp = sp_acq(&set->root);
 

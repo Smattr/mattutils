@@ -13,7 +13,8 @@
 
 size_t set_bitset_size_(set_t_ *set, set_sig_t_ sig) {
   assert(set != NULL);
-  assert(SET_CAN_BITSET_(sig));
+  assert(sig.size <= 2);
+  assert(sig.dtor == NULL);
 
   sp_t sp = sp_acq(&set->root);
 

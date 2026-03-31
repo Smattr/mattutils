@@ -20,7 +20,8 @@ int set_bitset_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
                        void (*user_dtor)(void *)) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
-  assert(SET_CAN_BITSET_(sig));
+  assert(sig.size <= 2);
+  assert(sig.dtor == NULL);
   (void)user_dtor;
 
 retry:;
