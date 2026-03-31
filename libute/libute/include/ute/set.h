@@ -93,8 +93,7 @@ extern "C" {
   (SET_CAN_BITSET_(set)  ? set_bitset_insert_                                  \
    : SET_CAN_UNBOX_(set) ? set_unboxed_insert_                                 \
                          : set_boxed_insert_)(                                 \
-      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set),   \
-      (set)->dtor)
+      &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set))
 
 /// remove an item from a set
 ///
@@ -196,10 +195,8 @@ typedef struct {
 /// @param set Set to operate on
 /// @param item Item to insert
 /// @param sig Signature of the set item type
-/// @param user_dtor User-supplied destructor
 /// @return 0 on success or an errno on failure
-int set_boxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
-                      void (*user_dtor)(void *));
+int set_boxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
 
 /// remove an item from a boxed set
 ///
@@ -238,10 +235,8 @@ void set_boxed_free_(set_t_ *set);
 /// @param set Set to operate on
 /// @param item Item to insert
 /// @param sig Signature of the set item type
-/// @param user_dtor User-supplied destructor
 /// @return 0 on success or an errno on failure
-int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
-                        void (*user_dtor)(void *));
+int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
 
 /// remove an item from an unboxed set
 ///
@@ -280,10 +275,8 @@ void set_unboxed_free_(set_t_ *set);
 /// @param set Set to operate on
 /// @param item Item to insert
 /// @param sig Signature of the set item type
-/// @param user_dtor User-supplied destructor
 /// @return 0 on success or an errno on failure
-int set_bitset_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
-                       void (*user_dtor)(void *));
+int set_bitset_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
 
 /// remove an item from a bitset-backed set
 ///

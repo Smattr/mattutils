@@ -136,8 +136,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
   return 0;
 }
 
-int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig,
-                        void (*user_dtor)(void *)) {
+int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
   assert(sig.size < sizeof(uintptr_t));
@@ -173,9 +172,9 @@ retry:;
     }
     *new = (set_impl_t){.base = b, .capacity = c};
 
-    sp_t new_sp = sp_new(new, dtor, user_dtor);
+    sp_t new_sp = sp_new(new, dtor, sig.dtor);
     if (new_sp.ptr == NULL) {
-      dtor(new, user_dtor);
+      dtor(new, sig.dtor);
       sp_rel(sp);
       return ENOMEM;
     }
