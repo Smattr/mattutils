@@ -49,8 +49,13 @@ extern "C" {
 ///
 ///   SET(int) ints = {0};
 ///
+/// In order to add a custom destructor, it needs to be repeated in the type as
+/// well as the initializer:
+///
+///   SET(int, my_dtor) = {.dtor = {my_dtor}};
+///
 /// @param type Type of items that will be stored in the set
-#define SET(type)                                                              \
+#define SET(type, ...)                                                         \
   struct {                                                                     \
     union {                                                                    \
       set_t_ impl; /**< private implementation */                              \
@@ -75,9 +80,9 @@ extern "C" {
                                                                                \
     /** optional user-supplied item destructor                              */ \
     /*                                                                      */ \
-    /* If this member is non-null, it will be called on set items           */ \
+    /* If this member is non-zero sized, it will be called on set items     */ \
     /* immediately before they are removed from the set.                    */ \
-    void (*dtor)(void *);                                                      \
+    void (*dtor[sizeof((void *[]){__VA_ARGS__}) / sizeof(void *)])(void *);    \
   }
 
 /// insert an item into a set
@@ -175,7 +180,7 @@ typedef struct {
 #define SET_SIG_(set)                                                          \
   ((set_sig_t_){.alignment = sizeof(*(set)->u_.alignment),                     \
                 .size = sizeof(*(set)->u_.witness),                            \
-                .dtor = (set)->dtor})
+                .dtor = sizeof((set)->dtor) > 0 ? (set)->dtor[0] : NULL})
 
 /// can this set use the optimised bitset implementation?
 #define SET_CAN_BITSET_(set)                                                   \
