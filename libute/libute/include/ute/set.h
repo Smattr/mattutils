@@ -90,9 +90,9 @@ extern "C" {
 /// @param item Item to insert
 /// @return 0 on success or an errno on failure
 #define SET_INSERT(set, item)                                                  \
-  (SET_CAN_BITSET_(set)            ? set_bitset_insert_                        \
-   : SET_CAN_UNBOX_(SET_SIG_(set)) ? set_unboxed_insert_                       \
-                                   : set_boxed_insert_)(                       \
+  (SET_CAN_BITSET_(set)  ? set_bitset_insert_                                  \
+   : SET_CAN_UNBOX_(set) ? set_unboxed_insert_                                 \
+                         : set_boxed_insert_)(                                 \
       &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set),   \
       (set)->dtor)
 
@@ -106,9 +106,9 @@ extern "C" {
 /// @param item Item to remove
 /// @return True if the item was removed or false if it was not in the set
 #define SET_REMOVE(set, item)                                                  \
-  (SET_CAN_BITSET_(set)            ? set_bitset_remove_                        \
-   : SET_CAN_UNBOX_(SET_SIG_(set)) ? set_unboxed_remove_                       \
-                                   : set_boxed_remove_)(                       \
+  (SET_CAN_BITSET_(set)  ? set_bitset_remove_                                  \
+   : SET_CAN_UNBOX_(set) ? set_unboxed_remove_                                 \
+                         : set_boxed_remove_)(                                 \
       &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set))
 
 /// does an item exist in a set?
@@ -121,9 +121,9 @@ extern "C" {
 /// @param item Item whose existence to check
 /// @return True if the item was found in the set
 #define SET_CONTAINS(set, item)                                                \
-  (SET_CAN_BITSET_(set)            ? set_bitset_contains_                      \
-   : SET_CAN_UNBOX_(SET_SIG_(set)) ? set_unboxed_contains_                     \
-                                   : set_boxed_contains_)(                     \
+  (SET_CAN_BITSET_(set)  ? set_bitset_contains_                                \
+   : SET_CAN_UNBOX_(set) ? set_unboxed_contains_                               \
+                         : set_boxed_contains_)(                               \
       &(set)->u_.impl, (TYPEOF(*(set)->u_.witness)[1]){item}, SET_SIG_(set))
 
 /// get the number of items in a set
@@ -135,10 +135,9 @@ extern "C" {
 /// @param set Set to operate on
 /// @return Size of the set
 #define SET_SIZE(set)                                                          \
-  (SET_CAN_BITSET_(set) ? set_bitset_size_                                     \
-   : SET_CAN_UNBOX_(SET_SIG_(set))                                             \
-       ? set_unboxed_size_                                                     \
-       : set_boxed_size_)(&(set)->u_.impl, SET_SIG_(set))
+  (SET_CAN_BITSET_(set)  ? set_bitset_size_                                    \
+   : SET_CAN_UNBOX_(set) ? set_unboxed_size_                                   \
+                         : set_boxed_size_)(&(set)->u_.impl, SET_SIG_(set))
 
 /// clear a set and deallocate its backing resources
 ///
@@ -150,9 +149,9 @@ extern "C" {
 ///
 /// @param set Set to operate on
 #define SET_FREE(set)                                                          \
-  (SET_CAN_BITSET_(set)            ? set_bitset_free_                          \
-   : SET_CAN_UNBOX_(SET_SIG_(set)) ? set_unboxed_free_                         \
-                                   : set_boxed_free_)(&(set)->u_.impl)
+  (SET_CAN_BITSET_(set)  ? set_bitset_free_                                    \
+   : SET_CAN_UNBOX_(set) ? set_unboxed_free_                                   \
+                         : set_boxed_free_)(&(set)->u_.impl)
 
 ////////////////////////////////////////////////////////////////////////////////
 // private API
@@ -184,8 +183,9 @@ typedef struct {
   (SET_SIG_(set).size <= 2 && SET_SIG_(set).dtor == NULL)
 
 /// can this set use the optimised unboxed implementation?
-#define SET_CAN_UNBOX_(sig)                                                    \
-  ((sig).size < sizeof(uintptr_t) && (sig).alignment <= alignof(uintptr_t))
+#define SET_CAN_UNBOX_(set)                                                    \
+  (SET_SIG_(set).size < sizeof(uintptr_t) &&                                   \
+   SET_SIG_(set).alignment <= alignof(uintptr_t))
 
 ////////////////////////////////////////////////////////////////////////////////
 // implementations for boxed set
