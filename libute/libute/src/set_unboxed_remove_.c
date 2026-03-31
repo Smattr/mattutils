@@ -35,7 +35,7 @@ retry1:;
 
   for (size_t i = 0; i < set_capacity(*s); ++i) {
     const size_t index = (h + i) % set_capacity(*s);
-    uintptr_t slot = slot_load(&s->base[index]);
+    slot_t slot = slot_load(&s->base[index]);
 
   retry2:
     if (slot_is_moved(slot)) {

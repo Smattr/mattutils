@@ -34,7 +34,7 @@ bool set_unboxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig) {
 
   for (size_t i = 0; i < set_capacity(*s); ++i) {
     const size_t index = (h + i) % set_capacity(*s);
-    const uintptr_t slot = slot_load(&s->base[index]);
+    const slot_t slot = slot_load(&s->base[index]);
 
     // skip checking whether this slot is moved or not, because we do not care
     // if we are racing with a rehashing and reading an older stale copy of the

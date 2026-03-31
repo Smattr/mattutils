@@ -17,6 +17,9 @@
 #include <stdint.h>
 #include <string.h>
 
+/// a set slot (see below)
+typedef uintptr_t __attribute__((may_alias)) slot_t;
+
 /// internal implementation of a set
 ///
 /// A set data structure looks like:
@@ -52,7 +55,7 @@ typedef struct {
   ///    │ │ └── slot contains an item?
   ///    │ └── has been migrated?
   ///    └── has been deleted?
-  _Atomic uintptr_t *base;
+  _Atomic slot_t *base;
 
   _Atomic size_t used;    ///< how many slots are non-empty?
   _Atomic size_t deleted; ///< how many slots contain deleted items?
@@ -65,13 +68,13 @@ static inline size_t set_capacity(const set_impl_t set) {
 }
 
 /// atomically read a slot from a hash table
-static inline uintptr_t slot_load(_Atomic uintptr_t *slotptr) {
+static inline slot_t slot_load(_Atomic slot_t *slotptr) {
   return atomic_load_explicit(slotptr, memory_order_acquire);
 }
 
 /// atomically compare-and-swap into a hash table slot
-static inline bool slot_cas(_Atomic uintptr_t *slotptr, uintptr_t *expected,
-                            uintptr_t desired) {
+static inline bool slot_cas(_Atomic slot_t *slotptr, slot_t *expected,
+                            slot_t desired) {
   return atomic_compare_exchange_strong_explicit(
       slotptr, expected, desired, memory_order_acq_rel, memory_order_acquire);
 }
@@ -86,28 +89,24 @@ enum {
 };
 
 /// is this set slot unoccupied?
-static inline bool slot_is_free(uintptr_t slot) {
-  return (slot & ~MIGRATED) == 0;
-}
+static inline bool slot_is_free(slot_t slot) { return (slot & ~MIGRATED) == 0; }
 
 /// does this set slot contain an item that was deleted?
-static inline bool slot_is_deleted(uintptr_t slot) {
+static inline bool slot_is_deleted(slot_t slot) {
   return (slot & DELETED) != 0;
 }
 
 /// derive the equivalent deleted representation of a slot
-static inline uintptr_t slot_deleted(uintptr_t slot) {
+static inline slot_t slot_deleted(slot_t slot) {
   assert(!slot_is_deleted(slot));
   return slot | DELETED;
 }
 
 /// has this slot been migrated to a new set?
-static inline bool slot_is_moved(uintptr_t slot) {
-  return (slot & MIGRATED) != 0;
-}
+static inline bool slot_is_moved(slot_t slot) { return (slot & MIGRATED) != 0; }
 
 /// derive the equivalent moved representation of a slot
-static inline uintptr_t slot_moved(uintptr_t slot) {
+static inline slot_t slot_moved(slot_t slot) {
   assert(!slot_is_moved(slot));
   return slot | MIGRATED;
 }
@@ -116,11 +115,11 @@ static inline uintptr_t slot_moved(uintptr_t slot) {
 #define SLOT_TO_PTR(slot) (&(slot))
 
 /// convert an item pointer to a set slot
-static inline uintptr_t ptr_to_slot(const void *ptr, size_t size) {
+static inline slot_t ptr_to_slot(const void *ptr, size_t size) {
   assert(ptr != NULL || size == 0);
   assert(size < sizeof(uintptr_t));
 
-  uintptr_t slot = 0;
+  slot_t slot = 0;
   if (size > 0)
     memcpy(&slot, ptr, size);
   return slot | PRESENT;

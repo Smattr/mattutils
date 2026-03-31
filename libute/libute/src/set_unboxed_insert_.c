@@ -29,7 +29,7 @@ static void dtor(void *set, void *context) {
 
   // free any slots we own
   for (size_t i = 0; i < set_capacity(*s); ++i) {
-    uintptr_t slot = slot_load(&s->base[i]);
+    slot_t slot = slot_load(&s->base[i]);
     if (slot_is_free(slot))
       continue;
     if (slot_is_moved(slot) && !slot_is_deleted(slot))
@@ -61,7 +61,7 @@ static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
   const size_t h = hash(item, sig.size);
   for (size_t i = 0; i < set_capacity(*set); ++i) {
     const size_t index = (h + i) % set_capacity(*set);
-    uintptr_t slot = slot_load(&set->base[index]);
+    slot_t slot = slot_load(&set->base[index]);
   retry:
 
     // has someone else begun a migration?
@@ -108,7 +108,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
     return 0;
 
   for (size_t i = 0; i < set_capacity(*src); ++i) {
-    uintptr_t slot = slot_load(&src->base[i]);
+    slot_t slot = slot_load(&src->base[i]);
   retry:
 
     // Did someone else beat us to migration? CASing in the “migrated” bit to
@@ -158,7 +158,7 @@ retry:;
   // do we need to expand the backing storage?
   if (used * 100 >= capacity * LOAD_FACTOR) {
     const size_t c = capacity + 1;
-    _Atomic uintptr_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
+    _Atomic slot_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
     if (b == NULL) {
       sp_rel(sp);
       return ENOMEM;
