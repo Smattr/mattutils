@@ -20,6 +20,7 @@ add_executable(test
   src/test-int128-store-mt.c
   src/test-int128-xchg.c
   src/test-int128-xchg-mt.c
+  src/test-is-integral.c
   src/test-print-int128-max.c
   src/test-print-int128-min.c
   src/test-print-int128-small.c
