@@ -10,8 +10,10 @@
 #define TYPEOF typeof
 #endif
 #endif
-#if !defined(TYPEOF) &&                                                        \
-    (defined(__GNUC__) || defined(_MSC_VER)) // Clang, GCC, MSVC
+#if !defined(TYPEOF) && defined(__GNUC__) // Clang, GCC
+#define TYPEOF __typeof__
+#endif
+#if !defined(TYPEOF) && defined(_MSC_VER) // MSVC
 #define TYPEOF __typeof__
 #endif
 #ifndef TYPEOF
