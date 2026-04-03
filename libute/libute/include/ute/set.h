@@ -23,7 +23,6 @@
 ///   https://web.stanford.edu/class/ee380/Abstracts/070221_LockFreeHash.pdf
 ///
 /// TODO:
-///   • custom hash
 ///   • support char *
 ///   • return “inserted?” indication in SET_INSERT
 ///
@@ -68,6 +67,13 @@ extern "C" {
       /* member, but this ensures we minimise the size of the struct.       */ \
       type *witness;                                                           \
     };                                                                         \
+                                                                               \
+    /** optional user-supplied item hash                                    */ \
+    /*                                                                      */ \
+    /* If this member is non-zero sized and not null, it will be called     */ \
+    /* when an item needs to be hashed.                                     */ \
+    size_t (*hash[sizeof((int[]){__VA_ARGS__}) / sizeof(int)])(const void *,   \
+                                                               size_t);        \
                                                                                \
     /** optional user-supplied item comparator                              */ \
     /*                                                                      */ \
@@ -187,6 +193,7 @@ typedef struct {
   /// this means the count is ≥`(SIZE_MAX >> 8)`.
   size_t count;
 
+  size_t (*hash)(const void *, size_t);           ///< set hasher
   bool (*eq)(const void *, const void *, size_t); ///< set comparator
   void (*dtor)(void *);                           ///< set destructor
 } set_sig_t_;
@@ -210,18 +217,20 @@ typedef struct {
                              ? (size_t)1                                       \
                                    << (sizeof(*(set)->witness) * CHAR_BIT)     \
                              : SIZE_MAX,                                       \
+                .hash = sizeof((set)->hash) > 0 ? (set)->hash[0] : NULL,       \
                 .eq = sizeof((set)->eq) > 0 ? (set)->eq[0] : NULL,             \
                 .dtor = sizeof((set)->dtor) > 0 ? (set)->dtor[0] : NULL})
 
 /// can this set use the optimised inline implementation?
 #define SET_CAN_INLINE_(set)                                                   \
   (SET_SIG_(set).count <= sizeof((set)->impl.raw) * CHAR_BIT &&                \
-   SET_SIG_(set).eq == NULL && SET_SIG_(set).dtor == NULL)
+   SET_SIG_(set).hash == NULL && SET_SIG_(set).eq == NULL &&                   \
+   SET_SIG_(set).dtor == NULL)
 
 /// can this set use the optimised bitset implementation?
 #define SET_CAN_BITSET_(set)                                                   \
-  (SET_SIG_(set).size <= 2 && SET_SIG_(set).eq == NULL &&                      \
-   SET_SIG_(set).dtor == NULL)
+  (SET_SIG_(set).size <= 2 && SET_SIG_(set).hash == NULL &&                    \
+   SET_SIG_(set).eq == NULL && SET_SIG_(set).dtor == NULL)
 
 /// can this set use the optimised unboxed implementation?
 #define SET_CAN_UNBOX_(set)                                                    \

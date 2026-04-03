@@ -20,7 +20,7 @@ bool set_unboxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(sig.size < sizeof(uintptr_t));
   assert(sig.alignment <= alignof(uintptr_t));
 
-  const size_t h = hash(item, sig.size);
+  const size_t h = (sig.hash != NULL ? sig.hash : hash)(item, sig.size);
 
   // acquire a reference to the set
   sp_t sp = sp_acq(&set->root);

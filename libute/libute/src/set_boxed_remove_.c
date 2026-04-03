@@ -17,7 +17,7 @@ bool set_boxed_remove_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
 
-  const size_t h = hash(item, sig.size);
+  const size_t h = (sig.hash != NULL ? sig.hash : hash)(item, sig.size);
 
 retry1:;
   // acquire a reference to the set

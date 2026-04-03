@@ -81,7 +81,7 @@ static void dtor(void *set, void *context) {
 static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
 
-  const size_t h = hash(item, sig.size);
+  const size_t h = (sig.hash != NULL ? sig.hash : hash)(item, sig.size);
   for (size_t i = 0; i < set_capacity(*set); ++i) {
     const size_t index = (h + i) % set_capacity(*set);
     uintptr_t slot = slot_load(&set->base[index]);
