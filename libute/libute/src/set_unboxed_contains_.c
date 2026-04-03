@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <ute/asp.h>
 #include <ute/hash.h>
 #include <ute/set.h>
@@ -50,7 +49,7 @@ bool set_unboxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig) {
 
     // check if this is the item we are seeking
     const void *const p = SLOT_TO_PTR(slot);
-    if (sig.size == 0 || memcmp(item, p, sig.size) == 0) {
+    if (eq(item, p, sig)) {
       sp_rel(sp);
       return true;
     }

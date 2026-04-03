@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <ute/asp.h>
 #include <ute/hash.h>
 #include <ute/set.h>
@@ -51,7 +50,7 @@ retry1:;
 
     // is this our sought item?
     const void *const p = slot_to_ptr(slot);
-    if (sig.size == 0 || memcmp(item, p, sig.size) == 0) {
+    if (eq(item, p, sig)) {
       // mark as deleted
       if (!slot_cas(&s->base[index], &slot, slot_deleted(slot)))
         goto retry2;

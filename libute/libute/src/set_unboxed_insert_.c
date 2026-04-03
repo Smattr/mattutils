@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ute/asp.h>
 #include <ute/attr.h>
 #include <ute/hash.h>
@@ -82,7 +81,7 @@ static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
 
     // otherwise, check if this is our item already present
     void *const p = SLOT_TO_PTR(slot);
-    if (sig.size == 0 || memcmp(p, item, sig.size) == 0)
+    if (eq(p, item, sig))
       return EEXIST;
   }
 

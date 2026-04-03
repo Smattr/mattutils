@@ -24,7 +24,6 @@
 ///
 /// TODO:
 ///   • custom hash
-///   • custom eq
 ///   • support char *
 ///   • return “inserted?” indication in SET_INSERT
 ///
@@ -50,10 +49,9 @@ extern "C" {
 ///
 ///   SET(int) ints = {0};
 ///
-/// In order to add a custom destructor, it needs to be repeated in the type as
-/// well as the initializer:
+/// In order to add custom member functions, you need to pass an extra `1`:
 ///
-///   SET(int, my_dtor) = {.dtor = {my_dtor}};
+///   SET(int, 1) = {.dtor = {my_dtor}};
 ///
 /// @param type Type of items that will be stored in the set
 #define SET(type, ...)                                                         \
@@ -71,11 +69,19 @@ extern "C" {
       type *witness;                                                           \
     };                                                                         \
                                                                                \
+    /** optional user-supplied item comparator                              */ \
+    /*                                                                      */ \
+    /* If this member is non-zero sized and not null, it will be called     */ \
+    /* when two items need to be compared.                                  */ \
+    bool (*eq[sizeof((int[]){__VA_ARGS__}) / sizeof(int)])(const void *,       \
+                                                           const void *,       \
+                                                           size_t);            \
+                                                                               \
     /** optional user-supplied item destructor                              */ \
     /*                                                                      */ \
-    /* If this member is non-zero sized, it will be called on set items     */ \
-    /* immediately before they are removed from the set.                    */ \
-    void (*dtor[sizeof((void *[]){__VA_ARGS__}) / sizeof(void *)])(void *);    \
+    /* If this member is non-zero sized and not null, it will be called on  */ \
+    /* set items immediately before they are removed from the set.          */ \
+    void (*dtor[sizeof((int[]){__VA_ARGS__}) / sizeof(int)])(void *);          \
   }
 
 /// insert an item into a set
@@ -181,7 +187,8 @@ typedef struct {
   /// this means the count is ≥`(SIZE_MAX >> 8)`.
   size_t count;
 
-  void (*dtor)(void *); ///< set destructor
+  bool (*eq)(const void *, const void *, size_t); ///< set comparator
+  void (*dtor)(void *);                           ///< set destructor
 } set_sig_t_;
 
 /// is a given value of boolean type?
@@ -203,16 +210,18 @@ typedef struct {
                              ? (size_t)1                                       \
                                    << (sizeof(*(set)->witness) * CHAR_BIT)     \
                              : SIZE_MAX,                                       \
+                .eq = sizeof((set)->eq) > 0 ? (set)->eq[0] : NULL,             \
                 .dtor = sizeof((set)->dtor) > 0 ? (set)->dtor[0] : NULL})
 
 /// can this set use the optimised inline implementation?
 #define SET_CAN_INLINE_(set)                                                   \
   (SET_SIG_(set).count <= sizeof((set)->impl.raw) * CHAR_BIT &&                \
-   SET_SIG_(set).dtor == NULL)
+   SET_SIG_(set).eq == NULL && SET_SIG_(set).dtor == NULL)
 
 /// can this set use the optimised bitset implementation?
 #define SET_CAN_BITSET_(set)                                                   \
-  (SET_SIG_(set).size <= 2 && SET_SIG_(set).dtor == NULL)
+  (SET_SIG_(set).size <= 2 && SET_SIG_(set).eq == NULL &&                      \
+   SET_SIG_(set).dtor == NULL)
 
 /// can this set use the optimised unboxed implementation?
 #define SET_CAN_UNBOX_(set)                                                    \

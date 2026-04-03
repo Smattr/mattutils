@@ -105,7 +105,7 @@ static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
 
     // otherwise, check if this is our item already present
     void *const p = slot_to_ptr(slot);
-    if (sig.size == 0 || memcmp(p, item, sig.size) == 0)
+    if (eq(p, item, sig))
       return EEXIST;
   }
 

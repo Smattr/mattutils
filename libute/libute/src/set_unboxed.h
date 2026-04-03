@@ -16,6 +16,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <ute/set.h>
 
 /// a set slot (see below)
 typedef uintptr_t __attribute__((may_alias)) slot_t;
@@ -123,4 +124,16 @@ static inline slot_t ptr_to_slot(const void *ptr, size_t size) {
   if (size > 0)
     memcpy(&slot, ptr, size);
   return slot | PRESENT;
+}
+
+/// are two set items equal?
+static inline bool eq(const void *a, const void *b, set_sig_t_ sig) {
+  assert(a != NULL || sig.size == 0);
+  assert(b != NULL || sig.size == 0);
+
+  if (sig.size == 0)
+    return true;
+  if (sig.eq != NULL)
+    return sig.eq(a, b, sig.size);
+  return memcmp(a, b, sig.size) == 0;
 }
