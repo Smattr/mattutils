@@ -7,7 +7,7 @@
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
+#include <ute/attr.h>
 #include <ute/set.h>
 
 /// a type with a larger alignment than `malloc` normally supports
@@ -15,29 +15,30 @@ struct wide {
   alignas(128) int x;
 };
 
-/// construct a `wide` value
-static struct wide make_wide(int x) {
-  // FIXME: we need to initialise this struct via `memset` instead of braced
-  // initialisation because we need to zero its padding too. This is because the
-  // set implementation currently always compares with `memcmp`. Rephrase this
-  // to use a custom comparator when this is supported.
-  struct wide ret;
-  memset(&ret, 0, sizeof(ret));
-  ret.x = x;
-  return ret;
+static size_t my_hash(const void *p, size_t size UNUSED) {
+  const struct wide *const x = p;
+  return (size_t)x->x;
+}
+
+static bool my_eq(const void *a, const void *b, size_t size UNUSED) {
+  const struct wide *const x = a;
+  const struct wide *const y = b;
+  return x->x == y->x;
 }
 
 /// basic operations on a set storing values with large alignment
 TEST("set with elements with large alignment") {
-  SET(struct wide) wides = {0};
+  // we need a custom hasher and comparator because the default ones look at the
+  // padding bits
+  SET(struct wide, 1) wides = {.hash = {my_hash}, .eq = {my_eq}};
 
   for (int i = 0; i < 10; ++i) {
-    const int r = SET_INSERT(&wides, make_wide(i));
+    const int r = SET_INSERT(&wides, (struct wide){i});
     ASSERT_EQ(r, 0);
     ASSERT_EQ(SET_SIZE(&wides), (size_t)i + 1);
 
     for (int j = 0; j < 10; ++j) {
-      const bool present = SET_CONTAINS(&wides, make_wide(j));
+      const bool present = SET_CONTAINS(&wides, (struct wide){j});
       if (j <= i) {
         ASSERT(present);
       } else {
@@ -47,12 +48,12 @@ TEST("set with elements with large alignment") {
   }
 
   for (int i = 0; i < 10; ++i) {
-    const bool r = SET_REMOVE(&wides, make_wide(i));
+    const bool r = SET_REMOVE(&wides, (struct wide){i});
     ASSERT(r);
     ASSERT_EQ(SET_SIZE(&wides), 10 - (size_t)i - 1);
 
     for (int j = 0; j < 10; ++j) {
-      const bool present = SET_CONTAINS(&wides, make_wide(j));
+      const bool present = SET_CONTAINS(&wides, (struct wide){j});
       if (j <= i) {
         ASSERT(!present);
       } else {
