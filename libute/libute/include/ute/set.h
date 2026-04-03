@@ -199,14 +199,7 @@ typedef struct {
 } set_sig_t_;
 
 /// is a given value of boolean type?
-#if !defined(SET_IS_BOOL_) && defined(__STDC_VERSION__)
-#if __STDC_VERSION__ >= 202311L
 #define SET_IS_BOOL_(val) _Generic((val), bool: 1, default: 0)
-#endif
-#endif
-#ifndef SET_IS_BOOL_
-#define SET_IS_BOOL_(val) _Generic((val), _Bool: 1, default: 0)
-#endif
 
 /// construct a `set_sig_t_` from a set type
 #define SET_SIG_(set)                                                          \

@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <stdbool.h>
+
 /// is the given type an integral type?
 #ifdef __SIZEOF_INT128__
 #define is_integral(t)                                                         \
@@ -16,14 +18,7 @@
 #define is_integral(t) (is_integral_bool_(t) || is_integral_(t))
 #endif
 
-#if defined(__STDC_VERSION__)
-#if __STDC_VERSION__ >= 202311L
 #define is_integral_bool_(t) _Generic(*(t *){0}, bool: 1, default: 0)
-#endif
-#endif
-#ifndef is_integral_bool_
-#define is_integral_bool_(t) _Generic(*(t *){0}, _Bool: 1, default: 0)
-#endif
 
 #define is_integral_(t)                                                        \
   _Generic(*(t *){0},                                                          \
