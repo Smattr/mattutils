@@ -26,7 +26,8 @@ void uint128_atomic_store(uint128_t *dst, uint128_t src) {
 #if !__has_feature(thread_sanitizer)
 #ifdef __SSE2__
   // A 128-bit AVX store is atomic. However _mm_store_si128 does not reliably
-  // lower to a MOVDQA. Thankfully a volatile store seems to reliably do this.
+  // lower to a MOVDQA. Thankfully a volatile store seems to reliably lower to
+  // either this or MOVAPS.
   {
     typedef __m128i __attribute__((may_alias)) avx128_t;
 

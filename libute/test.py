@@ -5,6 +5,8 @@ test libute with a variety of compiler configurations
 """
 
 import itertools
+import platform
+import re
 import shlex
 import shutil
 import subprocess
@@ -58,6 +60,38 @@ def main(args: List[str]) -> int:
 
             # test
             run("cmake", "--build", ".", "--target", "check", cwd=tmp)
+
+            # check volatile loads and stores really did lower to atomic MOVDQA/MOVAPS
+            if platform.machine() not in ("amd64", "x86_64"):
+                # skip non-SSE environments
+                continue
+            if bt == "RelWithDebInfo":
+                # skip LTO builds that cannot easily be disassembled
+                continue
+            if san == "thread,undefined":
+                # the TSan builds do not use SSE
+                continue
+            for src in (
+                "int128_atomic_load",
+                "int128_atomic_store",
+                "uint128_atomic_load",
+                "uint128_atomic_store",
+            ):
+                p = subprocess.run(
+                    [
+                        "objdump",
+                        "--disassemble-all",
+                        tmp / f"libute/CMakeFiles/libute.dir/src/{src}.c.o",
+                    ],
+                    stdout=subprocess.PIPE,
+                    check=True,
+                    text=True,
+                )
+                if re.search(r"\b(movdqa|movaps)\b", p.stdout) is None:
+                    raise RuntimeError(
+                        f"volatile 128-bit load/store in {src}.c "
+                        f"was not lowered to MOVDQA/MOVAPS:\n{p.stdout}"
+                    )
 
     return 0
 

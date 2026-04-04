@@ -34,7 +34,8 @@ uint128_t uint128_atomic_load(uint128_t *src) {
 
 #ifdef USE_AVX
   // A 128-bit AVX load is atomic. However _mm_load_si128 does not reliably
-  // lower to a MOVDQA. Thankfully a volatile load seems to reliably do this.
+  // lower to a MOVDQA. Thankfully a volatile load seems to reliably lower to
+  // either this or MOVAPS.
   {
     typedef __m128i __attribute__((may_alias)) avx128_t;
 
