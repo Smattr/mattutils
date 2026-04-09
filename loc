@@ -9,6 +9,7 @@ import collections
 import multiprocessing
 import os
 import sys
+from typing import Iterator
 
 def count(path: str) -> int:
   try:
@@ -25,27 +26,26 @@ def count(path: str) -> int:
   except IOError:
     return 0
 
-def counter(q1: multiprocessing.Queue, q2: multiprocessing.Queue) -> None:
+def counter(path: str) -> tuple[str, int]:
 
-  totals = collections.defaultdict(int)
+  # figure out a category to put it in
+  group = os.path.splitext(path)[-1]
+  if group == "":
+    group = os.path.basename(path)
 
-  while True:
+  return group, count(path)
 
-    # grab the next file to examine
-    path = q1.get()
-    if path is None:
-      break
-
-    # figure out a category to put it in
-    group = os.path.splitext(path)[-1]
-    if group == '':
-      group = os.path.basename(path)
-
-    # add its lines to our local total
-    totals[group] += count(path)
-
-  # return our accrued totals
-  q2.put(totals)
+def get(*paths: str) -> Iterator[str]:
+  """yield all files within a list of paths"""
+  for p in paths:
+    if os.path.isfile(p):
+      yield p
+    elif os.path.isdir(p):
+      for root, _, files in os.walk(p):
+        for f in files:
+          yield os.path.join(root, f)
+    else:
+      raise RuntimeError(f"{p} not found")
 
 def main(args: [str]) -> int:
 
@@ -62,44 +62,10 @@ def main(args: [str]) -> int:
 
   else:
 
-    CPUS = multiprocessing.cpu_count()
-
-    # setup two communication pipes
-    q1 = multiprocessing.Queue() # leader -> followers
-    q2 = multiprocessing.Queue() # followers -> leader
-
-    # start threads reading from q1
-    pool: [multiprocessing.Process] = []
-    for _ in range(CPUS - 1):
-      p = multiprocessing.Process(target=counter, args=(q1, q2))
-      p.start()
-      pool.append(p)
-
-    # push all files under the directory into q1
-    for input in options.input:
-      if os.path.isfile(input):
-        q1.put(input)
-      elif os.path.isdir(input):
-        for root, _, files in os.walk(input):
-          for f in files:
-            path = os.path.join(root, f)
-            q1.put(path)
-      else:
-        sys.stderr.write(f'{input} not found\n')
-        ret = -1
-
-    # push terminating markers into q1 for each thread
-    for _ in range(len(pool)):
-      q1.put(None)
-
     totals = collections.defaultdict(int)
-
-    # collect and accumulate totals from each follower
-    for p in pool:
-      p.join()
-      received = q2.get()
-      for k, v in received.items():
-        totals[k] += v
+    with multiprocessing.Pool() as pool:
+      for group, total in pool.imap_unordered(counter, get(*options.input)):
+        totals[group] += total
 
     # summarise
     for k, v in sorted(totals.items()):
