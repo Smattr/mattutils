@@ -7,12 +7,12 @@ a simple and stupid alternative to sloccount/cloc
 import argparse
 import collections
 import multiprocessing
-import os
 import sys
+from pathlib import Path
 from typing import Iterator
 
 
-def count(path: str) -> int:
+def count(path: Path) -> int:
     try:
         # read the file in binary to avoid thinking about unicode
         with open(path, "rb") as f:
@@ -28,25 +28,26 @@ def count(path: str) -> int:
         return 0
 
 
-def counter(path: str) -> tuple[str, int]:
+def counter(path: Path) -> tuple[str, int]:
 
     # figure out a category to put it in
-    group = os.path.splitext(path)[-1]
+    group = path.suffix
     if group == "":
-        group = os.path.basename(path)
+        group = path.name
 
     return group, count(path)
 
 
-def get(*paths: str) -> Iterator[str]:
+def get(*paths: str) -> Iterator[Path]:
     """yield all files within a list of paths"""
-    for p in paths:
-        if os.path.isfile(p):
+    for path in paths:
+        p = Path(path)
+        if p.is_file():
             yield p
-        elif os.path.isdir(p):
-            for root, _, files in os.walk(p):
+        elif p.is_dir():
+            for root, _, files in p.walk():
                 for f in files:
-                    yield os.path.join(root, f)
+                    yield root / f
         else:
             raise RuntimeError(f"{p} not found")
 
@@ -60,9 +61,9 @@ def main(args: [str]) -> int:
 
     ret = 0
 
-    if len(options.input) == 1 and os.path.isfile(options.input[0]):
+    if len(options.input) == 1 and Path(options.input[0]).is_file():
         # simply count this file
-        print(f"{options.input[0]}: {count(options.input[0])}")
+        print(f"{options.input[0]}: {count(Path(options.input[0]))}")
 
     else:
 
