@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-'''
+"""
 a simple and stupid alternative to sloccount/cloc
-'''
+"""
 
 import argparse
 import collections
@@ -11,67 +11,72 @@ import os
 import sys
 from typing import Iterator
 
+
 def count(path: str) -> int:
-  try:
-    # read the file in binary to avoid thinking about unicode
-    with open(path, 'rb') as f:
-      total = 0
-      while True:
-        c = f.read(1)
-        if c == b'':
-          break
-        if c == b'\n':
-          total += 1
-      return total
-  except IOError:
-    return 0
+    try:
+        # read the file in binary to avoid thinking about unicode
+        with open(path, "rb") as f:
+            total = 0
+            while True:
+                c = f.read(1)
+                if c == b"":
+                    break
+                if c == b"\n":
+                    total += 1
+            return total
+    except IOError:
+        return 0
+
 
 def counter(path: str) -> tuple[str, int]:
 
-  # figure out a category to put it in
-  group = os.path.splitext(path)[-1]
-  if group == "":
-    group = os.path.basename(path)
+    # figure out a category to put it in
+    group = os.path.splitext(path)[-1]
+    if group == "":
+        group = os.path.basename(path)
 
-  return group, count(path)
+    return group, count(path)
+
 
 def get(*paths: str) -> Iterator[str]:
-  """yield all files within a list of paths"""
-  for p in paths:
-    if os.path.isfile(p):
-      yield p
-    elif os.path.isdir(p):
-      for root, _, files in os.walk(p):
-        for f in files:
-          yield os.path.join(root, f)
-    else:
-      raise RuntimeError(f"{p} not found")
+    """yield all files within a list of paths"""
+    for p in paths:
+        if os.path.isfile(p):
+            yield p
+        elif os.path.isdir(p):
+            for root, _, files in os.walk(p):
+                for f in files:
+                    yield os.path.join(root, f)
+        else:
+            raise RuntimeError(f"{p} not found")
+
 
 def main(args: [str]) -> int:
 
-  # parse command line arguments
-  parser = argparse.ArgumentParser(description='simple line counter')
-  parser.add_argument('input', nargs='+', help='file or directory to examine')
-  options = parser.parse_args(args[1:])
+    # parse command line arguments
+    parser = argparse.ArgumentParser(description="simple line counter")
+    parser.add_argument("input", nargs="+", help="file or directory to examine")
+    options = parser.parse_args(args[1:])
 
-  ret = 0
+    ret = 0
 
-  if len(options.input) == 1 and os.path.isfile(options.input[0]):
-    # simply count this file
-    print(f'{options.input[0]}: {count(options.input[0])}')
+    if len(options.input) == 1 and os.path.isfile(options.input[0]):
+        # simply count this file
+        print(f"{options.input[0]}: {count(options.input[0])}")
 
-  else:
+    else:
 
-    totals = collections.defaultdict(int)
-    with multiprocessing.Pool() as pool:
-      for group, total in pool.imap_unordered(counter, get(*options.input)):
-        totals[group] += total
+        totals = collections.defaultdict(int)
+        with multiprocessing.Pool() as pool:
+            for group, total in pool.imap_unordered(counter, get(*options.input)):
+                totals[group] += total
 
-    # summarise
-    for k, v in sorted(totals.items()):
-      print(f'{k}: {v}')
+        # summarise
+        for k, v in sorted(totals.items()):
+            print(f"{k}: {v}")
 
-  return ret
+    return ret
 
-if __name__ == '__main__':
-  sys.exit(main(sys.argv))
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
