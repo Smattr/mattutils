@@ -163,6 +163,13 @@ int set_boxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
 
+  // copy the item for insertion
+  void *const item_copy = alloc(sig.alignment, sig.size);
+  if (item_copy == NULL)
+    return ENOMEM;
+  if (sig.size > 0)
+    memcpy(item_copy, item, sig.size);
+
   // percentage occupancy at which we expand the backing storage
   enum { LOAD_FACTOR = 70 };
 
@@ -182,6 +189,7 @@ retry:;
     _Atomic uintptr_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
     if (b == NULL) {
       sp_rel(sp);
+      free(item_copy);
       return ENOMEM;
     }
 
@@ -189,6 +197,7 @@ retry:;
     if (new == NULL) {
       free(b);
       sp_rel(sp);
+      free(item_copy);
       return ENOMEM;
     }
     *new = (set_impl_t){.base = b, .capacity = c};
@@ -197,6 +206,7 @@ retry:;
     if (new_sp.ptr == NULL) {
       dtor(new, sig.dtor);
       sp_rel(sp);
+      free(item_copy);
       return ENOMEM;
     }
 
@@ -212,23 +222,14 @@ retry:;
     goto retry;
   }
 
-  // copy the item for insertion
-  void *const p = alloc(sig.alignment, sig.size);
-  if (p == NULL) {
-    sp_rel(sp);
-    return ENOMEM;
-  }
-  if (sig.size > 0)
-    memcpy(p, item, sig.size);
-
   // insert it
   {
-    const int rc = insert(s, p, sig);
+    const int rc = insert(s, item_copy, sig);
     sp_rel(sp);
     if (rc != 0) {
-      free(p);
       if (rc != EEXIST)
         goto retry;
+      free(item_copy);
     }
   }
 
