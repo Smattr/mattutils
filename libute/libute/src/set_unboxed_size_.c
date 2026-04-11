@@ -13,6 +13,7 @@
 
 size_t set_unboxed_size_(set_t_ *set, set_sig_t_ sig UNUSED) {
   assert(set != NULL);
+  assert(sig.dtor == NULL);
 
   // acquire a reference to the set
   sp_t sp = sp_acq(&set->root);

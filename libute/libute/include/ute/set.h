@@ -228,7 +228,8 @@ typedef struct {
 /// can this set use the optimised unboxed implementation?
 #define SET_CAN_UNBOX_(set)                                                    \
   (SET_SIG_(set).size < sizeof(uintptr_t) &&                                   \
-   SET_SIG_(set).alignment <= alignof(uintptr_t))
+   SET_SIG_(set).alignment <= alignof(uintptr_t) &&                            \
+   SET_SIG_(set).dtor == NULL)
 
 ////////////////////////////////////////////////////////////////////////////////
 // implementations for boxed set

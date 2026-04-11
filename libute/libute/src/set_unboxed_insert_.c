@@ -19,25 +19,11 @@
 /// deallocate a set that is going out of scope
 ///
 /// @param set Set to operate on
-/// @param context Optional user-supplied destructor
-static void dtor(void *set, void *context) {
+/// @param context Ignored
+static void dtor(void *set, void *context UNUSED) {
   assert(set != NULL);
 
   set_impl_t *const s = set;
-  void (*user_dtor)(void *) = context;
-
-  // free any slots we own
-  for (size_t i = 0; i < set_capacity(*s); ++i) {
-    slot_t slot = slot_load(&s->base[i]);
-    if (slot_is_free(slot))
-      continue;
-    if (slot_is_moved(slot) && !slot_is_deleted(slot))
-      continue;
-    void *const p = SLOT_TO_PTR(slot);
-    assert(p != NULL);
-    if (user_dtor != NULL)
-      user_dtor(p);
-  }
 
   free(s->base);
   free(s);
@@ -140,6 +126,7 @@ int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(item != NULL || sig.size == 0);
   assert(sig.size < sizeof(uintptr_t));
   assert(sig.alignment <= alignof(uintptr_t));
+  assert(sig.dtor == NULL);
 
   // percentage occupancy at which we expand the backing storage
   enum { LOAD_FACTOR = 70 };
@@ -171,9 +158,9 @@ retry:;
     }
     *new = (set_impl_t){.base = b, .capacity = c};
 
-    sp_t new_sp = sp_new(new, dtor, sig.dtor);
+    sp_t new_sp = sp_new(new, dtor, NULL);
     if (new_sp.ptr == NULL) {
-      dtor(new, sig.dtor);
+      dtor(new, NULL);
       sp_rel(sp);
       return ENOMEM;
     }

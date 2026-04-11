@@ -19,6 +19,7 @@ bool set_unboxed_remove_(set_t_ *set, const void *item, set_sig_t_ sig) {
   assert(item != NULL || sig.size == 0);
   assert(sig.size < sizeof(uintptr_t));
   assert(sig.alignment <= alignof(uintptr_t));
+  assert(sig.dtor == NULL);
 
   const size_t h = (sig.hash != NULL ? sig.hash : hash)(item, sig.size);
 
