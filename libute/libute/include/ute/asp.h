@@ -73,6 +73,19 @@ sp_t sp_acq(asp_t *asp);
 /// @param sp Pointer to release
 void sp_rel(sp_t sp);
 
+/// copy an existing shared pointer
+///
+/// While shared pointers are just a struct and thus can be copied by
+/// assignment, this leaves the reference count unchanged. That is, the original
+/// and the copy both count as 1, and releasing either will count as dropping
+/// this reference. To get a duplicate that acts as its own reference, use this
+/// function. Both the pointer passed in and the new pointer acquired must
+/// eventually be released (`sp_rel`).
+///
+/// @param src Pointer to duplicate
+/// @return Duplicated pointer
+sp_t sp_dup(sp_t src);
+
 /// atomically overwrite a shared pointer
 ///
 /// This function consumes `src`, so the caller should not try to `sp_rel` it.

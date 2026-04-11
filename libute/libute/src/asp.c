@@ -300,6 +300,23 @@ sp_t sp_acq(asp_t *asp) {
   return ret;
 }
 
+sp_t sp_dup(sp_t src) {
+
+  // the null pointer is not reference counted
+  if (src.ptr == NULL) {
+    assert(src.impl == NULL && "null pointer with non-null control block");
+    return (sp_t){0};
+  }
+
+  assert(src.impl != NULL && "non-null pointer with no control block");
+
+  // increment the count for the new reference we are deriving
+  inc_ref(src.impl, 1);
+
+  // the derived pointer is just a copy of the same fields
+  return src;
+}
+
 void sp_rel(sp_t sp) {
 
   // if the target pointer was null, it was not reference counted
