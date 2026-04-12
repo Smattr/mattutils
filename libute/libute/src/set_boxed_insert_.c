@@ -13,6 +13,7 @@
 #include <string.h>
 #include <ute/asp.h>
 #include <ute/attr.h>
+#include <ute/dword.h>
 #include <ute/hash.h>
 #include <ute/set.h>
 
@@ -45,26 +46,45 @@ static void *alloc(size_t alignment, size_t size) {
 /// deallocate a set that is going out of scope
 ///
 /// @param set Set to operate on
-/// @param context Optional user-supplied destructor
-static void dtor(void *set, void *context) {
+/// @param context Ignored
+static void set_dtor(void *set, void *context UNUSED) {
   assert(set != NULL);
 
   set_impl_t *const s = set;
-  void (*user_dtor)(void *) = context;
 
-  // free any slots we own
+  // free our slots
   for (size_t i = 0; i < set_capacity(*s); ++i) {
-    const uintptr_t slot = slot_load(&s->base[i]);
-    if (slot_is_moved(slot) && !slot_is_deleted(slot))
-      continue;
-    void *const p = slot_to_ptr(slot);
-    if (user_dtor != NULL && p != NULL)
-      user_dtor(p);
-    free(p);
+    const dword_t slot = slot_load(&s->base[i]);
+    sp_t sp = slot_decode(slot);
+    sp.ptr = slot_to_ptr(slot); // clear MIGRATED|DELETED
+    sp_rel(sp);
   }
 
   free(s->base);
   free(s);
+}
+
+/// run the optional user-supplied destructor on a set element
+///
+/// @param ptr Pointer to the element
+/// @param context Optional user-supplied destructor
+static void slot_dtor_core(void *ptr, void *context) {
+  assert(ptr != NULL);
+
+  void (*user_dtor)(void *) = context;
+  if (user_dtor != NULL && ptr != NULL)
+    user_dtor(ptr);
+}
+
+/// deallocate a set element that is going out of scope
+///
+/// @param ptr Pointer to the element
+/// @param context Optional user-supplied destructor
+static void slot_dtor(void *ptr, void *context) {
+  assert(ptr != NULL);
+
+  slot_dtor_core(ptr, context);
+  free(ptr);
 }
 
 /// insert an item into a set
@@ -78,13 +98,13 @@ static void dtor(void *set, void *context) {
 /// @param item Copy to insert
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno otherwise
-static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
+static int insert(set_impl_t *set, sp_t item, set_sig_t_ sig) {
   assert(set != NULL);
 
-  const size_t h = (sig.hash != NULL ? sig.hash : hash)(item, sig.size);
+  const size_t h = (sig.hash != NULL ? sig.hash : hash)(item.ptr, sig.size);
   for (size_t i = 0; i < set_capacity(*set); ++i) {
     const size_t index = (h + i) % set_capacity(*set);
-    uintptr_t slot = slot_load(&set->base[index]);
+    dword_t slot = slot_load(&set->base[index]);
   retry:
 
     // has someone else begun a migration?
@@ -93,7 +113,7 @@ static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
 
     // if this slot is unoccupied, try to insert our item
     if (slot_is_free(slot)) {
-      if (!slot_cas(&set->base[index], &slot, ptr_to_slot(item)))
+      if (!slot_cas(&set->base[index], &slot, slot_encode(item)))
         goto retry;
       (void)atomic_fetch_add_explicit(&set->used, 1, memory_order_acq_rel);
       return 0;
@@ -105,7 +125,7 @@ static int insert(set_impl_t *set, const void *item, set_sig_t_ sig) {
 
     // otherwise, check if this is our item already present
     void *const p = slot_to_ptr(slot);
-    if (eq(p, item, sig))
+    if (eq(p, item.ptr, sig))
       return EEXIST;
   }
 
@@ -131,7 +151,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
     return 0;
 
   for (size_t i = 0; i < set_capacity(*src); ++i) {
-    uintptr_t slot = slot_load(&src->base[i]);
+    dword_t slot = slot_load(&src->base[i]);
   retry:
 
     // Did someone else beat us to migration? CASing in the “migrated” bit to
@@ -151,8 +171,9 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
     if (slot_is_free(slot) || slot_is_deleted(slot))
       continue;
 
-    const void *const p = slot_to_ptr(slot);
-    const int rc UNUSED = insert(dst, p, sig);
+    const sp_t item = slot_decode(slot);
+    const sp_t copy = sp_dup(item);
+    const int rc UNUSED = insert(dst, copy, sig);
     assert(rc == 0 && "rehash destination not owned exclusively?");
   }
 
@@ -166,12 +187,16 @@ int set_boxed_insert_(set_t_ *set, void *item, set_sig_t_ sig) {
   // copy the item for insertion
   void *const item_copy = alloc(sig.alignment, sig.size);
   if (item_copy == NULL) {
-    if (sig.dtor != NULL)
-      sig.dtor(item);
+    slot_dtor_core(item, sig.dtor);
     return ENOMEM;
   }
   if (sig.size > 0)
     memcpy(item_copy, item, sig.size);
+  const sp_t copy = sp_new(item_copy, slot_dtor, sig.dtor);
+  if (copy.ptr == NULL) {
+    slot_dtor(item_copy, sig.dtor);
+    return ENOMEM;
+  }
 
   // percentage occupancy at which we expand the backing storage
   enum { LOAD_FACTOR = 70 };
@@ -189,12 +214,10 @@ retry:;
   // do we need to expand the backing storage?
   if (used * 100 >= capacity * LOAD_FACTOR) {
     const size_t c = capacity + 1;
-    _Atomic uintptr_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
+    atomic_dword_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
     if (b == NULL) {
       sp_rel(sp);
-      if (sig.dtor != NULL)
-        sig.dtor(item_copy);
-      free(item_copy);
+      sp_rel(copy);
       return ENOMEM;
     }
 
@@ -202,20 +225,16 @@ retry:;
     if (new == NULL) {
       free(b);
       sp_rel(sp);
-      if (sig.dtor != NULL)
-        sig.dtor(item_copy);
-      free(item_copy);
+      sp_rel(copy);
       return ENOMEM;
     }
     *new = (set_impl_t){.base = b, .capacity = c};
 
-    sp_t new_sp = sp_new(new, dtor, sig.dtor);
+    sp_t new_sp = sp_new(new, set_dtor, NULL);
     if (new_sp.ptr == NULL) {
-      dtor(new, sig.dtor);
+      set_dtor(new, NULL);
       sp_rel(sp);
-      if (sig.dtor != NULL)
-        sig.dtor(item_copy);
-      free(item_copy);
+      sp_rel(copy);
       return ENOMEM;
     }
 
@@ -233,14 +252,12 @@ retry:;
 
   // insert it
   {
-    const int rc = insert(s, item_copy, sig);
+    const int rc = insert(s, copy, sig);
     sp_rel(sp);
     if (rc != 0) {
       if (rc != EEXIST)
         goto retry;
-      if (sig.dtor != NULL)
-        sig.dtor(item_copy);
-      free(item_copy);
+      sp_rel(copy);
     }
   }
 

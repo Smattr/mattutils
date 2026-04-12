@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <ute/asp.h>
+#include <ute/dword.h>
 #include <ute/hash.h>
 #include <ute/set.h>
 
@@ -31,7 +32,7 @@ retry1:;
 
   for (size_t i = 0; i < set_capacity(*s); ++i) {
     const size_t index = (h + i) % set_capacity(*s);
-    uintptr_t slot = slot_load(&s->base[index]);
+    dword_t slot = slot_load(&s->base[index]);
 
   retry2:
     if (slot_is_moved(slot)) {
@@ -49,8 +50,8 @@ retry1:;
       continue;
 
     // is this our sought item?
-    const void *const p = slot_to_ptr(slot);
-    if (eq(item, p, sig)) {
+    const sp_t p = slot_decode(slot);
+    if (eq(item, p.ptr, sig)) {
       // mark as deleted
       if (!slot_cas(&s->base[index], &slot, slot_deleted(slot)))
         goto retry2;
