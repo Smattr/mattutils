@@ -16,7 +16,7 @@
 
 static void dtor(void *s, void *ignored UNUSED) { free(s); }
 
-int set_bitset_insert_(set_t_ *set, const void *item, set_sig_t_ sig) {
+int set_bitset_insert_(set_t_ *set, void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
   assert(sig.size <= 2);

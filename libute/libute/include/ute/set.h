@@ -96,6 +96,11 @@ extern "C" {
 ///
 ///   int SET_INSERT(SET(<type>) *set, const <type> item);
 ///
+/// `item` is “consumed” regardless of whether insertion is successful. This
+/// only matters if you have set the `dtor` member of the set. That is, the
+/// caller is responsible for eventually calling the destructor on the passed
+/// item, whether the insertion succeeds or fails.
+///
 /// @param set Set to operate on
 /// @param item Item to insert
 /// @return 0 on success or an errno on failure
@@ -241,7 +246,7 @@ typedef struct {
 /// @param item Item to insert
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_boxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
+int set_boxed_insert_(set_t_ *set, void *item, set_sig_t_ sig);
 
 /// remove an item from a boxed set
 ///
@@ -281,7 +286,7 @@ void set_boxed_free_(set_t_ *set);
 /// @param item Item to insert
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
+int set_unboxed_insert_(set_t_ *set, void *item, set_sig_t_ sig);
 
 /// remove an item from an unboxed set
 ///
@@ -321,7 +326,7 @@ void set_unboxed_free_(set_t_ *set);
 /// @param item Item to insert
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_bitset_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
+int set_bitset_insert_(set_t_ *set, void *item, set_sig_t_ sig);
 
 /// remove an item from a bitset-backed set
 ///
@@ -361,7 +366,7 @@ void set_bitset_free_(set_t_ *set);
 /// @param item Item to insert
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_inline_insert_(set_t_ *set, const void *item, set_sig_t_ sig);
+int set_inline_insert_(set_t_ *set, void *item, set_sig_t_ sig);
 
 /// remove an item from an inline set
 ///

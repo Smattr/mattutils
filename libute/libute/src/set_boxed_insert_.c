@@ -159,14 +159,17 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
   return 0;
 }
 
-int set_boxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig) {
+int set_boxed_insert_(set_t_ *set, void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
 
   // copy the item for insertion
   void *const item_copy = alloc(sig.alignment, sig.size);
-  if (item_copy == NULL)
+  if (item_copy == NULL) {
+    if (sig.dtor != NULL)
+      sig.dtor(item);
     return ENOMEM;
+  }
   if (sig.size > 0)
     memcpy(item_copy, item, sig.size);
 
@@ -189,6 +192,8 @@ retry:;
     _Atomic uintptr_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
     if (b == NULL) {
       sp_rel(sp);
+      if (sig.dtor != NULL)
+        sig.dtor(item_copy);
       free(item_copy);
       return ENOMEM;
     }
@@ -197,6 +202,8 @@ retry:;
     if (new == NULL) {
       free(b);
       sp_rel(sp);
+      if (sig.dtor != NULL)
+        sig.dtor(item_copy);
       free(item_copy);
       return ENOMEM;
     }
@@ -206,6 +213,8 @@ retry:;
     if (new_sp.ptr == NULL) {
       dtor(new, sig.dtor);
       sp_rel(sp);
+      if (sig.dtor != NULL)
+        sig.dtor(item_copy);
       free(item_copy);
       return ENOMEM;
     }
@@ -229,6 +238,8 @@ retry:;
     if (rc != 0) {
       if (rc != EEXIST)
         goto retry;
+      if (sig.dtor != NULL)
+        sig.dtor(item_copy);
       free(item_copy);
     }
   }

@@ -121,7 +121,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
   return 0;
 }
 
-int set_unboxed_insert_(set_t_ *set, const void *item, set_sig_t_ sig) {
+int set_unboxed_insert_(set_t_ *set, void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
   assert(sig.size < sizeof(uintptr_t));

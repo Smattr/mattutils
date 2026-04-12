@@ -11,7 +11,7 @@
 #include <string.h>
 #include <ute/set.h>
 
-int set_inline_insert_(set_t_ *set, const void *item, set_sig_t_ sig) {
+int set_inline_insert_(set_t_ *set, void *item, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
   assert(sig.count <= sizeof(set->raw) * CHAR_BIT);
