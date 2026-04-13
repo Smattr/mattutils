@@ -17,6 +17,16 @@
 #include <ute/hash.h>
 #include <ute/set.h>
 
+/// `aligned_alloc` equivalent of `calloc`
+static void *aligned_calloc(size_t alignment, size_t n, size_t size) {
+  if (n > 0 && SIZE_MAX / n < size)
+    return NULL;
+  void *const p = aligned_alloc(alignment, n * size);
+  if (p != NULL)
+    memset(p, 0, n * size);
+  return p;
+}
+
 /// allocate storage for a new set item
 ///
 /// @param alignment Required alignment for the to-be-stored value
@@ -214,7 +224,8 @@ retry:;
   // do we need to expand the backing storage?
   if (used * 100 >= capacity * LOAD_FACTOR) {
     const size_t c = capacity + 1;
-    atomic_dword_t *const b = calloc((size_t)1 << c >> 1, sizeof(b[0]));
+    atomic_dword_t *const b = aligned_calloc(alignof(atomic_dword_t),
+                                             (size_t)1 << c >> 1, sizeof(b[0]));
     if (b == NULL) {
       sp_rel(sp);
       sp_rel(copy);
