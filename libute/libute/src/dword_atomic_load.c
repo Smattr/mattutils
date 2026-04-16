@@ -1,3 +1,8 @@
+/// @file
+/// @brief Implementation of dword load
+///
+/// All content in this file is in the public domain. Use it any way you wish.
+
 #include <assert.h>
 #include <stdatomic.h>
 #include <stddef.h>
