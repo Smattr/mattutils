@@ -105,7 +105,7 @@ bool dword_atomic_cas_n(atomic_dword_t *dst, dword_t expected, dword_t desired);
 ///
 /// Semantically this atomically performs:
 ///
-///   int128_t old = *dst;
+///   dword_t old = *dst;
 ///   *dst = src;
 ///   return old;
 ///
