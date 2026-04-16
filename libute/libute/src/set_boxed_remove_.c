@@ -10,7 +10,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <ute/asp.h>
-#include <ute/dword.h>
 #include <ute/hash.h>
 #include <ute/set.h>
 
@@ -32,28 +31,28 @@ retry1:;
 
   for (size_t i = 0; i < set_capacity(*s); ++i) {
     const size_t index = (h + i) % set_capacity(*s);
-    dword_t slot = slot_load(&s->base[index]);
+    uintptr_t slot = half_slot_load(&s->base[index]);
 
   retry2:
-    if (slot_is_moved(slot)) {
+    if (half_slot_is_moved(slot)) {
       // someone is rehashing the set into new storage
       sp_rel(sp);
       goto retry1;
     }
 
     // if this slot is unoccupied, we have probed as far as the item could be
-    if (slot_is_free(slot))
+    if (half_slot_is_free(slot))
       break;
 
     // skip tombstones
-    if (slot_is_deleted(slot))
+    if (half_slot_is_deleted(slot))
       continue;
 
     // is this our sought item?
-    const sp_t p = slot_decode(slot);
-    if (eq(item, p.ptr, sig)) {
+    const void *const p = half_slot_decode(slot);
+    if (eq(item, p, sig)) {
       // mark as deleted
-      if (!slot_cas(&s->base[index], &slot, slot_deleted(slot)))
+      if (!half_slot_cas(&s->base[index], &slot, half_slot_deleted(slot)))
         goto retry2;
       (void)atomic_fetch_add_explicit(&s->deleted, 1, memory_order_acq_rel);
       sp_rel(sp);

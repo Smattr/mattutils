@@ -67,10 +67,21 @@ static inline dword_t slot_load(atomic_dword_t *slotptr) {
   return dword_atomic_load(slotptr);
 }
 
+/// atomically read the lower word of a slot from the hash table
+static inline uintptr_t half_slot_load(atomic_dword_t *slotptr) {
+  return dword_atomic_load_lo(slotptr);
+}
+
 /// atomically compare-and-swap into a hash table slot
 static inline bool slot_cas(atomic_dword_t *slotptr, dword_t *expected,
                             dword_t desired) {
   return dword_atomic_cas(slotptr, expected, desired);
+}
+
+/// atomically compare-and-swap into the lower word of a hash table slot
+static inline bool half_slot_cas(atomic_dword_t *slotptr, uintptr_t *expected,
+                                 uintptr_t desired) {
+  return dword_atomic_cas_lo(slotptr, expected, desired);
 }
 
 enum {
@@ -86,6 +97,11 @@ static inline sp_t slot_decode(dword_t slot) {
   return decoded;
 }
 
+/// deserialise a half slot back into its originating shared pointer
+static inline void *half_slot_decode(uintptr_t half_slot) {
+  return (void *)half_slot;
+}
+
 /// serialise a shared pointer into a slot
 static inline dword_t slot_encode(sp_t ptr) {
   dword_t encoded = 0;
@@ -94,30 +110,43 @@ static inline dword_t slot_encode(sp_t ptr) {
   return encoded;
 }
 
+/// is this set half slot unoccupied?
+static inline bool half_slot_is_free(uintptr_t half_slot) {
+  return (half_slot & ~MIGRATED) == 0;
+}
+
 /// is this set slot unoccupied?
 static inline bool slot_is_free(dword_t slot) {
   const sp_t decoded = slot_decode(slot);
-  return ((uintptr_t)decoded.ptr & ~MIGRATED) == 0;
+  return half_slot_is_free((uintptr_t)decoded.ptr);
+}
+
+/// does this set half slot contain an item that was deleted?
+static inline bool half_slot_is_deleted(uintptr_t half_slot) {
+  return (half_slot & DELETED) != 0;
 }
 
 /// does this set slot contain an item that was deleted?
 static inline bool slot_is_deleted(dword_t slot) {
   const sp_t decoded = slot_decode(slot);
-  return ((uintptr_t)decoded.ptr & DELETED) != 0;
+  return half_slot_is_deleted((uintptr_t)decoded.ptr);
 }
 
-/// derive the equivalent deleted representation of a slot
-static inline dword_t slot_deleted(dword_t slot) {
-  assert(!slot_is_deleted(slot));
-  sp_t p = slot_decode(slot);
-  p.ptr = (void *)((uintptr_t)p.ptr | DELETED);
-  return slot_encode(p);
+/// derive the equivalent deleted representation of a half_slot
+static inline uintptr_t half_slot_deleted(uintptr_t half_slot) {
+  assert(!half_slot_is_deleted(half_slot));
+  return half_slot | DELETED;
+}
+
+/// has this half slot been migrated to a new set?
+static inline bool half_slot_is_moved(uintptr_t half_slot) {
+  return (half_slot & MIGRATED) != 0;
 }
 
 /// has this slot been migrated to a new set?
 static inline bool slot_is_moved(dword_t slot) {
   const sp_t decoded = slot_decode(slot);
-  return ((uintptr_t)decoded.ptr & MIGRATED) != 0;
+  return half_slot_is_moved((uintptr_t)decoded.ptr);
 }
 
 /// derive the equivalent moved representation of a slot
@@ -128,10 +157,15 @@ static inline dword_t slot_moved(dword_t slot) {
   return slot_encode(p);
 }
 
+/// convert a set half slot to its originating item pointer
+static inline void *half_slot_to_ptr(uintptr_t half_slot) {
+  return (void *)(half_slot & ~(MIGRATED | DELETED));
+}
+
 /// convert a set slot to its originating item pointer
 static inline void *slot_to_ptr(dword_t slot) {
   const sp_t decoded = slot_decode(slot);
-  return (void *)((uintptr_t)decoded.ptr & ~(MIGRATED | DELETED));
+  return half_slot_to_ptr((uintptr_t)decoded.ptr);
 }
 
 /// are two set items equal?

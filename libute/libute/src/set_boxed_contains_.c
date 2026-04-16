@@ -10,7 +10,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <ute/asp.h>
-#include <ute/dword.h>
 #include <ute/hash.h>
 #include <ute/set.h>
 
@@ -31,22 +30,22 @@ bool set_boxed_contains_(set_t_ *set, const void *item, set_sig_t_ sig) {
 
   for (size_t i = 0; i < set_capacity(*s); ++i) {
     const size_t index = (h + i) % set_capacity(*s);
-    const dword_t slot = slot_load(&s->base[index]);
+    const uintptr_t slot = half_slot_load(&s->base[index]);
 
     // skip checking whether this slot is moved or not, because we do not care
     // if we are racing with a rehashing and reading an older stale copy of the
     // table
 
     // if we see an empty slot, we have probed as far as this item would be
-    if (slot_is_free(slot))
+    if (half_slot_is_free(slot))
       break;
 
     // skip tombstones
-    if (slot_is_deleted(slot))
+    if (half_slot_is_deleted(slot))
       continue;
 
     // check if this is the item we are seeking
-    const void *const p = slot_to_ptr(slot);
+    const void *const p = half_slot_to_ptr(slot);
     if (eq(item, p, sig)) {
       sp_rel(sp);
       return true;
