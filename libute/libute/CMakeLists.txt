@@ -6,10 +6,20 @@
 add_library(libute
   src/asp.c
   src/dword_atomic_cas.c
+  src/dword_atomic_cas_lo.c
+  src/dword_atomic_cas_hi.c
   src/dword_atomic_cas_n.c
+  src/dword_atomic_cas_n_lo.c
+  src/dword_atomic_cas_n_hi.c
   src/dword_atomic_load.c
+  src/dword_atomic_load_lo.c
+  src/dword_atomic_load_hi.c
   src/dword_atomic_store.c
+  src/dword_atomic_store_lo.c
+  src/dword_atomic_store_hi.c
   src/dword_atomic_xchg.c
+  src/dword_atomic_xchg_lo.c
+  src/dword_atomic_xchg_hi.c
   src/hash.c
   src/int128_atomic_cas.c
   src/int128_atomic_cas_n.c
