@@ -190,7 +190,7 @@ static int rehash(set_impl_t *dst, set_impl_t *src, set_sig_t_ sig) {
   return 0;
 }
 
-int set_boxed_insert_(set_t_ *set, void *item, set_sig_t_ sig) {
+int set_boxed_insert_(set_t_ *set, void *item, bool *exists, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
 
@@ -270,6 +270,8 @@ retry:;
         goto retry;
       sp_rel(copy);
     }
+    if (exists != NULL)
+      *exists = rc == EEXIST;
   }
 
   return 0;

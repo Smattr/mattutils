@@ -16,7 +16,7 @@
 
 static void dtor(void *s, void *ignored UNUSED) { free(s); }
 
-int set_bitset_insert_(set_t_ *set, void *item, set_sig_t_ sig) {
+int set_bitset_insert_(set_t_ *set, void *item, bool *exists, set_sig_t_ sig) {
   assert(set != NULL);
   assert(item != NULL || sig.size == 0);
   assert(sig.size <= 2);
@@ -56,8 +56,12 @@ retry:;
   const size_t word_offset = value / WORD_SIZE;
   const size_t bit_offset = value % WORD_SIZE;
   _Atomic uintptr_t *const s = sp.ptr;
-  slot_or(&s[word_offset], (uintptr_t)1 << bit_offset);
+  const uintptr_t old = slot_or(&s[word_offset], (uintptr_t)1 << bit_offset);
 
   sp_rel(sp);
+
+  if (exists != NULL)
+    *exists = (old & ((uintptr_t)1 << bit_offset)) != 0;
+
   return 0;
 }

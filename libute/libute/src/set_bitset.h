@@ -22,6 +22,6 @@ static inline uintptr_t slot_and(_Atomic uintptr_t *slot, uintptr_t src) {
   return atomic_fetch_and_explicit(slot, src, memory_order_acq_rel);
 }
 
-static inline void slot_or(_Atomic uintptr_t *slot, uintptr_t src) {
-  (void)atomic_fetch_or_explicit(slot, src, memory_order_acq_rel);
+static inline uintptr_t slot_or(_Atomic uintptr_t *slot, uintptr_t src) {
+  return atomic_fetch_or_explicit(slot, src, memory_order_acq_rel);
 }

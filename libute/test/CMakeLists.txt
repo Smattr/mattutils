@@ -29,6 +29,7 @@ add_executable(test
   src/test-putb.c
   src/test-set-basic.c
   src/test-set-conflict.c
+  src/test-set-eexist.c
   src/test-set-mt.c
   src/test-set-over-align.c
   src/test-set-user-dtor.c

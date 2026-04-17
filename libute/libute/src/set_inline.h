@@ -26,6 +26,6 @@ static inline uintptr_t word_and(_Atomic uintptr_t *word, uintptr_t src) {
   return atomic_fetch_and_explicit(word, src, memory_order_acq_rel);
 }
 
-static inline void word_or(_Atomic uintptr_t *word, uintptr_t src) {
-  (void)atomic_fetch_or_explicit(word, src, memory_order_acq_rel);
+static inline uintptr_t word_or(_Atomic uintptr_t *word, uintptr_t src) {
+  return atomic_fetch_or_explicit(word, src, memory_order_acq_rel);
 }

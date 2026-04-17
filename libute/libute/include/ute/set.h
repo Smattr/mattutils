@@ -24,7 +24,6 @@
 ///
 /// TODO:
 ///   • support char *
-///   • return “inserted?” indication in SET_INSERT
 ///
 /// All content in this file is in the public domain. Use it any way you wish.
 
@@ -92,9 +91,10 @@ extern "C" {
 
 /// insert an item into a set
 ///
-/// This macro can be thought of as having the C type:
+/// This macro can be thought of as having one of the C types:
 ///
 ///   int SET_INSERT(SET(<type>) *set, const <type> item);
+///   int SET_INSERT(SET(<type>) *set, const <type> item, bool *exists);
 ///
 /// `item` is “consumed” regardless of whether insertion is successful. This
 /// only matters if you have set the `dtor` member of the set. That is, the
@@ -103,13 +103,16 @@ extern "C" {
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
+/// @param exists [out] If not null, on success this will be set to whether the
+///   item already existed in the set before the insertion
 /// @return 0 on success or an errno on failure
-#define SET_INSERT(set, item)                                                  \
+#define SET_INSERT(set, item, ...)                                             \
   (SET_CAN_INLINE_(set)   ? set_inline_insert_                                 \
    : SET_CAN_BITSET_(set) ? set_bitset_insert_                                 \
    : SET_CAN_UNBOX_(set)  ? set_unboxed_insert_                                \
                           : set_boxed_insert_)(                                 \
-      &(set)->impl, (TYPEOF(*(set)->witness)[1]){item}, SET_SIG_(set))
+      &(set)->impl, (TYPEOF(*(set)->witness)[1]){item},                        \
+      (bool *[2]){NULL, ##__VA_ARGS__}[1], SET_SIG_(set))
 
 /// remove an item from a set
 ///
@@ -244,9 +247,11 @@ typedef struct {
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
+/// @param exists [out] If not null, on success this will be set to whether the
+///   item already existed in the set before the insertion
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_boxed_insert_(set_t_ *set, void *item, set_sig_t_ sig);
+int set_boxed_insert_(set_t_ *set, void *item, bool *exists, set_sig_t_ sig);
 
 /// remove an item from a boxed set
 ///
@@ -284,9 +289,11 @@ void set_boxed_free_(set_t_ *set);
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
+/// @param exists [out] If not null, on success this will be set to whether the
+///   item already existed in the set before the insertion
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_unboxed_insert_(set_t_ *set, void *item, set_sig_t_ sig);
+int set_unboxed_insert_(set_t_ *set, void *item, bool *exists, set_sig_t_ sig);
 
 /// remove an item from an unboxed set
 ///
@@ -324,9 +331,11 @@ void set_unboxed_free_(set_t_ *set);
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
+/// @param exists [out] If not null, on success this will be set to whether the
+///   item already existed in the set before the insertion
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_bitset_insert_(set_t_ *set, void *item, set_sig_t_ sig);
+int set_bitset_insert_(set_t_ *set, void *item, bool *exists, set_sig_t_ sig);
 
 /// remove an item from a bitset-backed set
 ///
@@ -364,9 +373,11 @@ void set_bitset_free_(set_t_ *set);
 ///
 /// @param set Set to operate on
 /// @param item Item to insert
+/// @param exists [out] If not null, on success this will be set to whether the
+///   item already existed in the set before the insertion
 /// @param sig Signature of the set item type
 /// @return 0 on success or an errno on failure
-int set_inline_insert_(set_t_ *set, void *item, set_sig_t_ sig);
+int set_inline_insert_(set_t_ *set, void *item, bool *exists, set_sig_t_ sig);
 
 /// remove an item from an inline set
 ///
