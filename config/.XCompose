@@ -1,3 +1,5 @@
+include "%L"
+
 <Multi_key> <A> <l> <p> <h> <a>         : "Α"   U0391    # GREEK CAPITAL LETTER ALPHA
 <Multi_key> <a> <l> <p> <h> <a>         : "α"   U03B1    # GREEK SMALL LETTER ALPHA
 <Multi_key> <B> <e> <t> <a>             : "Β"   U0392    # GREEK CAPITAL LETTER BETA
