@@ -19,7 +19,11 @@
 #include <ute/set.h>
 
 /// a set slot (see below)
+#ifdef _MSC_VER
+typedef uintptr_t slot_t;
+#else
 typedef uintptr_t __attribute__((may_alias)) slot_t;
+#endif
 
 /// internal implementation of a set
 ///
