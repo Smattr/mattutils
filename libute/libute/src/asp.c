@@ -137,7 +137,7 @@ UNUSED static void inc_load_ref(sp_ctrl_t *ctrl, size_t by) {
   assert(ctrl != NULL);
   assert(by > 0 && "redundant inc_load_ref");
 
-  const size_t old __attribute__((unused)) = atomic_fetch_add_explicit(
+  const size_t old UNUSED = atomic_fetch_add_explicit(
       &ctrl->ref_count, by * LOAD_SCALE, memory_order_acq_rel);
   assert((old & REFS_MASK) > 0 &&
          "changing load count while not holding a reference");
@@ -167,7 +167,7 @@ static void dec_ref(sp_ctrl_t *ctrl) {
 static void dec_load_ref(sp_ctrl_t *ctrl) {
   assert(ctrl != NULL);
 
-  const size_t old __attribute__((unused)) = atomic_fetch_sub_explicit(
+  const size_t old UNUSED = atomic_fetch_sub_explicit(
       &ctrl->ref_count, LOAD_SCALE, memory_order_acq_rel);
   assert((old & REFS_MASK) > 0 &&
          "changing load count while not holding a reference");
