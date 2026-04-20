@@ -9,10 +9,16 @@
 #include <stdint.h>
 #include <ute/dword.h>
 
+#ifdef _MSC_VER
+#define MAY_ALIAS /* nothing */
+#else
+#define MAY_ALIAS __attribute__((may_alias))
+#endif
+
 void dword_atomic_store_hi(atomic_dword_t *dst, uintptr_t src) {
   assert(dst != NULL);
 
-  typedef uintptr_t __attribute__((may_alias)) word_t;
+  typedef uintptr_t MAY_ALIAS word_t;
   _Atomic word_t *const d = (_Atomic word_t *)dst;
   atomic_store_explicit(d + 1, src, memory_order_release);
 }

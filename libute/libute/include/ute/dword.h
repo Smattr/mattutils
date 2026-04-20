@@ -11,11 +11,37 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifndef __SIZEOF_POINTER__
+#if !defined(_MSC_VER) && !defined(__SIZEOF_POINTER__)
 #error "sizeof pointer not available"
 #endif
 
-#if __SIZEOF_POINTER__ == 8
+#if defined(_MSC_VER) && defined(_WIN64) // MSVC on 64-bit ARM, x64, ARM64EC
+
+/// a 2-pointer-wide scalar type
+typedef struct __declspec(align(16)) {
+  int64_t word[2];
+} dword_t;
+
+#ifdef _ISO_VOLATILE
+#error "dword atomics require /volatile:ms"
+#endif
+
+/// a 2-pointer-wide scalar type that must be operated on atomically
+typedef volatile dword_t atomic_dword_t;
+
+#elif defined(_MSC_VER) && defined(_WIN32) // MSVC on 32-bit ARM, x86
+
+/// a 2-pointer-wide scalar type
+typedef __declspec(align(8)) int64_t dword_t;
+
+#ifdef _ISO_VOLATILE
+#error "dword atomics require /volatile:ms"
+#endif
+
+/// a 2-pointer-wide scalar type that must be operated on atomically
+typedef volatile dword_t atomic_dword_t;
+
+#elif __SIZEOF_POINTER__ == 8
 #include <ute/int128.h>
 
 /// a 2-pointer-wide scalar type
