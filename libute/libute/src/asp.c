@@ -222,7 +222,7 @@ static asp_impl_t asp2impl(dword_t src) {
 
 /// wrap our representation into the external representation
 static dword_t impl2asp(asp_impl_t src) {
-  dword_t dst = 0;
+  dword_t dst = dword_zero();
   static_assert(sizeof(src) <= sizeof(dst),
                 "atomic shared pointer does not fit in a dword");
   memcpy(&dst, &src, sizeof(src));

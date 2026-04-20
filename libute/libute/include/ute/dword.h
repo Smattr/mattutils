@@ -40,6 +40,11 @@ typedef _Atomic uint64_t atomic_dword_t;
 extern "C" {
 #endif
 
+/// create a new dword
+///
+/// @return A zeroed dword
+dword_t dword_zero(void);
+
 /// atomically read a dword from memory
 ///
 /// This function is lock-free. It performs the read with (at least) acquire

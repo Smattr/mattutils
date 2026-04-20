@@ -20,6 +20,7 @@ add_library(libute
   src/dword_atomic_xchg.c
   src/dword_atomic_xchg_lo.c
   src/dword_atomic_xchg_hi.c
+  src/dword_zero.c
   src/hash.c
   src/int128_atomic_cas.c
   src/int128_atomic_cas_n.c
