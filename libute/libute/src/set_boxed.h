@@ -34,6 +34,8 @@
 ///
 /// `set_impl_t` carries no information about the size of set items. This is
 /// expected to be passed in by callers.
+///
+/// ¹ This is an atomic shared pointer, 2 words wide.
 typedef struct {
   /// backing storage of set slots
   ///
