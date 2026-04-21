@@ -166,7 +166,7 @@ extern "C" {
 ///
 ///   void SET_FREE(SET(<type>) *set);
 ///
-/// After a call to this function, the set is empty and can be reused.
+/// After a call to this macro, the set is empty and can be reused.
 ///
 /// @param set Set to operate on
 #define SET_FREE(set)                                                          \
