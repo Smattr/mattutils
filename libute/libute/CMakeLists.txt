@@ -5,6 +5,11 @@
 
 add_library(libute
   src/asp.c
+  src/dict_contains_.c
+  src/dict_free_.c
+  src/dict_get_.c
+  src/dict_remove_.c
+  src/dict_set_.c
   src/dword_atomic_cas.c
   src/dword_atomic_cas_lo.c
   src/dword_atomic_cas_hi.c
