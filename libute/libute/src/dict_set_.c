@@ -69,6 +69,16 @@ static void dict_dtor(void *dict, void *context UNUSED) {
   free(d);
 }
 
+/// deallocate a dictionary element that is going out of scope
+///
+/// @param ptr Pointer to the element
+/// @param context Ignored
+static void slot_dtor(void *ptr, void *context UNUSED) {
+  assert(ptr != NULL);
+
+  free(ptr);
+}
+
 static int insert(dict_impl_t *dict, sp_t item, dict_sig_t_ sig) {
   assert(dict != NULL);
 
@@ -162,7 +172,7 @@ int dict_set_(dict_t_ *dict, const void *key, const void *value,
     memcpy(box, key, sig.key_size);
   if (sig.value_size > 0)
     memcpy((char *)box + sig.witness_value_offset, value, sig.value_size);
-  const sp_t copy = sp_new(box, NULL, NULL);
+  const sp_t copy = sp_new(box, slot_dtor, NULL);
   if (copy.ptr == NULL) {
     free(box);
     return ENOMEM;
