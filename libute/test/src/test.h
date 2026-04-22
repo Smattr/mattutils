@@ -77,17 +77,17 @@ void run_cleanups(void);
 #define ASSERT_(a, a_name, op, b, b_name)                                      \
   do {                                                                         \
     atomic_flag_test_and_set_explicit(&has_assertion_, memory_order_release);  \
-    __typeof__(a) _a = (a);                                                    \
-    __typeof__(b) _b = (b);                                                    \
-    if (!(_a op _b)) {                                                         \
+    __typeof__(a) a_ = (a);                                                    \
+    __typeof__(b) b_ = (b);                                                    \
+    if (!(a_ op b_)) {                                                         \
       flockfile(stderr);                                                       \
       fprintf(stderr, "failed\n    %s:%d: assertion “%s %s %s” failed\n",      \
               __FILE__, __LINE__, #a_name, #op, #b_name);                      \
       fprintf(stderr, "      %s = ", #a_name);                                 \
-      fprintf(stderr, PRINT_FMT(_a), _a);                                      \
+      fprintf(stderr, PRINT_FMT(a_), a_);                                      \
       fprintf(stderr, "\n");                                                   \
       fprintf(stderr, "      %s = ", #b_name);                                 \
-      fprintf(stderr, PRINT_FMT(_b), _b);                                      \
+      fprintf(stderr, PRINT_FMT(b_), b_);                                      \
       fprintf(stderr, "\n");                                                   \
       fflush(stderr);                                                          \
       funlockfile(stderr);                                                     \
