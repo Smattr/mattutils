@@ -22,7 +22,7 @@ size_t set_unboxed_size_(set_t_ *set, set_sig_t_ sig UNUSED) {
   if (sp.ptr == NULL)
     return 0;
 
-  set_impl_t *const s = sp.ptr;
+  const set_impl_t *const s = sp.ptr;
   const size_t used = atomic_load_explicit(&s->used, memory_order_acquire);
   const size_t deleted =
       atomic_load_explicit(&s->deleted, memory_order_acquire);
