@@ -117,8 +117,8 @@ void run_cleanups(void);
 
 #define ASSERT_NOT_NULL(p)                                                     \
   do {                                                                         \
-    const void *_p = (p);                                                      \
-    ASSERT_(_p, p, !=, (const void *)NULL, NULL);                              \
+    const void *p_ = (p);                                                      \
+    ASSERT_(p_, p, !=, (const void *)NULL, NULL);                              \
   } while (0)
 
 #define ASSERT_STREQ(a, b)                                                     \
