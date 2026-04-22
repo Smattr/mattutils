@@ -127,6 +127,16 @@ extern "C" {
   dict_contains_(&(dict)->impl, (TYPEOF((dict)->witness->k)[1]){key},          \
                  DICT_SIG_(dict))
 
+/// get the number of items in a dictionary
+///
+/// This macro can be thought of as having the C type:
+///
+///   size_t DICT_SIZE(DICT(<key_type>, <value_type>) *dict);
+///
+/// @param dict Dictionary to operate on
+/// @return Size of the dictionary
+#define DICT_SIZE(dict) dict_size_(&(dict)->impl)
+
 /// clear a dictionary and deallocate its backing resources
 ///
 /// This macro can be thought of as having the C type:
@@ -215,6 +225,12 @@ bool dict_remove_(dict_t_ *dict, const void *key, dict_sig_t_ sig);
 /// @param sig Signature of the dictionary
 /// @return True if the key was found in the dictionary
 bool dict_contains_(dict_t_ *dict, const void *key, dict_sig_t_ sig);
+
+/// get the number of items in a dictionary
+///
+/// @param dict Dictionary to operate on
+/// @return Size of the dictionary
+size_t dict_size_(dict_t_ *dict);
 
 /// clear a dictionary and deallocate its backing resources
 ///

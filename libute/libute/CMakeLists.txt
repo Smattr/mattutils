@@ -10,6 +10,7 @@ add_library(libute
   src/dict_get_.c
   src/dict_remove_.c
   src/dict_set_.c
+  src/dict_size_.c
   src/dword_atomic_cas.c
   src/dword_atomic_cas_lo.c
   src/dword_atomic_cas_hi.c
