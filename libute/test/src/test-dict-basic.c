@@ -150,3 +150,47 @@ TEST("0-sized dictionary key") {
 
   DICT_FREE(&xs);
 }
+
+/// a dictionary with 0-sized value, a Clang/GCC extension
+TEST("0-sized dictionary value") {
+  struct foo {};
+  DICT(int, struct foo) xs = {0};
+
+  for (int i = 0; i < 10; ++i) {
+    const int r = DICT_SET(&xs, i, (struct foo){});
+    ASSERT_EQ(r, 0);
+    ASSERT_EQ(DICT_SIZE(&xs), (size_t)i + 1);
+
+    for (int j = 0; j < 10; ++j) {
+      const bool present = DICT_CONTAINS(&xs, j);
+      const struct foo *const v = DICT_GET(&xs, j);
+      if (j <= i) {
+        ASSERT(present);
+        ASSERT_NOT_NULL(v);
+      } else {
+        ASSERT(!present);
+        ASSERT_NULL(v);
+      }
+    }
+  }
+
+  for (int i = 0; i < 10; ++i) {
+    const bool r = DICT_REMOVE(&xs, i);
+    ASSERT(r);
+    ASSERT_EQ(DICT_SIZE(&xs), 10 - (size_t)i - 1);
+
+    for (int j = 0; j < 10; ++j) {
+      const bool present = DICT_CONTAINS(&xs, j);
+      const struct foo *const v = DICT_GET(&xs, j);
+      if (j <= i) {
+        ASSERT(!present);
+        ASSERT_NULL(v);
+      } else {
+        ASSERT(present);
+        ASSERT_NOT_NULL(v);
+      }
+    }
+  }
+
+  DICT_FREE(&xs);
+}
