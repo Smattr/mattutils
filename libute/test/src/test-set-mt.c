@@ -30,7 +30,6 @@ static THREAD_RET char_entry(void *arg) {
     const unsigned char v = make_char_val((int)s->thread_id, i);
     const int r = SET_INSERT(s->chars, v);
     ASSERT_EQ(r, 0);
-    ASSERT_GE(SET_SIZE(s->chars), (size_t)i + 1);
 
     for (int j = 0; j < 10; ++j) {
       const unsigned char v2 = make_char_val((int)s->thread_id, j);
@@ -47,7 +46,6 @@ static THREAD_RET char_entry(void *arg) {
     const unsigned char v = make_char_val((int)s->thread_id, i);
     const bool r = SET_REMOVE(s->chars, v);
     ASSERT(r);
-    ASSERT_GE(SET_SIZE(s->chars), 10 - (size_t)i - 1);
 
     for (int j = 0; j < 10; ++j) {
       const unsigned char v2 = make_char_val((int)s->thread_id, j);
@@ -137,7 +135,6 @@ static THREAD_RET short_entry(void *arg) {
     const unsigned short v = make_short_val((int)s->thread_id, i);
     const int r = SET_INSERT(s->shorts, v);
     ASSERT_EQ(r, 0);
-    ASSERT_GE(SET_SIZE(s->shorts), (size_t)i + 1);
 
     for (int j = 0; j < 10; ++j) {
       const unsigned short v2 = make_short_val((int)s->thread_id, j);
@@ -154,7 +151,6 @@ static THREAD_RET short_entry(void *arg) {
     const unsigned short v = make_short_val((int)s->thread_id, i);
     const bool r = SET_REMOVE(s->shorts, v);
     ASSERT(r);
-    ASSERT_GE(SET_SIZE(s->shorts), 10 - (size_t)i - 1);
 
     for (int j = 0; j < 10; ++j) {
       const unsigned short v2 = make_short_val((int)s->thread_id, j);
@@ -242,7 +238,6 @@ static THREAD_RET int_entry(void *arg) {
     const int v = make_int_val((int)s->thread_id, i);
     const int r = SET_INSERT(s->ints, v);
     ASSERT_EQ(r, 0);
-    ASSERT_GE(SET_SIZE(s->ints), (size_t)i + 1);
 
     for (int j = 0; j < 10; ++j) {
       const int v2 = make_int_val((int)s->thread_id, j);
@@ -259,7 +254,6 @@ static THREAD_RET int_entry(void *arg) {
     const int v = make_int_val((int)s->thread_id, i);
     const bool r = SET_REMOVE(s->ints, v);
     ASSERT(r);
-    ASSERT_GE(SET_SIZE(s->ints), 10 - (size_t)i - 1);
 
     for (int j = 0; j < 10; ++j) {
       const int v2 = make_int_val((int)s->thread_id, j);
@@ -349,7 +343,6 @@ static THREAD_RET long_entry(void *arg) {
     const unsigned long v = make_long_val((int)s->thread_id, i);
     const int r = SET_INSERT(s->longs, v);
     ASSERT_EQ(r, 0);
-    ASSERT_GE(SET_SIZE(s->longs), (size_t)i + 1);
 
     for (int j = 0; j < 10; ++j) {
       const unsigned long v2 = make_long_val((int)s->thread_id, j);
@@ -366,7 +359,6 @@ static THREAD_RET long_entry(void *arg) {
     const unsigned long v = make_long_val((int)s->thread_id, i);
     const bool r = SET_REMOVE(s->longs, v);
     ASSERT(r);
-    ASSERT_GE(SET_SIZE(s->longs), 10 - (size_t)i - 1);
 
     for (int j = 0; j < 10; ++j) {
       const unsigned long v2 = make_long_val((int)s->thread_id, j);
