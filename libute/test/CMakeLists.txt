@@ -32,6 +32,7 @@ add_executable(test
   src/test-set-eexist.c
   src/test-set-mt.c
   src/test-set-over-align.c
+  src/test-set-packed.c
   src/test-set-user-dtor.c
   src/test-uint128-cas.c
   src/test-uint128-cas-fail.c
