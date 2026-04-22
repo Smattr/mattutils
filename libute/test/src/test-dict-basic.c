@@ -115,3 +115,38 @@ TEST("int64_t→struct dict") {
 
   DICT_FREE(&xs);
 }
+
+/// a dictionary with 0-sized key, a Clang/GCC extension
+TEST("0-sized dictionary key") {
+  struct foo {};
+  DICT(struct foo, int) xs = {0};
+
+  for (int i = 0; i < 10; ++i) {
+    const int r = DICT_SET(&xs, (struct foo){}, 42);
+    ASSERT_EQ(r, 0);
+    ASSERT_EQ(DICT_SIZE(&xs), 1u);
+
+    for (int j = 0; j < 10; ++j) {
+      const bool present = DICT_CONTAINS(&xs, (struct foo){});
+      ASSERT(present);
+      const int *const v = DICT_GET(&xs, (struct foo){});
+      ASSERT_NOT_NULL(v);
+      ASSERT_EQ(*v, 42);
+    }
+  }
+
+  for (int i = 0; i < 10; ++i) {
+    const bool r = DICT_REMOVE(&xs, (struct foo){});
+    if (i == 0) {
+      ASSERT(r);
+    } else {
+      ASSERT(!r);
+    }
+    ASSERT_EQ(DICT_SIZE(&xs), 0u);
+
+    const bool present = DICT_CONTAINS(&xs, (struct foo){});
+    ASSERT(!present);
+  }
+
+  DICT_FREE(&xs);
+}
