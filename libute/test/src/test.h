@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct _test_case {
+typedef struct test_case_ {
   void (*function)(void);
   const char *description;
-  struct _test_case *next;
+  struct test_case_ *next;
 } test_case_t;
 
 extern test_case_t *test_cases;
