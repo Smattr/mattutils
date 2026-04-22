@@ -19,8 +19,8 @@ typedef struct test_case_ {
 
 extern test_case_t *test_cases;
 
-#define _JOIN(x, y) x##y
-#define JOIN(x, y) _JOIN(x, y)
+#define JOIN_(x, y) x##y
+#define JOIN(x, y) JOIN_(x, y)
 
 extern atomic_flag has_assertion_;
 
