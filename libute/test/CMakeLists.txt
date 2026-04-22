@@ -9,6 +9,7 @@ add_executable(test
   src/test-asp-mt.c
   src/test-asp-self-store-aba.c
   src/test-asp-st.c
+  src/test-dict-basic.c
   src/test-int128-cas.c
   src/test-int128-cas-ro.c
   src/test-int128-cas-fail.c
