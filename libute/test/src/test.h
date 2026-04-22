@@ -121,6 +121,12 @@ void run_cleanups(void);
     ASSERT_(p_, p, !=, (const void *)NULL, NULL);                              \
   } while (0)
 
+#define ASSERT_NULL(p)                                                         \
+  do {                                                                         \
+    const void *p_ = (p);                                                      \
+    ASSERT_(p_, p, ==, (const void *)NULL, NULL);                              \
+  } while (0)
+
 #define ASSERT_STREQ(a, b)                                                     \
   do {                                                                         \
     atomic_flag_test_and_set_explicit(&has_assertion_, memory_order_release);  \
