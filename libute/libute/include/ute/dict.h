@@ -124,7 +124,7 @@ extern "C" {
 /// @param key Key to seek
 /// @return True if the key was found in the dictionary
 #define DICT_CONTAINS(dict, key)                                               \
-  dict_contains_(&(src)->impl, (TYPEOF((dict)->witness->k)[1]){key},           \
+  dict_contains_(&(dict)->impl, (TYPEOF((dict)->witness->k)[1]){key},          \
                  DICT_SIG_(dict))
 
 /// clear a dictionary and deallocate its backing resources
@@ -172,7 +172,7 @@ typedef struct {
                  .witness_size = sizeof(*(dict)->witness),                     \
                  .witness_alignment = alignof(TYPEOF(*(dict)->witness)),       \
                  .witness_value_offset =                                       \
-                     offsetof(TYPEOF(*(dict)->witness), value),                \
+                     offsetof(TYPEOF(*(dict)->witness), v),                    \
                  .hash = (dict)->hash})
 
 /// insert or update an entry in a dictionary
