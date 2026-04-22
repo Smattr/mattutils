@@ -65,6 +65,9 @@ void run_cleanups(void);
 
 #define PRINT_FMT(x)                                                           \
   _Generic((x),                                                                \
+      char: "%c",                                                              \
+      signed char: "%hhd",                                                     \
+      unsigned char: "%hhu",                                                   \
       int: "%d",                                                               \
       long: "%ld",                                                             \
       long long: "%lld",                                                       \
