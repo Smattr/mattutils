@@ -124,15 +124,15 @@ void run_cleanups(void);
 #define ASSERT_STREQ(a, b)                                                     \
   do {                                                                         \
     atomic_flag_test_and_set_explicit(&has_assertion_, memory_order_release);  \
-    const char *_a = (a);                                                      \
-    const char *_b = (b);                                                      \
-    if (strcmp(_a, _b) != 0) {                                                 \
+    const char *a_ = (a);                                                      \
+    const char *b_ = (b);                                                      \
+    if (strcmp(a_, b_) != 0) {                                                 \
       flockfile(stderr);                                                       \
       fprintf(stderr,                                                          \
               "failed\n    %s:%d: assertion “strcmp(%s, %s) == 0” failed\n",   \
               __FILE__, __LINE__, #a, #b);                                     \
-      fprintf(stderr, "      %s = \"%s\"\n", #a, _a);                          \
-      fprintf(stderr, "      %s = \"%s\"\n", #b, _b);                          \
+      fprintf(stderr, "      %s = \"%s\"\n", #a, a_);                          \
+      fprintf(stderr, "      %s = \"%s\"\n", #b, b_);                          \
       fflush(stderr);                                                          \
       funlockfile(stderr);                                                     \
       run_cleanups();                                                          \
