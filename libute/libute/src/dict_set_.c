@@ -215,7 +215,9 @@ retry:;
       goto retry;
     }
 
-    if (!sp_cas(&dict->root, sp, new_sp))
+    const bool r = sp_cas(&dict->root, sp, new_sp);
+    assert((r || sp.ptr == NULL) && "successful migrations race one another");
+    if (!r)
       sp_rel(new_sp);
     sp_rel(sp);
     goto retry;
