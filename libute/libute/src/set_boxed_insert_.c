@@ -51,7 +51,7 @@ static void *alloc(size_t alignment, size_t size) {
       size += 4 - size % 4;
   }
 
-  return aligned_alloc(alignment, size);
+  return alloc_aligned(alignment, size);
 }
 
 /// deallocate a set that is going out of scope
@@ -95,7 +95,7 @@ static void slot_dtor(void *ptr, void *context) {
   assert(ptr != NULL);
 
   slot_dtor_core(ptr, context);
-  free(ptr);
+  free_aligned(ptr);
 }
 
 /// insert an item into a set
