@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <ute/asp.h>
 #include <ute/dict.h>
@@ -18,6 +19,7 @@ bool dict_contains_(dict_t_ *dict, const void *key, dict_sig_t_ sig) {
 
   const size_t h = (sig.hash != NULL ? sig.hash : hash)(key, sig.key_size);
 
+retry:;
   // acquire a reference to the dictionary
   sp_t sp = sp_acq(&dict->root);
 
@@ -29,26 +31,28 @@ bool dict_contains_(dict_t_ *dict, const void *key, dict_sig_t_ sig) {
 
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
     const size_t index = (h + i) % dict_capacity(*d);
-    const dword_t slot = slot_load(&d->base[index]);
-
-    // skip checking whether this slot is moved or not, because we do not care
-    // if we are racing with a rehashing and reading an older stale copy of the
-    // table
+    const dword_t k = key_slot_load(&d->key[index]);
 
     // if we see an empty slot, we have probed as far as this item would be
-    if (slot_is_free(slot))
+    if (key_slot_is_free(k))
       break;
 
-    // skip tombstones
-    if (slot_is_deleted(slot))
+    // if this our sought item?
+    const void *const p = key_slot_to_ptr(k);
+    if (sig.key_size != 0 && memcmp(key, p, sig.key_size) != 0)
       continue;
 
-    // check if this is the item we are seeking
-    const void *const p = slot_to_ptr(slot);
-    if (sig.key_size == 0 || memcmp(key, p, sig.key_size) == 0) {
-      sp_rel(sp);
-      return true;
+    // load the corresponding value slot
+    const uintptr_t v = value_slot_load(&d->value[index]);
+
+    sp_rel(sp);
+
+    if (value_slot_is_moved(v)) {
+      // someone is rehashing the dictionary into new storage
+      goto retry;
     }
+
+    return !value_slot_is_free(v);
   }
 
   sp_rel(sp);

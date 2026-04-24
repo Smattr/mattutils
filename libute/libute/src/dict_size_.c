@@ -21,16 +21,9 @@ size_t dict_size_(dict_t_ *dict) {
     return 0;
 
   const dict_impl_t *const d = sp.ptr;
-  const size_t used = atomic_load_explicit(&d->used, memory_order_acquire);
-  const size_t deleted =
-      atomic_load_explicit(&d->deleted, memory_order_acquire);
+  const size_t size = atomic_load_explicit(&d->size, memory_order_acquire);
 
   sp_rel(sp);
 
-  // in the case of racing insertions and deletions, we can see an inconsistent
-  // state
-  if (used < deleted)
-    return 0;
-
-  return used - deleted;
+  return size;
 }

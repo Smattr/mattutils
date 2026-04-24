@@ -30,28 +30,27 @@ void *dict_get_(dict_t_ *dict, const void *key, dict_sig_t_ sig) {
 
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
     const size_t index = (h + i) % dict_capacity(*d);
-    dword_t slot = slot_load(&d->base[index]);
+    const dword_t k = key_slot_load(&d->key[index]);
+
+    // if this slot is unoccupied, we have probed as far as the item could be
+    if (key_slot_is_free(k))
+      break;
+
+    // is this our sought item?
+    void *const p = key_slot_to_ptr(k);
+    if (sig.key_size != 0 && memcmp(p, key, sig.key_size) != 0)
+      continue;
+
+    // load the corresponding value slot
+    const uintptr_t v = value_slot_load(&d->value[index]);
+
+    sp_rel(sp);
 
     // we should not encounter anyone else rehashing the dictionary because this
     // violates our precondition
-    assert(!slot_is_moved(slot) && "race between DICT_GET and modifier");
+    assert(!value_slot_is_moved(v) && "race between DICT_GET and modifier");
 
-    // if this slot is unoccupied, we have probed as far as the item could be
-    if (slot_is_free(slot))
-      break;
-
-    // skip tombstones
-    if (slot_is_deleted(slot))
-      continue;
-
-    // is this our sought item?
-    void *const p = slot_to_ptr(slot);
-    if (sig.key_size == 0 || memcmp(p, key, sig.key_size) == 0) {
-      sp_rel(sp);
-      // compute a pointer to the value within the slot
-      void *const value = (void *)((uintptr_t)p + sig.witness_value_offset);
-      return value;
-    }
+    return value_slot_to_ptr(v);
   }
 
   sp_rel(sp);

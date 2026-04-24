@@ -162,13 +162,10 @@ typedef struct {
 
 /// the characterisation of a dictionary
 typedef struct {
-  size_t key_alignment;        ///< required alignment of keys
-  size_t key_size;             ///< byte size of keys
-  size_t value_alignment;      ///< required alignment of values
-  size_t value_size;           ///< byte size of values
-  size_t witness_size;         ///< byte size of witness struct
-  size_t witness_alignment;    ///< required alignment of witness struct
-  size_t witness_value_offset; ///< byte offset of `witness->v`
+  size_t key_alignment;   ///< required alignment of keys
+  size_t key_size;        ///< byte size of keys
+  size_t value_alignment; ///< required alignment of values
+  size_t value_size;      ///< byte size of values
 
   size_t (*hash)(const void *, size_t); ///< dictionary hasher
 } dict_sig_t_;
@@ -179,10 +176,6 @@ typedef struct {
                  .key_size = sizeof((dict)->witness->k),                       \
                  .value_alignment = alignof(TYPEOF((dict)->witness->v)),       \
                  .value_size = sizeof((dict)->witness->v),                     \
-                 .witness_size = sizeof(*(dict)->witness),                     \
-                 .witness_alignment = alignof(TYPEOF(*(dict)->witness)),       \
-                 .witness_value_offset =                                       \
-                     offsetof(TYPEOF(*(dict)->witness), v),                    \
                  .hash = (dict)->hash})
 
 /// insert or update an entry in a dictionary
