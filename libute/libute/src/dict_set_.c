@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ute/alloc_aligned.h>
 #include <ute/asp.h>
 #include <ute/attr.h>
 #include <ute/dict.h>
@@ -20,7 +21,7 @@
 static void *aligned_calloc(size_t alignment, size_t n, size_t size) {
   if (n > 0 && SIZE_MAX / n < size)
     return NULL;
-  void *const p = aligned_alloc(alignment, n * size);
+  void *const p = alloc_aligned(alignment, n * size);
   if (p != NULL)
     memset(p, 0, n * size);
   return p;
@@ -80,7 +81,7 @@ static void dict_dtor(void *dict, void *context) {
   }
 
   free(d->value);
-  free(d->key);
+  free_aligned(d->key);
   free(d);
 }
 
@@ -299,7 +300,7 @@ retry:;
 
     atomic_uintptr_t *const vs = calloc((size_t)1 << c >> 1, sizeof(vs[0]));
     if (vs == NULL) {
-      free(ks);
+      free_aligned(ks);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
@@ -311,7 +312,7 @@ retry:;
     dict_impl_t *new = malloc(sizeof(*new));
     if (new == NULL) {
       free(vs);
-      free(ks);
+      free_aligned(ks);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
