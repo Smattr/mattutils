@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ute/alloc_aligned.h>
 #include <ute/asp.h>
 #include <ute/dict.h>
 #include <ute/dword.h>
@@ -66,7 +67,7 @@ retry1:;
       void *const value = value_slot_to_ptr(v);
       if (value != NULL && sig.value_dtor != NULL)
         sig.value_dtor(value);
-      free(value);
+      free_aligned(value);
     }
     return true;
   }

@@ -50,7 +50,7 @@ static void *alloc(size_t alignment, size_t size) {
       size += 2 - size % 2;
   }
 
-  return aligned_alloc(alignment, size);
+  return alloc_aligned(alignment, size);
 }
 
 /// deallocate a dictionary that is going out of scope
@@ -77,7 +77,7 @@ static void dict_dtor(void *dict, void *context) {
     void *const value = value_slot_to_ptr(v);
     if (value != NULL && value_dtor != NULL)
       value_dtor(value);
-    free(value);
+    free_aligned(value);
   }
 
   free(d->value);
@@ -167,7 +167,7 @@ static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
       void *const val = value_slot_to_ptr(v);
       if (val != NULL && sig.value_dtor != NULL)
         sig.value_dtor(val);
-      free(val);
+      free_aligned(val);
     }
     if (value_slot_is_free(v))
       (void)atomic_fetch_add_explicit(&dict->size, 1, memory_order_acq_rel);
@@ -293,7 +293,7 @@ retry:;
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free(v);
+      free_aligned(v);
       sp_rel(k);
       return ENOMEM;
     }
@@ -304,7 +304,7 @@ retry:;
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free(v);
+      free_aligned(v);
       sp_rel(k);
       return ENOMEM;
     }
@@ -316,7 +316,7 @@ retry:;
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free(v);
+      free_aligned(v);
       sp_rel(k);
       return ENOMEM;
     }
@@ -328,7 +328,7 @@ retry:;
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free(v);
+      free_aligned(v);
       sp_rel(k);
       return ENOMEM;
     }
