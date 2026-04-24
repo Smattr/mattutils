@@ -12,6 +12,7 @@ add_executable(test
   src/test-dict-basic.c
   src/test-dict-conflict.c
   src/test-dict-mt.c
+  src/test-dict-set-contains.c
   src/test-int128-cas.c
   src/test-int128-cas-ro.c
   src/test-int128-cas-fail.c
