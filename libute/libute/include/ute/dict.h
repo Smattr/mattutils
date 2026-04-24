@@ -1,8 +1,6 @@
 /// @file
 /// @brief Type-generic dictionary
 ///
-/// XXX: this implementation is entirely untested as of now
-///
 /// This dictionary is:
 ///   • Type-generic – works for any element type
 ///   • Type-safe – compiler should catch all incorrect parameter passing
