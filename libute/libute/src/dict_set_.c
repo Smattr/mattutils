@@ -96,7 +96,7 @@ static void key_dtor(void *ptr, void *context) {
   if (dtor != NULL)
     dtor(ptr);
 
-  free(ptr);
+  free_aligned(ptr);
 }
 
 /// insert/update an entry in a dictionary
@@ -241,7 +241,7 @@ int dict_set_(dict_t_ *dict, void *key, void *value, dict_sig_t_ sig) {
 
   // copy key for insertion
   const size_t k_size = sig.key_size == 0 ? 1 : sig.key_size;
-  void *const box = aligned_alloc(sig.key_alignment, k_size);
+  void *const box = alloc_aligned(sig.key_alignment, k_size);
   if (box == NULL) {
     if (sig.value_dtor != NULL)
       sig.value_dtor(value);
