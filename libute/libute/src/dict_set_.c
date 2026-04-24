@@ -52,6 +52,10 @@ static void *alloc(size_t alignment, size_t size) {
   return aligned_alloc(alignment, size);
 }
 
+/// deallocate a dictionary that is going out of scope
+///
+/// @param dict Dictionary to operate on
+/// @param context Optional user-supplied value destructor
 static void dict_dtor(void *dict, void *context) {
   assert(dict != NULL);
 
@@ -80,11 +84,11 @@ static void dict_dtor(void *dict, void *context) {
   free(d);
 }
 
-/// deallocate a dictionary element that is going out of scope
+/// deallocate a dictionary key that is going out of scope
 ///
-/// @param ptr Pointer to the element
+/// @param ptr Pointer to the key
 /// @param context Optional user-supplied key destructor
-static void slot_dtor(void *ptr, void *context) {
+static void key_dtor(void *ptr, void *context) {
   assert(ptr != NULL);
 
   void (*dtor)(void *) = context;
@@ -94,6 +98,17 @@ static void slot_dtor(void *ptr, void *context) {
   free(ptr);
 }
 
+/// insert/update an entry in a dictionary
+///
+/// The return value means:
+///   • 0 – the entry was inserted or updated
+///   • `ENOMEM` – not enough space to insert the entry
+///
+/// @param dict Dictionary to operate on
+/// @param key Key of entry to insert/update
+/// @param value Value to insert/update
+/// @param sig Signature of the dictionary
+/// @return 0 on success or an errno otherwise
 static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
   assert(dict != NULL);
   assert(key.ptr != NULL);
@@ -166,6 +181,17 @@ static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
   return ENOMEM;
 }
 
+/// insert everything from one dictionary into another
+///
+/// The destination dictionary is assumed to have enough space to store all
+/// entries from the source dictionary without expansion. On success, the source
+/// dictionary is “consumed” in that the destination takes ownership over all
+/// its values.
+///
+/// @param dst Dictionary to insert into
+/// @param src Dictionary to insert from
+/// @param sig Signature of the dictionary
+/// @return 0 on success or an errno on failure
 static int rehash(dict_impl_t *dst, dict_impl_t *src, dict_sig_t_ sig) {
   assert(dst != NULL);
   assert(src == NULL || dict_capacity(*dst) >= dict_capacity(*src));
@@ -224,11 +250,11 @@ int dict_set_(dict_t_ *dict, void *key, void *value, dict_sig_t_ sig) {
   }
   if (sig.key_size > 0)
     memcpy(box, key, sig.key_size);
-  const sp_t k = sp_new(box, slot_dtor, sig.key_dtor);
+  const sp_t k = sp_new(box, key_dtor, sig.key_dtor);
   if (k.ptr == NULL) {
     if (sig.value_dtor != NULL)
       sig.value_dtor(value);
-    slot_dtor(box, sig.key_dtor);
+    key_dtor(box, sig.key_dtor);
     return ENOMEM;
   }
 
