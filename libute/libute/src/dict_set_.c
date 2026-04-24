@@ -52,10 +52,11 @@ static void *alloc(size_t alignment, size_t size) {
   return aligned_alloc(alignment, size);
 }
 
-static void dict_dtor(void *dict, void *context UNUSED) {
+static void dict_dtor(void *dict, void *context) {
   assert(dict != NULL);
 
   dict_impl_t *const d = dict;
+  void (*value_dtor)(void *) = context;
 
   // free our keys
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
@@ -68,7 +69,10 @@ static void dict_dtor(void *dict, void *context UNUSED) {
   // free our values
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
     const uintptr_t v = value_slot_load(&d->value[i]);
-    free(value_slot_to_ptr(v));
+    void *const value = value_slot_to_ptr(v);
+    if (value != NULL && value_dtor != NULL)
+      value_dtor(value);
+    free(value);
   }
 
   free(d->value);
@@ -139,7 +143,12 @@ static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
       goto retry2;
 
     // cleanup any value we just overwrote
-    free(value_slot_to_ptr(v));
+    {
+      void *const val = value_slot_to_ptr(v);
+      if (val != NULL && sig.value_dtor != NULL)
+        sig.value_dtor(val);
+      free(val);
+    }
     if (value_slot_is_free(v))
       (void)atomic_fetch_add_explicit(&dict->size, 1, memory_order_acq_rel);
 
@@ -194,8 +203,7 @@ static int rehash(dict_impl_t *dst, dict_impl_t *src, dict_sig_t_ sig) {
   return 0;
 }
 
-int dict_set_(dict_t_ *dict, const void *key, const void *value,
-              dict_sig_t_ sig) {
+int dict_set_(dict_t_ *dict, const void *key, void *value, dict_sig_t_ sig) {
   assert(dict != NULL);
   assert(key != NULL || sig.key_size == 0);
   assert(value != NULL || sig.value_size == 0);
@@ -203,13 +211,18 @@ int dict_set_(dict_t_ *dict, const void *key, const void *value,
   // copy key for insertion
   const size_t k_size = sig.key_size == 0 ? 1 : sig.key_size;
   void *const box = aligned_alloc(sig.key_alignment, k_size);
-  if (box == NULL)
+  if (box == NULL) {
+    if (sig.value_dtor != NULL)
+      sig.value_dtor(value);
     return ENOMEM;
+  }
   if (sig.key_size > 0)
     memcpy(box, key, sig.key_size);
   const sp_t k = sp_new(box, slot_dtor, NULL);
   if (k.ptr == NULL) {
     free(box);
+    if (sig.value_dtor != NULL)
+      sig.value_dtor(value);
     return ENOMEM;
   }
 
@@ -217,6 +230,8 @@ int dict_set_(dict_t_ *dict, const void *key, const void *value,
   void *const v = alloc(sig.value_alignment, sig.value_size);
   if (v == NULL) {
     sp_rel(k);
+    if (sig.value_dtor != NULL)
+      sig.value_dtor(value);
     return ENOMEM;
   }
   if (sig.value_size > 0)
@@ -243,6 +258,8 @@ retry:;
         alignof(atomic_dword_t), (size_t)1 << c >> 1, sizeof(ks[0]));
     if (ks == NULL) {
       sp_rel(sp);
+      if (sig.value_dtor != NULL)
+        sig.value_dtor(v);
       free(v);
       sp_rel(k);
       return ENOMEM;
@@ -252,6 +269,8 @@ retry:;
     if (vs == NULL) {
       free(ks);
       sp_rel(sp);
+      if (sig.value_dtor != NULL)
+        sig.value_dtor(v);
       free(v);
       sp_rel(k);
       return ENOMEM;
@@ -262,16 +281,20 @@ retry:;
       free(vs);
       free(ks);
       sp_rel(sp);
+      if (sig.value_dtor != NULL)
+        sig.value_dtor(v);
       free(v);
       sp_rel(k);
       return ENOMEM;
     }
     *new = (dict_impl_t){.key = ks, .value = vs, .capacity = c};
 
-    sp_t new_sp = sp_new(new, dict_dtor, NULL);
+    sp_t new_sp = sp_new(new, dict_dtor, sig.value_dtor);
     if (new_sp.ptr == NULL) {
-      dict_dtor(new, NULL);
+      dict_dtor(new, sig.value_dtor);
       sp_rel(sp);
+      if (sig.value_dtor != NULL)
+        sig.value_dtor(v);
       free(v);
       sp_rel(k);
       return ENOMEM;

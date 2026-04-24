@@ -59,6 +59,12 @@ extern "C" {
     /* If this member is not null, it will be called when a key needs to be */ \
     /* hashed.                                                              */ \
     size_t (*hash)(const void *, size_t);                                      \
+                                                                               \
+    /** optional user-supplied value destructor                             */ \
+    /*                                                                      */ \
+    /* If this member is not null, it will be called on values immediately  */ \
+    /* before they are removed from the dictionary.                         */ \
+    void (*value_dtor)(void *);                                                \
   }
 
 /// insert or update an entry in a dictionary
@@ -67,6 +73,11 @@ extern "C" {
 ///
 ///   int DICT_SET(DICT(<key_type>, <value_type>) *dict, const <key_type> key,
 ///                const <value_type> value);
+///
+/// `value` is “consumed” regardless of whether the insertion is successful.
+/// This only matters if you have set the `value_dtor` member of the dictionary.
+/// That is, the caller is responsible for eventually calling the destructor on
+/// the passed in value, whether the insertion succeeds or fails.
 ///
 /// @param dict Dictionary to operate on
 /// @param key Key to insert
@@ -166,6 +177,7 @@ typedef struct {
   size_t value_size;      ///< byte size of values
 
   size_t (*hash)(const void *, size_t); ///< dictionary hasher
+  void (*value_dtor)(void *);           ///< value destructor
 } dict_sig_t_;
 
 /// construct a `dict_sig_t_` from a dictionary type
@@ -174,7 +186,8 @@ typedef struct {
                  .key_size = sizeof((dict)->witness->k),                       \
                  .value_alignment = alignof(TYPEOF((dict)->witness->v)),       \
                  .value_size = sizeof((dict)->witness->v),                     \
-                 .hash = (dict)->hash})
+                 .hash = (dict)->hash,                                         \
+                 .value_dtor = (dict)->value_dtor})
 
 /// insert or update an entry in a dictionary
 ///
@@ -183,8 +196,7 @@ typedef struct {
 /// @param value Value to insert
 /// @param sig Signature of the dictionary
 /// @return 0 on success or an errno on failure
-int dict_set_(dict_t_ *dict, const void *key, const void *value,
-              dict_sig_t_ sig);
+int dict_set_(dict_t_ *dict, const void *key, void *value, dict_sig_t_ sig);
 
 /// retrieve a value from a dictionary
 ///

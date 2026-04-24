@@ -62,7 +62,12 @@ retry1:;
       goto retry2;
     (void)atomic_fetch_sub_explicit(&d->size, 1, memory_order_acq_rel);
     sp_rel(sp);
-    free(value_slot_to_ptr(v));
+    {
+      void *const value = value_slot_to_ptr(v);
+      if (value != NULL && sig.value_dtor != NULL)
+        sig.value_dtor(value);
+      free(value);
+    }
     return true;
   }
 
