@@ -248,7 +248,7 @@ retry:;
       return ENOMEM;
     }
 
-    _Atomic uintptr_t *const vs = calloc((size_t)1 << c >> 1, sizeof(vs[0]));
+    atomic_uintptr_t *const vs = calloc((size_t)1 << c >> 1, sizeof(vs[0]));
     if (vs == NULL) {
       free(ks);
       sp_rel(sp);

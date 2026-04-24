@@ -6,6 +6,7 @@
 #include "set_bitset.h"
 #include <assert.h>
 #include <limits.h>
+#include <stdatomic.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <ute/asp.h>
@@ -27,7 +28,7 @@ size_t set_bitset_size_(set_t_ *set, set_sig_t_ sig) {
   const size_t words = bits / WORD_SIZE + (bits % WORD_SIZE == 0 ? 0 : 1);
 
   // count set bits
-  const _Atomic uintptr_t *const s = sp.ptr;
+  const atomic_uintptr_t *const s = sp.ptr;
   size_t size = 0;
   for (size_t i = 0; i < words; ++i) {
     const uintptr_t slot = slot_load(&s[i]);

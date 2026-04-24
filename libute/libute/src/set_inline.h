@@ -14,18 +14,18 @@
 
 enum { WORD_SIZE = sizeof(uintptr_t) * CHAR_BIT };
 
-static inline uintptr_t word_load(const _Atomic uintptr_t *word) {
+static inline uintptr_t word_load(const atomic_uintptr_t *word) {
   return atomic_load_explicit(word, memory_order_acquire);
 }
 
-static inline void word_store(_Atomic uintptr_t *dst, uintptr_t src) {
+static inline void word_store(atomic_uintptr_t *dst, uintptr_t src) {
   atomic_store_explicit(dst, src, memory_order_release);
 }
 
-static inline uintptr_t word_and(_Atomic uintptr_t *word, uintptr_t src) {
+static inline uintptr_t word_and(atomic_uintptr_t *word, uintptr_t src) {
   return atomic_fetch_and_explicit(word, src, memory_order_acq_rel);
 }
 
-static inline uintptr_t word_or(_Atomic uintptr_t *word, uintptr_t src) {
+static inline uintptr_t word_or(atomic_uintptr_t *word, uintptr_t src) {
   return atomic_fetch_or_explicit(word, src, memory_order_acq_rel);
 }

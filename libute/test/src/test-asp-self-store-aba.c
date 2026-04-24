@@ -63,7 +63,7 @@ static THREAD_RET count(void *arg) {
     const sp_t sp = sp_acq(s->ptr);
 
     // unless this is our thread ID, retry
-    _Atomic size_t *const id_ptr = sp.ptr;
+    atomic_size_t *const id_ptr = sp.ptr;
     const size_t id = atomic_load_explicit(id_ptr, memory_order_acquire);
     if (id != s->thread_id) {
       sp_rel(sp);
@@ -101,7 +101,7 @@ TEST("atomic shared pointer store/acquire race") {
 
   // allocate a size_t pointer in this space
   {
-    _Atomic size_t *const p = malloc(sizeof(*p));
+    atomic_size_t *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     atomic_store_explicit(p, 0, memory_order_release);
     const sp_t sp = sp_new(p, free_, NULL);

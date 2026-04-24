@@ -114,7 +114,7 @@ struct sp_ctrl {
   void *value;                  ///< the managed underlying pointer
   void (*dtor)(void *, void *); ///< optional user-supplied destructor
   void *dtor_context;           ///< second parameter to `dtor`
-  _Atomic size_t ref_count;     ///< outstanding references
+  atomic_size_t ref_count;      ///< outstanding references
 };
 
 /// increment the reference count of a shared pointer

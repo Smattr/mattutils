@@ -30,7 +30,7 @@ static THREAD_RET inplace_entry(void *arg) {
     const sp_t sp = sp_acq(s->ptr);
 
     // unless this is our thread ID, retry
-    _Atomic size_t *const id_ptr = sp.ptr;
+    atomic_size_t *const id_ptr = sp.ptr;
     const size_t id = atomic_load_explicit(id_ptr, memory_order_acquire);
     if (id != s->thread_id) {
       sp_rel(sp);
@@ -68,7 +68,7 @@ TEST("atomic shared pointer counter in-place, multi-threaded") {
 
   // allocate a size_t pointer in this space
   {
-    _Atomic size_t *const p = malloc(sizeof(*p));
+    atomic_size_t *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     atomic_store_explicit(p, 0, memory_order_release);
     const sp_t sp = sp_new(p, free_, NULL);
@@ -112,7 +112,7 @@ static THREAD_RET reallocate_entry(void *arg) {
     // if this was null and we are the first thread…
     if (sp.ptr == NULL && s->thread_id == 0) {
       // …write 1
-      _Atomic size_t *const p = malloc(sizeof(*p));
+      atomic_size_t *const p = malloc(sizeof(*p));
       ASSERT_NOT_NULL(p);
       atomic_store_explicit(p, 1, memory_order_release);
       const sp_t new = sp_new(p, free_, NULL);
@@ -122,7 +122,7 @@ static THREAD_RET reallocate_entry(void *arg) {
     }
 
     // if this is not our thread ID, retry
-    _Atomic size_t *const id_ptr = sp.ptr;
+    atomic_size_t *const id_ptr = sp.ptr;
     const size_t id = atomic_load_explicit(id_ptr, memory_order_acquire);
     if (id != s->thread_id) {
       sp_rel(sp);
@@ -130,7 +130,7 @@ static THREAD_RET reallocate_entry(void *arg) {
     }
 
     // create a new pointer with the next thread’s ID
-    _Atomic size_t *const next = malloc(sizeof(*next));
+    atomic_size_t *const next = malloc(sizeof(*next));
     ASSERT_NOT_NULL(next);
     atomic_store_explicit(next, s->thread_id + 1, memory_order_release);
     const sp_t new = sp_new(next, free_, NULL);
@@ -163,7 +163,7 @@ TEST("atomic shared pointer counter reallocate, multi-threaded") {
 
   // allocate a size_t pointer in this space
   {
-    _Atomic size_t *const p = malloc(sizeof(*p));
+    atomic_size_t *const p = malloc(sizeof(*p));
     ASSERT_NOT_NULL(p);
     atomic_store_explicit(p, 0, memory_order_release);
     const sp_t sp = sp_new(p, free_, NULL);
@@ -201,7 +201,7 @@ static THREAD_RET write_entry(void *arg) {
   state_t *const s = arg;
 
   // ignore the current value of the pointer, and write our own
-  _Atomic size_t *const p = malloc(sizeof(*p));
+  atomic_size_t *const p = malloc(sizeof(*p));
   ASSERT_NOT_NULL(p);
   atomic_store_explicit(p, s->thread_id, memory_order_release);
   const sp_t new = sp_new(p, free_, NULL);

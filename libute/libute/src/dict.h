@@ -61,10 +61,10 @@ typedef struct {
   ///                                               │
   ///                                               │
   ///                           has been migrated? ─┘
-  _Atomic uintptr_t *value;
+  atomic_uintptr_t *value;
 
-  _Atomic size_t used; ///< how many key slots are non-empty?
-  _Atomic size_t size; ///< how many value slots are non-empty?
+  atomic_size_t used; ///< how many key slots are non-empty?
+  atomic_size_t size; ///< how many value slots are non-empty?
   size_t capacity; ///< exponent + 1 of how many total slots at `key`/`value`?
 } dict_impl_t;
 
@@ -79,7 +79,7 @@ static inline dword_t key_slot_load(atomic_dword_t *slotptr) {
 }
 
 /// atomically read a value slot from a hash table
-static inline uintptr_t value_slot_load(_Atomic uintptr_t *slotptr) {
+static inline uintptr_t value_slot_load(atomic_uintptr_t *slotptr) {
   return atomic_load_explicit(slotptr, memory_order_acquire);
 }
 
@@ -90,7 +90,7 @@ static inline bool key_slot_cas(atomic_dword_t *slotptr, dword_t *expected,
 }
 
 /// atomically compare-and-swap into a hash table value slot
-static inline bool value_slot_cas(_Atomic uintptr_t *slotptr,
+static inline bool value_slot_cas(atomic_uintptr_t *slotptr,
                                   uintptr_t *expected, uintptr_t desired) {
   return atomic_compare_exchange_strong_explicit(
       slotptr, expected, desired, memory_order_acq_rel, memory_order_acquire);

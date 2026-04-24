@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +31,7 @@ retry:;
   if (sp.ptr == NULL) {
     const size_t bits = (size_t)1 << (sig.size * CHAR_BIT);
     const size_t words = bits / WORD_SIZE + (bits % WORD_SIZE == 0 ? 0 : 1);
-    _Atomic uintptr_t *const s = calloc(words, sizeof(s[0]));
+    atomic_uintptr_t *const s = calloc(words, sizeof(s[0]));
     if (s == NULL)
       return ENOMEM;
 
@@ -55,7 +56,7 @@ retry:;
   // insert it
   const size_t word_offset = value / WORD_SIZE;
   const size_t bit_offset = value % WORD_SIZE;
-  _Atomic uintptr_t *const s = sp.ptr;
+  atomic_uintptr_t *const s = sp.ptr;
   const uintptr_t old = slot_or(&s[word_offset], (uintptr_t)1 << bit_offset);
 
   sp_rel(sp);

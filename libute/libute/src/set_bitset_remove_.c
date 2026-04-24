@@ -5,6 +5,7 @@
 
 #include "set_bitset.h"
 #include <assert.h>
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -32,7 +33,7 @@ bool set_bitset_remove_(set_t_ *set, const void *item, set_sig_t_ sig) {
   // remove it
   const size_t word_offset = value / WORD_SIZE;
   const size_t bit_offset = value % WORD_SIZE;
-  _Atomic uintptr_t *const s = sp.ptr;
+  atomic_uintptr_t *const s = sp.ptr;
   const uintptr_t mask = (uintptr_t)1 << bit_offset;
   const uintptr_t previous = slot_and(&s[word_offset], ~mask);
 

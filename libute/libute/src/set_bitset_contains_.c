@@ -5,6 +5,7 @@
 
 #include "set_bitset.h"
 #include <assert.h>
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -32,7 +33,7 @@ bool set_bitset_contains_(set_t_ *set, const void *item, set_sig_t_ sig) {
   // load its containing word
   const size_t word_offset = value / WORD_SIZE;
   const size_t bit_offset = value % WORD_SIZE;
-  _Atomic uintptr_t *const s = sp.ptr;
+  atomic_uintptr_t *const s = sp.ptr;
   const uintptr_t word = slot_load(&s[word_offset]);
 
   sp_rel(sp);

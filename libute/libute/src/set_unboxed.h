@@ -64,9 +64,9 @@ typedef struct {
   ///    └── has been deleted?
   _Atomic slot_t *base;
 
-  _Atomic size_t used;    ///< how many slots are non-empty?
-  _Atomic size_t deleted; ///< how many slots contain deleted items?
-  size_t capacity;        ///< exponent + 1 of how many total slots at `base`?
+  atomic_size_t used;    ///< how many slots are non-empty?
+  atomic_size_t deleted; ///< how many slots contain deleted items?
+  size_t capacity;       ///< exponent + 1 of how many total slots at `base`?
 } set_impl_t;
 
 /// get the capacity (in slots) of a set
