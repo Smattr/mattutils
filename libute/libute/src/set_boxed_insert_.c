@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ute/alloc_aligned.h>
+#include <ute/aligned_alloc.h>
 #include <ute/asp.h>
 #include <ute/attr.h>
 #include <ute/dword.h>
@@ -22,7 +22,7 @@
 static void *aligned_calloc(size_t alignment, size_t n, size_t size) {
   if (n > 0 && SIZE_MAX / n < size)
     return NULL;
-  void *const p = alloc_aligned(alignment, n * size);
+  void *const p = ALIGNED_ALLOC(alignment, n * size);
   if (p != NULL)
     memset(p, 0, n * size);
   return p;
@@ -51,7 +51,7 @@ static void *alloc(size_t alignment, size_t size) {
       size += 4 - size % 4;
   }
 
-  return alloc_aligned(alignment, size);
+  return ALIGNED_ALLOC(alignment, size);
 }
 
 /// deallocate a set that is going out of scope
@@ -71,7 +71,7 @@ static void set_dtor(void *set, void *context UNUSED) {
     sp_rel(sp);
   }
 
-  free_aligned(s->base);
+  ALIGNED_FREE(s->base);
   free(s);
 }
 
@@ -95,7 +95,7 @@ static void slot_dtor(void *ptr, void *context) {
   assert(ptr != NULL);
 
   slot_dtor_core(ptr, context);
-  free_aligned(ptr);
+  ALIGNED_FREE(ptr);
 }
 
 /// insert an item into a set
@@ -235,7 +235,7 @@ retry:;
 
     set_impl_t *const new = malloc(sizeof(*new));
     if (new == NULL) {
-      free_aligned(b);
+      ALIGNED_FREE(b);
       sp_rel(sp);
       sp_rel(copy);
       return ENOMEM;

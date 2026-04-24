@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ute/alloc_aligned.h>
+#include <ute/aligned_alloc.h>
 #include <ute/asp.h>
 #include <ute/attr.h>
 #include <ute/dict.h>
@@ -21,7 +21,7 @@
 static void *aligned_calloc(size_t alignment, size_t n, size_t size) {
   if (n > 0 && SIZE_MAX / n < size)
     return NULL;
-  void *const p = alloc_aligned(alignment, n * size);
+  void *const p = ALIGNED_ALLOC(alignment, n * size);
   if (p != NULL)
     memset(p, 0, n * size);
   return p;
@@ -50,7 +50,7 @@ static void *alloc(size_t alignment, size_t size) {
       size += 2 - size % 2;
   }
 
-  return alloc_aligned(alignment, size);
+  return ALIGNED_ALLOC(alignment, size);
 }
 
 /// deallocate a dictionary that is going out of scope
@@ -77,11 +77,11 @@ static void dict_dtor(void *dict, void *context) {
     void *const value = value_slot_to_ptr(v);
     if (value != NULL && value_dtor != NULL)
       value_dtor(value);
-    free_aligned(value);
+    ALIGNED_FREE(value);
   }
 
   free(d->value);
-  free_aligned(d->key);
+  ALIGNED_FREE(d->key);
   free(d);
 }
 
@@ -96,7 +96,7 @@ static void key_dtor(void *ptr, void *context) {
   if (dtor != NULL)
     dtor(ptr);
 
-  free_aligned(ptr);
+  ALIGNED_FREE(ptr);
 }
 
 /// insert/update an entry in a dictionary
@@ -167,7 +167,7 @@ static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
       void *const val = value_slot_to_ptr(v);
       if (val != NULL && sig.value_dtor != NULL)
         sig.value_dtor(val);
-      free_aligned(val);
+      ALIGNED_FREE(val);
     }
     if (value_slot_is_free(v))
       (void)atomic_fetch_add_explicit(&dict->size, 1, memory_order_acq_rel);
@@ -241,7 +241,7 @@ int dict_set_(dict_t_ *dict, void *key, void *value, dict_sig_t_ sig) {
 
   // copy key for insertion
   const size_t k_size = sig.key_size == 0 ? 1 : sig.key_size;
-  void *const box = alloc_aligned(sig.key_alignment, k_size);
+  void *const box = ALIGNED_ALLOC(sig.key_alignment, k_size);
   if (box == NULL) {
     if (sig.value_dtor != NULL)
       sig.value_dtor(value);
@@ -293,18 +293,18 @@ retry:;
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free_aligned(v);
+      ALIGNED_FREE(v);
       sp_rel(k);
       return ENOMEM;
     }
 
     atomic_uintptr_t *const vs = calloc((size_t)1 << c >> 1, sizeof(vs[0]));
     if (vs == NULL) {
-      free_aligned(ks);
+      ALIGNED_FREE(ks);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free_aligned(v);
+      ALIGNED_FREE(v);
       sp_rel(k);
       return ENOMEM;
     }
@@ -312,11 +312,11 @@ retry:;
     dict_impl_t *new = malloc(sizeof(*new));
     if (new == NULL) {
       free(vs);
-      free_aligned(ks);
+      ALIGNED_FREE(ks);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free_aligned(v);
+      ALIGNED_FREE(v);
       sp_rel(k);
       return ENOMEM;
     }
@@ -328,7 +328,7 @@ retry:;
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
-      free_aligned(v);
+      ALIGNED_FREE(v);
       sp_rel(k);
       return ENOMEM;
     }

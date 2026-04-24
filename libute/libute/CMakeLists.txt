@@ -4,6 +4,7 @@
 ## All content in this file is in the public domain. Use it any way you wish.
 
 add_library(libute
+  src/aligned_alloc.c
   src/asp.c
   src/dict_contains_.c
   src/dict_free_.c
