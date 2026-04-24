@@ -60,6 +60,12 @@ extern "C" {
     /* hashed.                                                              */ \
     size_t (*hash)(const void *, size_t);                                      \
                                                                                \
+    /** optional user-supplied key destructor                               */ \
+    /*                                                                      */ \
+    /* If this member is not null, it will be called on keys immediately    */ \
+    /* before they are removed from the dictionary.                         */ \
+    void (*key_dtor)(void *);                                                  \
+                                                                               \
     /** optional user-supplied value destructor                             */ \
     /*                                                                      */ \
     /* If this member is not null, it will be called on values immediately  */ \
@@ -177,6 +183,7 @@ typedef struct {
   size_t value_size;      ///< byte size of values
 
   size_t (*hash)(const void *, size_t); ///< dictionary hasher
+  void (*key_dtor)(void *);             ///< key destructor
   void (*value_dtor)(void *);           ///< value destructor
 } dict_sig_t_;
 
@@ -187,6 +194,7 @@ typedef struct {
                  .value_alignment = alignof(TYPEOF((dict)->witness->v)),       \
                  .value_size = sizeof((dict)->witness->v),                     \
                  .hash = (dict)->hash,                                         \
+                 .key_dtor = (dict)->key_dtor,                                 \
                  .value_dtor = (dict)->value_dtor})
 
 /// insert or update an entry in a dictionary
@@ -196,7 +204,7 @@ typedef struct {
 /// @param value Value to insert
 /// @param sig Signature of the dictionary
 /// @return 0 on success or an errno on failure
-int dict_set_(dict_t_ *dict, const void *key, void *value, dict_sig_t_ sig);
+int dict_set_(dict_t_ *dict, void *key, void *value, dict_sig_t_ sig);
 
 /// retrieve a value from a dictionary
 ///

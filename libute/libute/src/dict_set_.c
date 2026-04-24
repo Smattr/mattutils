@@ -83,9 +83,13 @@ static void dict_dtor(void *dict, void *context) {
 /// deallocate a dictionary element that is going out of scope
 ///
 /// @param ptr Pointer to the element
-/// @param context Ignored
-static void slot_dtor(void *ptr, void *context UNUSED) {
+/// @param context Optional user-supplied key destructor
+static void slot_dtor(void *ptr, void *context) {
   assert(ptr != NULL);
+
+  void (*dtor)(void *) = context;
+  if (dtor != NULL)
+    dtor(ptr);
 
   free(ptr);
 }
@@ -203,7 +207,7 @@ static int rehash(dict_impl_t *dst, dict_impl_t *src, dict_sig_t_ sig) {
   return 0;
 }
 
-int dict_set_(dict_t_ *dict, const void *key, void *value, dict_sig_t_ sig) {
+int dict_set_(dict_t_ *dict, void *key, void *value, dict_sig_t_ sig) {
   assert(dict != NULL);
   assert(key != NULL || sig.key_size == 0);
   assert(value != NULL || sig.value_size == 0);
@@ -214,15 +218,17 @@ int dict_set_(dict_t_ *dict, const void *key, void *value, dict_sig_t_ sig) {
   if (box == NULL) {
     if (sig.value_dtor != NULL)
       sig.value_dtor(value);
+    if (sig.key_dtor != NULL)
+      sig.key_dtor(key);
     return ENOMEM;
   }
   if (sig.key_size > 0)
     memcpy(box, key, sig.key_size);
-  const sp_t k = sp_new(box, slot_dtor, NULL);
+  const sp_t k = sp_new(box, slot_dtor, sig.key_dtor);
   if (k.ptr == NULL) {
-    free(box);
     if (sig.value_dtor != NULL)
       sig.value_dtor(value);
+    slot_dtor(box, sig.key_dtor);
     return ENOMEM;
   }
 

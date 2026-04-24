@@ -11,6 +11,7 @@ add_executable(test
   src/test-asp-st.c
   src/test-dict-basic.c
   src/test-dict-conflict.c
+  src/test-dict-key-dtor.c
   src/test-dict-mt.c
   src/test-dict-set-contains.c
   src/test-dict-value-dtor.c
