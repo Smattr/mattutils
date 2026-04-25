@@ -30,7 +30,7 @@ static bool my_eq(const void *a, const void *b, size_t size UNUSED) {
 TEST("set with elements with large alignment") {
   // we need a custom hasher and comparator because the default ones look at the
   // padding bits
-  SET(struct wide, 1) wides = {.hash = {my_hash}, .eq = {my_eq}};
+  SET(struct wide) wides = {.hash = my_hash, .eq = my_eq};
 
   for (int i = 0; i < 10; ++i) {
     const int r = SET_INSERT(&wides, (struct wide){i});

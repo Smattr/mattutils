@@ -47,10 +47,6 @@ extern "C" {
 ///
 ///   SET(int) ints = {0};
 ///
-/// In order to add custom member functions, you need to pass an extra `1`:
-///
-///   SET(int, 1) = {.dtor = {my_dtor}};
-///
 /// @param type Type of items that will be stored in the set
 #define SET(type, ...)                                                         \
   struct {                                                                     \
@@ -69,24 +65,21 @@ extern "C" {
                                                                                \
     /** optional user-supplied item hash                                    */ \
     /*                                                                      */ \
-    /* If this member is non-zero sized and not null, it will be called     */ \
-    /* when an item needs to be hashed.                                     */ \
-    size_t (*hash[sizeof((int[]){__VA_ARGS__}) / sizeof(int)])(const void *,   \
-                                                               size_t);        \
+    /* If this member is not null, it will be called when an item needs to  */ \
+    /* be hashed.                                                           */ \
+    size_t (*hash)(const void *, size_t);                                      \
                                                                                \
     /** optional user-supplied item comparator                              */ \
     /*                                                                      */ \
-    /* If this member is non-zero sized and not null, it will be called     */ \
-    /* when two items need to be compared.                                  */ \
-    bool (*eq[sizeof((int[]){__VA_ARGS__}) / sizeof(int)])(const void *,       \
-                                                           const void *,       \
-                                                           size_t);            \
+    /* If this member is not null, it will be called when two items need to */ \
+    /* be compared.                                                         */ \
+    bool (*eq)(const void *, const void *, size_t);                            \
                                                                                \
     /** optional user-supplied item destructor                              */ \
     /*                                                                      */ \
-    /* If this member is non-zero sized and not null, it will be called on  */ \
-    /* set items immediately before they are removed from the set.          */ \
-    void (*dtor[sizeof((int[]){__VA_ARGS__}) / sizeof(int)])(void *);          \
+    /* If this member is not null, it will be called on set items           */ \
+    /* immediately before they are removed from the set.                    */ \
+    void (*dtor)(void *);                                                      \
   }
 
 /// insert an item into a set
@@ -218,9 +211,9 @@ typedef struct {
                              ? (size_t)1                                       \
                                    << (sizeof(*(set)->witness) * CHAR_BIT)     \
                              : SIZE_MAX,                                       \
-                .hash = sizeof((set)->hash) > 0 ? (set)->hash[0] : NULL,       \
-                .eq = sizeof((set)->eq) > 0 ? (set)->eq[0] : NULL,             \
-                .dtor = sizeof((set)->dtor) > 0 ? (set)->dtor[0] : NULL})
+                .hash = (set)->hash,                                           \
+                .eq = (set)->eq,                                               \
+                .dtor = (set)->dtor})
 
 /// can this set use the optimised inline implementation?
 #define SET_CAN_INLINE_(set)                                                   \

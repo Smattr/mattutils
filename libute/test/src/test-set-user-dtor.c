@@ -19,7 +19,7 @@ static void dtor(void *foo) {
 
 /// does `SET_REMOVE` correctly invoke user destructors?
 TEST("set with user destructor (remove)") {
-  SET(struct foo, 1) foos = {.dtor = {dtor}};
+  SET(struct foo) foos = {.dtor = dtor};
 
   struct foo fs[10] = {0};
   for (size_t i = 0; i < sizeof(fs) / sizeof(fs[0]); ++i) {
@@ -41,7 +41,7 @@ TEST("set with user destructor (remove)") {
 
 /// does `SET_FREE` correctly invoke user destructors?
 TEST("set with user destructor (free)") {
-  SET(struct foo, 1) foos = {.dtor = {dtor}};
+  SET(struct foo) foos = {.dtor = dtor};
 
   struct foo fs[10] = {0};
   for (size_t i = 0; i < sizeof(fs) / sizeof(fs[0]); ++i) {
