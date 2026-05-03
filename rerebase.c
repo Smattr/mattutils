@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
 
   // open a temporary file for making a new rebase input
   tmp = getenv("TMPDIR");
-  if (tmp == NULL)
+  if (tmp == NULL || access(tmp, R_OK | W_OK | X_OK) != 0)
     tmp = "/tmp";
   if (asprintf(&out_file, "%s/tmp.XXXXXX", tmp) < 0) {
     fprintf(stderr, "failed to create temporary path\n");
