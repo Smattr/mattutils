@@ -67,7 +67,6 @@ static void dict_dtor(void *dict, void *context) {
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
     const dword_t k = key_slot_load(&d->key[i]);
     sp_t sp = key_slot_decode(k);
-    sp.ptr = key_slot_to_ptr(k); // clear MIGRATED
     sp_rel(sp);
   }
 
