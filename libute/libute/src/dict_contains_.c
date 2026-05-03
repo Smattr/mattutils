@@ -19,7 +19,6 @@ bool dict_contains_(dict_t_ *dict, const void *key, dict_sig_t_ sig) {
 
   const size_t h = (sig.hash != NULL ? sig.hash : hash)(key, sig.key_size);
 
-retry:;
   // acquire a reference to the dictionary
   sp_t sp = sp_acq(&dict->root);
 
@@ -47,10 +46,9 @@ retry:;
 
     sp_rel(sp);
 
-    if (value_slot_is_moved(v)) {
-      // someone is rehashing the dictionary into new storage
-      goto retry;
-    }
+    // skip checking whether this slot is moved or not, because we do not care
+    // if we are racing with a rehashing and reading an older stale copy of the
+    // table
 
     return !value_slot_is_free(v);
   }
