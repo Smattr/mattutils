@@ -288,46 +288,9 @@ retry:;
 
   // do we need to expand the backing storage?
   if (used * 100 >= capacity * LOAD_FACTOR) {
-    const size_t c = capacity + 1;
 
-    sp_ctrl_t *_Atomic *const cs = calloc((size_t)1 << c >> 1, sizeof(cs[0]));
-    if (cs == NULL) {
-      sp_rel(sp);
-      if (sig.value_dtor != NULL)
-        sig.value_dtor(v);
-      ALIGNED_FREE(v);
-      sp_rel(k);
-      return ENOMEM;
-    }
-
-    void *_Atomic *const ks = calloc((size_t)1 << c >> 1, sizeof(ks[0]));
-    if (ks == NULL) {
-      free(cs);
-      sp_rel(sp);
-      if (sig.value_dtor != NULL)
-        sig.value_dtor(v);
-      ALIGNED_FREE(v);
-      sp_rel(k);
-      return ENOMEM;
-    }
-
-    atomic_uintptr_t *const vs = calloc((size_t)1 << c >> 1, sizeof(vs[0]));
-    if (vs == NULL) {
-      free(ks);
-      free(cs);
-      sp_rel(sp);
-      if (sig.value_dtor != NULL)
-        sig.value_dtor(v);
-      ALIGNED_FREE(v);
-      sp_rel(k);
-      return ENOMEM;
-    }
-
-    dict_impl_t *new = malloc(sizeof(*new));
+    dict_impl_t *const new = calloc(1, sizeof(*new));
     if (new == NULL) {
-      free(vs);
-      free(ks);
-      free(cs);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
@@ -335,7 +298,6 @@ retry:;
       sp_rel(k);
       return ENOMEM;
     }
-    *new = (dict_impl_t){.ctrl = cs, .key = ks, .value = vs, .capacity = c};
 
     sp_t new_sp = sp_new(new, dict_dtor, sig.value_dtor);
     if (new_sp.ptr == NULL) {
@@ -347,6 +309,22 @@ retry:;
       sp_rel(k);
       return ENOMEM;
     }
+
+    const size_t c = capacity + 1;
+    *new = (dict_impl_t){
+        .ctrl = calloc((size_t)1 << c >> 1, sizeof(new->ctrl[0])),
+        .key = calloc((size_t)1 << c >> 1, sizeof(new->key[0])),
+        .value = calloc((size_t)1 << c >> 1, sizeof(new->value[0]))};
+    if (new->ctrl == NULL || new->key == NULL || new->value == NULL) {
+      sp_rel(new_sp);
+      sp_rel(sp);
+      if (sig.value_dtor != NULL)
+        sig.value_dtor(v);
+      ALIGNED_FREE(v);
+      sp_rel(k);
+      return ENOMEM;
+    }
+    new->capacity = c;
 
     if (rehash(new, d, sig) != 0) {
       sp_rel(new_sp);
