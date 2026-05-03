@@ -30,15 +30,14 @@ bool dict_contains_(dict_t_ *dict, const void *key, dict_sig_t_ sig) {
 
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
     const size_t index = (h + i) % dict_capacity(*d);
-    const dword_t k = key_slot_load(&d->key[index]);
+    const void *const k = key_load(&d->key[index]);
 
     // if we see an empty slot, we have probed as far as this item would be
-    if (key_slot_is_free(k))
+    if (k == NULL)
       break;
 
     // if this our sought item?
-    const void *const p = key_slot_to_ptr(k);
-    if (sig.key_size != 0 && memcmp(key, p, sig.key_size) != 0)
+    if (sig.key_size != 0 && memcmp(key, k, sig.key_size) != 0)
       continue;
 
     // load the corresponding value slot

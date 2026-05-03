@@ -17,16 +17,6 @@
 #include <ute/dict.h>
 #include <ute/hash.h>
 
-/// `aligned_alloc` equivalent of `calloc`
-static void *aligned_calloc(size_t alignment, size_t n, size_t size) {
-  if (n > 0 && SIZE_MAX / n < size)
-    return NULL;
-  void *const p = ALIGNED_ALLOC(alignment, n * size);
-  if (p != NULL)
-    memset(p, 0, n * size);
-  return p;
-}
-
 /// allocate storage for a new dictionary value
 ///
 /// @param alignment Required alignment for the value
@@ -65,8 +55,9 @@ static void dict_dtor(void *dict, void *context) {
 
   // free our keys
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
-    const dword_t k = key_slot_load(&d->key[i]);
-    sp_t sp = key_slot_decode(k);
+    void *const k = key_load(&d->key[i]);
+    sp_ctrl_t *const c = ctrl_load(&d->ctrl[i]);
+    sp_t sp = {.ptr = k, .impl = c};
     sp_rel(sp);
   }
 
@@ -82,7 +73,8 @@ static void dict_dtor(void *dict, void *context) {
   }
 
   free(d->value);
-  ALIGNED_FREE(d->key);
+  free(d->key);
+  free(d->ctrl);
   free(d);
 }
 
@@ -114,6 +106,7 @@ static void key_dtor(void *ptr, void *context) {
 static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
   assert(dict != NULL);
   assert(key.ptr != NULL);
+  assert(key.impl != NULL);
   assert(value != NULL);
 
   // has `key` been saved somewhere or `sp_rel`-ed?
@@ -122,13 +115,16 @@ static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
   const size_t h = (sig.hash != NULL ? sig.hash : hash)(key.ptr, sig.key_size);
   for (size_t i = 0; i < dict_capacity(*dict); ++i) {
     const size_t index = (h + i) % dict_capacity(*dict);
-    dword_t k = key_slot_load(&dict->key[index]);
+    sp_ctrl_t *c = ctrl_load(&dict->ctrl[index]);
 
   retry1:
     // if this slot is empty, try to claim it as ours
-    if (key_slot_is_free(k)) {
-      if (!key_slot_cas(&dict->key[index], &k, key_slot_encode(key)))
+    if (c == NULL) {
+      if (!ctrl_cas(&dict->ctrl[index], &c, key.impl))
         goto retry1;
+
+      key_store(&dict->key[index], key.ptr);
+
       // Note that we saved the key somewhere globally visible. This effectively
       // counts as our 1 reference. But it is fine to hang on to the
       // (semantically no longer accounted for) `key` because we hold a
@@ -138,16 +134,19 @@ static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
       (void)atomic_fetch_add_explicit(&dict->used, 1, memory_order_acq_rel);
 
     } else {
+    retry2:;
       // if this slot is not ours, skip it
-      const void *const p = key_slot_to_ptr(k);
-      if (sig.key_size != 0 && memcmp(p, key.ptr, sig.key_size) != 0)
+      const void *const k = key_load(&dict->key[index]);
+      if (k == NULL)
+        goto retry2;
+      if (sig.key_size != 0 && memcmp(k, key.ptr, sig.key_size) != 0)
         continue;
     }
 
     // load the corresponding value slot
     uintptr_t v = value_slot_load(&dict->value[index]);
 
-  retry2:
+  retry3:
     // has someone else begun a migration?
     if (value_slot_is_moved(v)) {
       // If we are only implicitly holding a reference count for `key`, make
@@ -161,7 +160,7 @@ static int insert(dict_impl_t *dict, sp_t key, void *value, dict_sig_t_ sig) {
 
     // store our updated value
     if (!value_slot_cas(&dict->value[index], &v, (uintptr_t)value))
-      goto retry2;
+      goto retry3;
 
     // cleanup any value we just overwrote
     {
@@ -224,9 +223,12 @@ static int rehash(dict_impl_t *dst, dict_impl_t *src, dict_sig_t_ sig) {
     if (value_slot_is_free(v))
       continue;
 
-    const dword_t k = key_slot_load(&src->key[i]);
+    sp_ctrl_t *const c = ctrl_load(&src->ctrl[i]);
+    assert(c != NULL && "value associated with key without control block");
+    void *const k = key_load(&src->key[i]);
+    assert(k != NULL && "value associated with null key");
 
-    const sp_t item = key_slot_decode(k);
+    const sp_t item = {.ptr = k, .impl = c};
     const sp_t copy = sp_dup(item);
     const int rc UNUSED = insert(dst, copy, value_slot_to_ptr(v), sig);
     assert(rc == 0 && "rehash destination not owned exclusively?");
@@ -288,9 +290,19 @@ retry:;
   if (used * 100 >= capacity * LOAD_FACTOR) {
     const size_t c = capacity + 1;
 
-    atomic_dword_t *const ks = aligned_calloc(
-        alignof(atomic_dword_t), (size_t)1 << c >> 1, sizeof(ks[0]));
+    sp_ctrl_t *_Atomic *const cs = calloc((size_t)1 << c >> 1, sizeof(cs[0]));
+    if (cs == NULL) {
+      sp_rel(sp);
+      if (sig.value_dtor != NULL)
+        sig.value_dtor(v);
+      ALIGNED_FREE(v);
+      sp_rel(k);
+      return ENOMEM;
+    }
+
+    void *_Atomic *const ks = calloc((size_t)1 << c >> 1, sizeof(ks[0]));
     if (ks == NULL) {
+      free(cs);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
@@ -301,7 +313,8 @@ retry:;
 
     atomic_uintptr_t *const vs = calloc((size_t)1 << c >> 1, sizeof(vs[0]));
     if (vs == NULL) {
-      ALIGNED_FREE(ks);
+      free(ks);
+      free(cs);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
@@ -313,7 +326,8 @@ retry:;
     dict_impl_t *new = malloc(sizeof(*new));
     if (new == NULL) {
       free(vs);
-      ALIGNED_FREE(ks);
+      free(ks);
+      free(cs);
       sp_rel(sp);
       if (sig.value_dtor != NULL)
         sig.value_dtor(v);
@@ -321,7 +335,7 @@ retry:;
       sp_rel(k);
       return ENOMEM;
     }
-    *new = (dict_impl_t){.key = ks, .value = vs, .capacity = c};
+    *new = (dict_impl_t){.ctrl = cs, .key = ks, .value = vs, .capacity = c};
 
     sp_t new_sp = sp_new(new, dict_dtor, sig.value_dtor);
     if (new_sp.ptr == NULL) {

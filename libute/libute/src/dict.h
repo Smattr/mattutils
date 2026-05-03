@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <ute/asp.h>
 #include <ute/dict.h>
 
@@ -18,11 +17,13 @@
 ///
 /// A dictionary data structure looks like:
 ///
-///   dict_t_     dict_impl_t
-///   ┌───────┐   ┌──────────┐   ┌───────┬───────┬───────┬── key slots
-///   │ root¹ ├──►│   key    ├──►│   0²  │   1²  │   2²  │ …
-///   │       │   ├──────────┤   └───┬───┴───────┴───┬───┴──
-///   └───────┘   │  value   ├┐      │               │
+///   dict_t_     dict_impl_t    ┌───────┬───────┬───────┬── ctrl slots
+///   ┌───────┐   ┌──────────┐ ┌►│   0²  │   1²  │   2²  │ …
+///   │ root¹ ├──►│   ctrl   ├─┘ └───────┴───────┴───────┴──
+///   │       │   ├──────────┤
+///   └───────┘   │   key    ├─┐ ┌───────┬───────┬───────┬── key slots
+///               ├──────────┤ └►│   0²  │   1²  │   2²  │ …
+///               │  value   ├┐  └───┬───┴───────┴───┬───┴──
 ///               ├──────────┤│      ▼               ▼
 ///               │   used   ││  ┌───────┐       ┌───────┐
 ///               ├──────────┤│  │  key  │       │  key  │
@@ -40,12 +41,14 @@
 /// values. This is expected to be passed in by callers.
 ///
 /// ¹ This is an atomic shared pointer, 2 words wide.
-/// ² These are shared pointers, 2 words wide.
+/// ² These are the two halves of a shared pointer,
+///   `(sp_t){.ptr = key[i], .impl = ctrl[i]}`.
 typedef struct {
-  /// backing storage of dictionary key slots
-  ///
-  /// The key slots are shared pointers, made up of two words.
-  atomic_dword_t *key;
+  /// backing storage for the dictionary keys’ metadata
+  sp_ctrl_t *_Atomic *ctrl;
+
+  /// backing storage of dictionary keys
+  void *_Atomic *key;
 
   /// backing storage of dictionary value slots
   ///
@@ -73,20 +76,36 @@ static inline size_t dict_capacity(const dict_impl_t dict) {
   return (size_t)1 << dict.capacity >> 1;
 }
 
-/// atomically read a key slot from a hash table
-static inline dword_t key_slot_load(atomic_dword_t *slotptr) {
-  return dword_atomic_load(slotptr);
+/// atomically read a control pointer
+static inline sp_ctrl_t *ctrl_load(sp_ctrl_t *_Atomic *src) {
+  return atomic_load_explicit(src, memory_order_acquire);
 }
 
-/// atomically read a value slot from a hash table
+/// atomically read a key pointer
+static inline void *key_load(void *_Atomic *src) {
+  return atomic_load_explicit(src, memory_order_acquire);
+}
+
+/// atomically read a value slot
 static inline uintptr_t value_slot_load(atomic_uintptr_t *slotptr) {
   return atomic_load_explicit(slotptr, memory_order_acquire);
 }
 
-/// atomically compare-and-swap into a hash table key slot
-static inline bool key_slot_cas(atomic_dword_t *slotptr, dword_t *expected,
-                                dword_t desired) {
-  return dword_atomic_cas(slotptr, expected, desired);
+/// atomically compare-and-swap into a control pointer
+static inline bool ctrl_cas(sp_ctrl_t *_Atomic *dst, sp_ctrl_t **expected,
+                            sp_ctrl_t *desired) {
+  assert(expected != NULL);
+  assert(*expected == NULL && "overwriting non-empty control slot");
+  assert(desired != NULL);
+  return atomic_compare_exchange_strong_explicit(
+      dst, expected, desired, memory_order_acq_rel, memory_order_acquire);
+}
+
+/// atomically write to an empty key pointer
+static inline void key_store(void *_Atomic *dst, void *src) {
+  assert(atomic_load_explicit(dst, memory_order_acquire) == NULL &&
+         "overwriting non-empty key slot");
+  atomic_store_explicit(dst, src, memory_order_release);
 }
 
 /// atomically compare-and-swap into a hash table value slot
@@ -98,33 +117,6 @@ static inline bool value_slot_cas(atomic_uintptr_t *slotptr,
 
 /// mask for migration bit (see above)
 enum { MIGRATED = (uintptr_t)1 };
-
-/// deserialise a key slot back into its originating shared pointer
-static inline sp_t key_slot_decode(dword_t slot) {
-  sp_t decoded;
-  assert(sizeof(slot) >= sizeof(decoded));
-  memcpy(&decoded, &slot, sizeof(decoded));
-  return decoded;
-}
-
-/// serialise a shared pointer into a key slot
-static inline dword_t key_slot_encode(sp_t ptr) {
-  dword_t encoded = 0;
-  assert(sizeof(encoded) >= sizeof(ptr));
-  memcpy(&encoded, &ptr, sizeof(ptr));
-  return encoded;
-}
-
-/// convert a key slot to its originating pointer
-static inline void *key_slot_to_ptr(dword_t slot) {
-  sp_t decoded = key_slot_decode(slot);
-  return decoded.ptr;
-}
-
-/// is this key slot unoccupied?
-static inline bool key_slot_is_free(dword_t slot) {
-  return key_slot_to_ptr(slot) == NULL;
-}
 
 /// has this slot been migrated to a new dictionary?
 static inline bool value_slot_is_moved(uintptr_t slot) {
