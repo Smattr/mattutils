@@ -74,6 +74,8 @@ static void dict_dtor(void *dict, void *context) {
   // free our values
   for (size_t i = 0; i < dict_capacity(*d); ++i) {
     const uintptr_t v = value_slot_load(&d->value[i]);
+    if (value_slot_is_moved(v))
+      continue;
     void *const value = value_slot_to_ptr(v);
     if (value != NULL && value_dtor != NULL)
       value_dtor(value);
@@ -215,7 +217,7 @@ static int rehash(dict_impl_t *dst, dict_impl_t *src, dict_sig_t_ sig) {
     }
 
     // mark this slot as migrated
-    if (!value_slot_cas(&src->value[i], &v, value_slot_moved(0))) {
+    if (!value_slot_cas(&src->value[i], &v, value_slot_moved(v))) {
       // an inserter or deleter (or migrator if i == 0) beat us
       goto retry;
     }
