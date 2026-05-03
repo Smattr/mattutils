@@ -13,6 +13,8 @@
 TEST("empty dict lifecycle") {
   DICT(int, int) ints = {0};
   ASSERT_EQ(DICT_SIZE(&ints), 0u);
+  ASSERT_NULL(DICT_GET(&ints, 42));
+  ASSERT(!DICT_CONTAINS(&ints, 42));
   DICT_FREE(&ints);
 }
 

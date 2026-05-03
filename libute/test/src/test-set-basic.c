@@ -12,6 +12,7 @@
 TEST("empty set lifecycle") {
   SET(int) ints = {0};
   ASSERT_EQ(SET_SIZE(&ints), 0u);
+  ASSERT(!SET_CONTAINS(&ints, 42));
   SET_FREE(&ints);
 }
 
