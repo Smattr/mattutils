@@ -15,13 +15,16 @@
 #define __has_feature(x) 0
 #endif
 
+#ifdef __x86_64__
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
+#endif
 #endif
 
 void uint128_atomic_store(uint128_t *dst, uint128_t src) {
   assert(dst != NULL);
 
+#ifdef __x86_64__
 #if __has_include(<immintrin.h>)
 #if !__has_feature(thread_sanitizer)
 #ifdef __SSE2__
@@ -34,6 +37,7 @@ void uint128_atomic_store(uint128_t *dst, uint128_t src) {
     volatile avx128_t *d = (avx128_t *)dst;
     *d = (__m128i)src;
   }
+#endif
 #endif
 #endif
 #endif

@@ -15,12 +15,14 @@
 #define __has_feature(x) 0
 #endif
 
+#ifdef __x86_64__
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
 
 #ifdef __SSE2__
 #if !__has_feature(thread_sanitizer)
 #define USE_AVX
+#endif
 #endif
 #endif
 #endif
