@@ -33,6 +33,37 @@ bool path_is_absolute(const char *path);
 /// is this a relative (as opposed to absolute) path?
 bool path_is_relative(const char *path);
 
+/// default character that separates directories/files in paths
+///
+/// This is analogous to Python’s `os.sep`. Some platforms support multiple
+/// separator characters; see `PATH_ALTSEP`
+#if defined(_WIN32) && !defined(__MINGW32__)
+#define PATH_SEP '\\'
+#else
+#define PATH_SEP '/'
+#endif
+
+/// alternative character that separates directories/files in paths
+///
+/// This is analogous to Python’s `os.altsep`. If the platform only supports a
+/// single separator character, this is 0.
+#ifdef __MINGW32__
+#define PATH_ALTSEP '\\'
+#elif defined(_WIN32)
+#define PATH_ALTSEP '/'
+#else
+#define PATH_ALTSEP 0
+#endif
+
+/// default character that separates search path entries
+///
+/// This is analogous to Python’s `os.pathsep`.
+#if defined(_WIN32) && !defined(__MINGW32__)
+#define PATH_LISTSEP ';'
+#else
+#define PATH_LISTSEP ':'
+#endif
+
 #ifdef __cplusplus
 }
 #endif
