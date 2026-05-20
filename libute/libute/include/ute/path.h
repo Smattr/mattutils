@@ -1,6 +1,13 @@
 /// @file
 /// @brief Functions for dealing with file system paths
 ///
+/// The functions below, with the exception of `path_getcwd`, deal with paths
+/// purely as strings, not making any decisions based on file system contents.
+/// This is a deliberate design to guide users away from
+/// Time-Of-Check-to-Time-Of-Use (TOCTOU) problems. Any time you need to relate
+/// a path to current file system contents, you should be operating on open file
+/// descriptors (possibly opened with `O_PATH`) instead of path strings.
+///
 /// All content in this file is in the public domain. Use it any way you wish.
 
 #pragma once
