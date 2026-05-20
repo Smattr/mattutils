@@ -11,6 +11,15 @@
 extern "C" {
 #endif
 
+/// get the path to the current working directory
+///
+/// This function behaves similarly to `getcwd` and has many of the same
+/// caveats. The value returned in `wd` should eventually be passed to `free`.
+///
+/// @param wd [out] Current working directory on success
+/// @return 0 on success or an errno on failure
+int path_getcwd(char **wd);
+
 /// is this an absolute (as opposed to relative) path?
 bool path_is_absolute(const char *path);
 
