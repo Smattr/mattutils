@@ -62,11 +62,6 @@ end;
  * thread-local storage                                                        *
  ******************************************************************************/
 
--- sp_acq stack frame
-type sp_acq_t: record
-  new: asp_t;
-end;
-
 -- sp_rel stack frame
 type sp_rel_t: record
   old_count: count_t;
@@ -101,7 +96,6 @@ type pc_t: enum {
 type tls_t: record
   pc: pc_t;
   sp: array[0..N_SP - 1] of sp_t; -- currently live sps this thread has
-  sp_acq: sp_acq_t;
   sp_rel: sp_rel_t;
   sp_store: sp_store_t;
   sp_cas: sp_cas_t;
@@ -109,6 +103,7 @@ type tls_t: record
   -- function-local variables
   local: record
     old: asp_t;
+    new: asp_t;
   end;
 end;
 
@@ -342,15 +337,14 @@ ruleset tid: tid_t do
     if isundefined(tls[tid].local.old.ctrl) then
       -- “the target pointer is null; no need to ref count”
       undefine tls[tid].sp[0];
-      undefine tls[tid].sp_acq;
       undefine tls[tid].local;
       undefine tls[tid].pc;
       return;
     end;
-    tls[tid].sp_acq.new := tls[tid].local.old;
-    tls[tid].sp_acq.new.load_count := add(tls[tid].sp_acq.new.load_count, 1);
-    if asp_cas(tls[tid].local.old, tls[tid].sp_acq.new) then
-      tls[tid].local.old := tls[tid].sp_acq.new;
+    tls[tid].local.new := tls[tid].local.old;
+    tls[tid].local.new.load_count := add(tls[tid].local.new.load_count, 1);
+    if asp_cas(tls[tid].local.old, tls[tid].local.new) then
+      tls[tid].local.old := tls[tid].local.new;
       assert !isundefined(tls[tid].local.old.ctrl)
         "non-null pointer has no control block";
       tls[tid].pc := SP_ACQ_L2;
@@ -378,10 +372,9 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L4 ==>
   begin
     -- “undo our increment of the load count”
-    tls[tid].sp_acq.new := tls[tid].local.old;
-    tls[tid].sp_acq.new.load_count := sub(tls[tid].sp_acq.new.load_count, 1);
-    if asp_cas(tls[tid].local.old, tls[tid].sp_acq.new) then
-      undefine tls[tid].sp_acq;
+    tls[tid].local.new := tls[tid].local.old;
+    tls[tid].local.new.load_count := sub(tls[tid].local.new.load_count, 1);
+    if asp_cas(tls[tid].local.old, tls[tid].local.new) then
       undefine tls[tid].local;
       undefine tls[tid].pc;
       return;
@@ -394,9 +387,8 @@ ruleset tid: tid_t do
     var updated: asp_t;
   begin
     if isundefined(tls[tid].local.old.ctrl) |
-       tls[tid].sp_acq.new.ctrl != tls[tid].local.old.ctrl then
-      dec_load_ref(tls[tid].sp_acq.new.ctrl);
-      undefine tls[tid].sp_acq;
+       tls[tid].local.new.ctrl != tls[tid].local.old.ctrl then
+      dec_load_ref(tls[tid].local.new.ctrl);
       undefine tls[tid].local;
       undefine tls[tid].pc;
       return;
