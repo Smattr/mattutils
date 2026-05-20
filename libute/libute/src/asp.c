@@ -154,6 +154,12 @@ static void dec_ref(sp_ctrl_t *ctrl) {
   assert((old & REFS_MASK) > 0 && "dropping a reference that was not held");
 
   // if we just dropped the last reference, clean up
+SP_REL_L1:
+  UNUSED;
+SP_STORE_L2:
+  UNUSED;
+SP_CAS_L3:
+  UNUSED;
   if (old == 1) {
     if (ctrl->dtor != NULL)
       ctrl->dtor(ctrl->value, ctrl->dtor_context);
@@ -195,6 +201,10 @@ UNUSED static void inc_and_dec(sp_ctrl_t *ctrl, size_t load_by) {
   assert((old & REFS_MASK) > 0 && "dropping a reference that was not held");
 
   // if we just dropped the last reference, clean up
+SP_STORE_L2:
+  UNUSED;
+SP_CAS_L3:
+  UNUSED;
   if (old + load_by * LOAD_SCALE == 1) {
     if (ctrl->dtor != NULL)
       ctrl->dtor(ctrl->value, ctrl->dtor_context);
@@ -259,6 +269,8 @@ sp_t sp_acq(asp_t *asp) {
 
   // load the implementation, incrementing the load count
   dword_t old = dword_atomic_load(asp);
+SP_ACQ_L1:
+  UNUSED;
   while (true) {
     asp_impl_t impl = asp2impl(old);
     if (impl.ctrl == NULL) { // the target pointer is null; no need to ref count
@@ -278,16 +290,24 @@ sp_t sp_acq(asp_t *asp) {
   assert(impl.ctrl != NULL && "non-null pointer has no control block");
 
   // load the target pointer, incrementing the reference count
+SP_ACQ_L2:
+  UNUSED;
   inc_ref(impl.ctrl, 1);
+SP_ACQ_L3:
+  UNUSED;
   const sp_t ret = {.ptr = impl.ctrl->value, .impl = impl.ctrl};
 
   // undo our increment of the load count
   while (true) {
+  SP_ACQ_L4:
+    UNUSED;
     --impl.load_count;
     const dword_t new = impl2asp(impl);
     if (dword_atomic_cas(asp, &old, new))
       break;
     const asp_impl_t updated = asp2impl(old);
+  SP_ACQ_L5:
+    UNUSED;
     if (impl.ctrl != updated.ctrl) {
       // XXX: this is the counter-intuitive path
       DELAY2();
@@ -343,6 +363,8 @@ void sp_store(asp_t *dst, sp_t src) {
   const dword_t old = dword_atomic_xchg(dst, new);
 
   const asp_impl_t old_impl = asp2impl(old);
+SP_STORE_L1:
+  UNUSED;
   if (old_impl.ctrl != NULL) {
 #if 1
     // as an optimisation, we can fuse what would otherwise be two separate
@@ -367,6 +389,8 @@ void sp_store(asp_t *dst, sp_t src) {
 bool sp_cas(asp_t *dst, sp_t expected, sp_t desired) {
   assert(dst != NULL);
 
+SP_CAS_L1:
+  UNUSED;
   const asp_impl_t new_impl = {.ctrl = desired.impl};
   const dword_t new = impl2asp(new_impl);
   bool ret;
@@ -380,6 +404,8 @@ bool sp_cas(asp_t *dst, sp_t expected, sp_t desired) {
 
     if (ret) {
       // replicate load propagation logic from `sp_store`
+    SP_CAS_L2:
+      UNUSED;
       if (old_impl.ctrl != NULL) {
 #if 1
         // as an optimisation, we can fuse what would otherwise be two separate

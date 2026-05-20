@@ -89,17 +89,17 @@ end;
 
 -- program counter location
 type pc_t: enum {
-  SP_ACQ_L1,   -- sp_acq, asp.c:259
-  SP_ACQ_L2,   -- sp_acq, asp.c:277
-  SP_ACQ_L3,   -- sp_acq, asp.c:278
-  SP_ACQ_L4,   -- sp_acq, asp.c:282
-  SP_ACQ_L5,   -- sp_acq, asp.c:285
-  SP_REL_L1,   -- dec_ref, asp.c:154
-  SP_STORE_L1, -- sp_store, asp.c:345
-  SP_STORE_L2, -- sp_store, asp.c:154/asp.c:195
-  SP_CAS_L1,   -- sp_cas, asp.c:371
-  SP_CAS_L2,   -- sp_cas, asp.c:383
-  SP_CAS_L3,   -- sp_cas, asp.c:154/asp.c:195
+  SP_ACQ_L1,
+  SP_ACQ_L2,
+  SP_ACQ_L3,
+  SP_ACQ_L4,
+  SP_ACQ_L5,
+  SP_REL_L1,
+  SP_STORE_L1,
+  SP_STORE_L2,
+  SP_CAS_L1,
+  SP_CAS_L2,
+  SP_CAS_L3,
 };
 
 -- thread-local storage
