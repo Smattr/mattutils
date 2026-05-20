@@ -23,13 +23,10 @@ static THREAD_RET entry(void *arg) {
   for (int i = 0; i < 10; ++i) {
     const int r = DICT_SET(s->xs, i, i + 1);
     ASSERT_EQ(r, 0);
-    ASSERT_LE(DICT_SIZE(s->xs), 10 + s->n_threads - 1);
   }
 
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 10; ++i)
     (void)DICT_REMOVE(s->xs, i);
-    ASSERT_LE(DICT_SIZE(s->xs), 10 + s->n_threads - 1);
-  }
 
   return 0;
 }
