@@ -64,7 +64,6 @@ end;
 
 -- sp_acq stack frame
 type sp_acq_t: record
-  old: asp_t;
   new: asp_t;
 end;
 
@@ -75,13 +74,11 @@ end;
 
 -- sp_store stack frame
 type sp_store_t: record
-  old: asp_t;
   old_count: count_t;
 end;
 
 -- sp_cas stack frame
 type sp_cas_t: record
-  old: asp_t;
   old_count: count_t;
 end;
 
@@ -108,6 +105,11 @@ type tls_t: record
   sp_rel: sp_rel_t;
   sp_store: sp_store_t;
   sp_cas: sp_cas_t;
+
+  -- function-local variables
+  local: record
+    old: asp_t;
+  end;
 end;
 
 /******************************************************************************/
@@ -330,25 +332,26 @@ ruleset tid: tid_t do
     isundefined(tls[tid].pc) & isundefined(tls[tid].sp[0].ptr) ==>
   begin
     -- “load the implementation…”
-    tls[tid].sp_acq.old := asp;
+    tls[tid].local.old := asp;
     tls[tid].pc := SP_ACQ_L1;
   end;
 
   rule "sp_acq (2 / 6)"
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L1 ==>
   begin
-    if isundefined(tls[tid].sp_acq.old.ctrl) then
+    if isundefined(tls[tid].local.old.ctrl) then
       -- “the target pointer is null; no need to ref count”
       undefine tls[tid].sp[0];
       undefine tls[tid].sp_acq;
+      undefine tls[tid].local;
       undefine tls[tid].pc;
       return;
     end;
-    tls[tid].sp_acq.new := tls[tid].sp_acq.old;
+    tls[tid].sp_acq.new := tls[tid].local.old;
     tls[tid].sp_acq.new.load_count := add(tls[tid].sp_acq.new.load_count, 1);
-    if asp_cas(tls[tid].sp_acq.old, tls[tid].sp_acq.new) then
-      tls[tid].sp_acq.old := tls[tid].sp_acq.new;
-      assert !isundefined(tls[tid].sp_acq.old.ctrl)
+    if asp_cas(tls[tid].local.old, tls[tid].sp_acq.new) then
+      tls[tid].local.old := tls[tid].sp_acq.new;
+      assert !isundefined(tls[tid].local.old.ctrl)
         "non-null pointer has no control block";
       tls[tid].pc := SP_ACQ_L2;
     end;
@@ -358,7 +361,7 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L2 ==>
   begin
     -- “…incrementing the reference count”
-    inc_ref(tls[tid].sp_acq.old.ctrl, 1);
+    inc_ref(tls[tid].local.old.ctrl, 1);
     tls[tid].pc := SP_ACQ_L3;
   end;
 
@@ -366,8 +369,8 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L3 ==>
   begin
     -- “load the target pointer…”
-    tls[tid].sp[0].ptr := sp_ctrls[tls[tid].sp_acq.old.ctrl].value;
-    tls[tid].sp[0].impl := tls[tid].sp_acq.old.ctrl;
+    tls[tid].sp[0].ptr := sp_ctrls[tls[tid].local.old.ctrl].value;
+    tls[tid].sp[0].impl := tls[tid].local.old.ctrl;
     tls[tid].pc := SP_ACQ_L4;
   end;
 
@@ -375,10 +378,11 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L4 ==>
   begin
     -- “undo our increment of the load count”
-    tls[tid].sp_acq.new := tls[tid].sp_acq.old;
+    tls[tid].sp_acq.new := tls[tid].local.old;
     tls[tid].sp_acq.new.load_count := sub(tls[tid].sp_acq.new.load_count, 1);
-    if asp_cas(tls[tid].sp_acq.old, tls[tid].sp_acq.new) then
+    if asp_cas(tls[tid].local.old, tls[tid].sp_acq.new) then
       undefine tls[tid].sp_acq;
+      undefine tls[tid].local;
       undefine tls[tid].pc;
       return;
     end;
@@ -389,10 +393,11 @@ ruleset tid: tid_t do
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_ACQ_L5 ==>
     var updated: asp_t;
   begin
-    if isundefined(tls[tid].sp_acq.old.ctrl) |
-       tls[tid].sp_acq.new.ctrl != tls[tid].sp_acq.old.ctrl then
+    if isundefined(tls[tid].local.old.ctrl) |
+       tls[tid].sp_acq.new.ctrl != tls[tid].local.old.ctrl then
       dec_load_ref(tls[tid].sp_acq.new.ctrl);
       undefine tls[tid].sp_acq;
+      undefine tls[tid].local;
       undefine tls[tid].pc;
       return;
     end;
@@ -416,6 +421,7 @@ ruleset tid: tid_t do
     dec_ref_2(tls[tid].sp[0].impl, tls[tid].sp_rel.old_count);
     undefine tls[tid].sp[0];
     undefine tls[tid].sp_rel;
+    undefine tls[tid].local;
     undefine tls[tid].pc;
   end;
 
@@ -429,24 +435,25 @@ ruleset tid: tid_t do
       new.ctrl := tls[tid].sp[0].impl;
     end;
     new.load_count := 0;
-    tls[tid].sp_store.old := asp_xchg(new);
+    tls[tid].local.old := asp_xchg(new);
     tls[tid].pc := SP_STORE_L1;
   end;
 
   rule "sp_store (2 / 3)"
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_STORE_L1 ==>
   begin
-    if !isundefined(tls[tid].sp_store.old.ctrl) then
-      if mul(tls[tid].sp_store.old.load_count, LOAD_SCALE) = 0 then
-        tls[tid].sp_store.old_count := dec_ref_1(tls[tid].sp_store.old.ctrl);
+    if !isundefined(tls[tid].local.old.ctrl) then
+      if mul(tls[tid].local.old.load_count, LOAD_SCALE) = 0 then
+        tls[tid].sp_store.old_count := dec_ref_1(tls[tid].local.old.ctrl);
       else
         tls[tid].sp_store.old_count :=
-          inc_and_dec_1(tls[tid].sp_store.old.ctrl, tls[tid].sp_store.old.load_count);
+          inc_and_dec_1(tls[tid].local.old.ctrl, tls[tid].local.old.load_count);
       end;
       tls[tid].pc := SP_STORE_L2;
     else
       undefine tls[tid].sp[0];
       undefine tls[tid].sp_store;
+      undefine tls[tid].local;
       undefine tls[tid].pc;
     end;
   end;
@@ -454,9 +461,10 @@ ruleset tid: tid_t do
   rule "sp_store (3 / 3)"
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_STORE_L2 ==>
   begin
-    dec_ref_2(tls[tid].sp_store.old.ctrl, tls[tid].sp_store.old_count);
+    dec_ref_2(tls[tid].local.old.ctrl, tls[tid].sp_store.old_count);
     undefine tls[tid].sp[0];
     undefine tls[tid].sp_store;
+    undefine tls[tid].local;
     undefine tls[tid].pc;
   end;
 
@@ -464,11 +472,11 @@ ruleset tid: tid_t do
     isundefined(tls[tid].pc) ==>
   begin
     if isundefined(tls[tid].sp[0].impl) then
-      undefine tls[tid].sp_cas.old.ctrl;
+      undefine tls[tid].local.old.ctrl;
     else
-      tls[tid].sp_cas.old.ctrl := tls[tid].sp[0].impl;
+      tls[tid].local.old.ctrl := tls[tid].sp[0].impl;
     end;
-    tls[tid].sp_cas.old.load_count := 0;
+    tls[tid].local.old.load_count := 0;
     tls[tid].pc := SP_CAS_L1;
   end;
 
@@ -482,14 +490,15 @@ ruleset tid: tid_t do
       new.ctrl := tls[tid].sp[1].impl;
     end;
     new.load_count := 0;
-    if asp_cas(tls[tid].sp_cas.old, new) then
+    if asp_cas(tls[tid].local.old, new) then
       undefine tls[tid].sp[1];
       tls[tid].pc := SP_CAS_L2;
       return;
     end;
-    if (isundefined(tls[tid].sp_cas.old.ctrl) != isundefined(tls[tid].sp[0].impl)) |
-       (!isundefined(tls[tid].sp_cas.old.ctrl) & !isundefined(tls[tid].sp[0].impl) & tls[tid].sp_cas.old.ctrl != tls[tid].sp[0].impl) then
+    if (isundefined(tls[tid].local.old.ctrl) != isundefined(tls[tid].sp[0].impl)) |
+       (!isundefined(tls[tid].local.old.ctrl) & !isundefined(tls[tid].sp[0].impl) & tls[tid].local.old.ctrl != tls[tid].sp[0].impl) then
       undefine tls[tid].sp_cas;
+      undefine tls[tid].local;
       undefine tls[tid].pc;
     end;
   end;
@@ -497,25 +506,27 @@ ruleset tid: tid_t do
   rule "sp_cas (3 / 4)"
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_CAS_L2 ==>
   begin
-    if !isundefined(tls[tid].sp_cas.old.ctrl) then
-      if mul(tls[tid].sp_cas.old.load_count, LOAD_SCALE) = 0 then
-        tls[tid].sp_cas.old_count := dec_ref_1(tls[tid].sp_cas.old.ctrl);
+    if !isundefined(tls[tid].local.old.ctrl) then
+      if mul(tls[tid].local.old.load_count, LOAD_SCALE) = 0 then
+        tls[tid].sp_cas.old_count := dec_ref_1(tls[tid].local.old.ctrl);
       else
         tls[tid].sp_cas.old_count :=
-          inc_and_dec_1(tls[tid].sp_cas.old.ctrl, tls[tid].sp_cas.old.load_count);
+          inc_and_dec_1(tls[tid].local.old.ctrl, tls[tid].local.old.load_count);
       end;
       tls[tid].pc := SP_CAS_L3;
       return;
     end;
     undefine tls[tid].sp_cas;
+    undefine tls[tid].local;
     undefine tls[tid].pc;
   end;
 
   rule "sp_cas (4 / 4)"
     !isundefined(tls[tid].pc) & tls[tid].pc = SP_CAS_L3 ==>
   begin
-    dec_ref_2(tls[tid].sp_cas.old.ctrl, tls[tid].sp_cas.old_count);
+    dec_ref_2(tls[tid].local.old.ctrl, tls[tid].sp_cas.old_count);
     undefine tls[tid].sp_cas;
+    undefine tls[tid].local;
     undefine tls[tid].pc;
   end;
 
