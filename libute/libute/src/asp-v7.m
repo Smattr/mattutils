@@ -38,7 +38,7 @@ type sp_ctrl_t: record
 end;
 
 -- pointer to a sp_ctrl_t
-type sp_ctrl_ptr_t: 1..N_THREAD;
+type sp_ctrl_ptr_t: scalarset(N_THREAD);
 
 /*******************************************************************************
  * shared pointers                                                             *
