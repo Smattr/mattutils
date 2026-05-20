@@ -40,8 +40,6 @@ end;
 -- pointer to a sp_ctrl_t
 type sp_ctrl_ptr_t: 1..N_THREAD;
 
-type nullable_sp_ctrl_ptr_t: 0..N_THREAD;
-
 /*******************************************************************************
  * shared pointers                                                             *
  ******************************************************************************/
@@ -150,15 +148,15 @@ begin
   return r;
 end;
 
-function calloc_sp_ctrl(): nullable_sp_ctrl_ptr_t;
+function calloc_sp_ctrl(var ret: sp_ctrl_ptr_t);
 begin
   for i: sp_ctrl_ptr_t do
     if isundefined(sp_ctrls[i].value) then
       sp_ctrls[i].ref_count := 0;
-      return i;
+      ret := i;
+      return;
     end;
   end;
-  return 0;
 end;
 
 function free_sp_ctrl(p: sp_ctrl_ptr_t);
@@ -310,13 +308,13 @@ ruleset tid: tid_t do
           isundefined(tls[peer].sp[i].ptr) | tls[peer].sp[i].ptr != value
         end
       end ==>
-      var ctrl: nullable_sp_ctrl_ptr_t;
+      var ctrl: sp_ctrl_ptr_t;
     begin
       -- omit null pointer construction, as all threads effectively start with
       -- them
 
-      ctrl := calloc_sp_ctrl();
-      if ctrl = 0 then
+      calloc_sp_ctrl(ctrl);
+      if isundefined(ctrl) then
         return;
       end;
 
