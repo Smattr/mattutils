@@ -263,12 +263,6 @@ fi
 # Configure ssh-agent for gnome
 export SSH_ASKPASS=gnome-ssh-askpass
 
-# Check cron mail
-mail -H &>/dev/null
-if [[ $? == 0 ]]; then
-    printf 'You have unread mail.\n'
-fi
-
 if [[ "${TERM}" != "screen" && "${TERM}" != "screen-256color" && \
       "${TERM}" != "tmux"   && "${TERM}" != "tmux-256color" ]]; then
     printf 'You are not in screen/tmux...\n'
