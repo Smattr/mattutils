@@ -70,7 +70,6 @@ alias mv="mv -i"
 alias lessp="less +Gg"
 alias ll="ls -l"
 alias la="ls -A"
-alias vi="vim"
 alias hist='fc -RI' # Import History
 alias :q=exit
 alias :Q=exit
