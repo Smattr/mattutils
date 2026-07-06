@@ -229,7 +229,8 @@ static int run_less(proc_t *less) {
 
   const char *const args[] = {
       "env", "--unset=LESS", "--unset=LESSCLOSE", "--unset=LESSECHO",
-      "LESSSECURE=1", "LESSSECURE_ALLOW=history", "less",
+      "LESSSECURE=1", "LESSSECURE_ALLOW=history", "--unset=LESS_SIGUSR1",
+      "less",
       "--ignore-case",  // case-insensitive searches unless uppercase characters
                         // are present
       "--line-numbers", // no line numbers
