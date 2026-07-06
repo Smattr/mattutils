@@ -67,7 +67,6 @@ alias grep="grep --color=always"
 alias l="ls"
 alias cp="cp -i"
 alias mv="mv -i"
-alias lessp="less +Gg"
 alias ll="ls -l"
 alias la="ls -A"
 alias hist='fc -RI' # Import History
