@@ -229,13 +229,11 @@ static int run_less(proc_t *less) {
 
   const char *const args[] = {
       "less",
-      "--ignore-case", // case-insensitive searches unless uppercase characters
-                       // are present
+      "--ignore-case",  // case-insensitive searches unless uppercase characters
+                        // are present
+      "--line-numbers", // no line numbers
       "--RAW-CONTROL-CHARS", // ANSI control characters
-      "--quit-if-one-screen",
-      "--no-init",
-      "+Gg",
-      NULL};
+      "--quit-if-one-screen", "--no-init", "+Gg", NULL};
 
   pid_t pid;
   if ((rc = posix_spawnp(&pid, args[0], &fa, NULL, (char *const *)args,
