@@ -232,6 +232,7 @@ static int run_less(proc_t *less) {
       "--ignore-case",  // case-insensitive searches unless uppercase characters
                         // are present
       "--line-numbers", // no line numbers
+      "--LONG-PROMPT",
       "--RAW-CONTROL-CHARS", // ANSI control characters
       "--quit-if-one-screen", "--no-init", "+Gg", NULL};
 
