@@ -227,9 +227,12 @@ static int run_less(proc_t *less) {
   if ((rc = posix_spawn_file_actions_adddup2(&fa, out[0], STDIN_FILENO)))
     goto done;
 
-  const char *const args[] = {
-      "less", "--RAW-CONTROL-CHARS", "--quit-if-one-screen", "--no-init", "+Gg",
-      NULL};
+  const char *const args[] = {"less",
+                              "--RAW-CONTROL-CHARS", // ANSI control characters
+                              "--quit-if-one-screen",
+                              "--no-init",
+                              "+Gg",
+                              NULL};
 
   pid_t pid;
   if ((rc = posix_spawnp(&pid, args[0], &fa, NULL, (char *const *)args,
