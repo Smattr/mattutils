@@ -21,8 +21,6 @@ default: \
   ${HOME}/.mplayer \
   ${HOME}/.screenrc \
   ${HOME}/.tmux.conf \
-  ${HOME}/.tmux-new-vi-copy.conf \
-  ${HOME}/.tmux-old-vi-copy.conf \
   ${HOME}/.vimrc \
   ${HOME}/.vim \
   ${HOME}/.wgetrc \
@@ -31,7 +29,6 @@ default: \
   ${HOME}/.zshrc \
   ${HOME}/bin/bashd.sh \
   ${HOME}/bin/c \
-  ${HOME}/bin/check_tmux_version.sh \
   ${HOME}/bin/cub.py \
   ${HOME}/bin/dif \
   ${HOME}/bin/find-broken.sh \
