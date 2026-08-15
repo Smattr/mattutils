@@ -77,7 +77,6 @@ alias cd..="cd .."
 alias ..='cd ..'
 alias ffs='sudo $(fc -ln -1)'
 alias vcat='pygmentize -g -O bg=dark'
-alias cs="cscope -R"
 
 # ZSH Options
 
