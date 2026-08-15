@@ -10,11 +10,15 @@ set ignorecase
 " Fix typos. Ugh, there must be a better way.
 cnoreabbrev W w
 cnoreabbrev Q q
+cnoreabbrev Qa qa
+cnoreabbrev QA qa
+cnoreabbrev qA qa
 cnoreabbrev Wa wa
 cnoreabbrev WA wa
 cnoreabbrev wA wa
 cnoreabbrev Wq wq
 cnoreabbrev WQ wq
+cnoreabbrev wQ wq
 cnoreabbrev WQA wqa
 cnoreabbrev WQa wqa
 cnoreabbrev WqA wqa
