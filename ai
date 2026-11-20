@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# start your preferred robot TUI
+
+if command -v opencode; then
+  set -x
+  exec opencode "$@"
+fi
+
+printf 'no AI tool found\n' >&2
+exit 1

@@ -27,6 +27,7 @@ default: \
   ${HOME}/.XCompose \
   ${HOME}/.Xdefaults \
   ${HOME}/.zshrc \
+  ${HOME}/bin/ai \
   ${HOME}/bin/bashd.sh \
   ${HOME}/bin/c \
   ${HOME}/bin/cub.py \
