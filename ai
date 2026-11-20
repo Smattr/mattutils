@@ -2,6 +2,20 @@
 
 # start your preferred robot TUI
 
+if command -v codex; then
+  set -x
+  # --no-alt-screen: without this, Codex uses the alternate screen which thwarts
+  #   one’s ability to use Tmux scrollback to read its longer replies
+  # -c …: these can be set within Codex’s TOML, but various things regularly
+  #   overwrite this with the defaults, including upgrading Codex
+  exec codex \
+    --no-alt-screen \
+    -c 'model="gpt-6.2-astra"' \
+    -c 'model_reasoning_effort="ultra"' \
+    -c 'plan_mode_reasoning_effort="ultra"' \
+    "$@"
+fi
+
 if command -v opencode; then
   set -x
   exec opencode "$@"
