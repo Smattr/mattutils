@@ -16,6 +16,15 @@ if command -v codex; then
     "$@"
 fi
 
+if command -v claude; then
+  set -x
+  exec claude \
+    --model claude-fable-5-2 \
+    --fallback-model fable,opus,sonnet,haiku \
+    --effort ultracode \
+    "$@"
+fi
+
 if command -v opencode; then
   set -x
   exec opencode "$@"
